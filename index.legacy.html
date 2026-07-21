@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarbonPocket — Know your carbon story</title>
+  <meta name="description" content="CarbonPocket calculates your personal footprint based on real emission factors for your country — and helps you reduce it." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0a120e; color: #e8ede8; line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ===== LANGUAGE SYSTEM ===== */
+    .lang-pt, .lang-pt-block { display: none !important; }
+    .lang-en { display: revert; }
+    .lang-en-block { display: block; }
+    body.pt .lang-en, body.pt .lang-en-block { display: none !important; }
+    body.pt .lang-pt { display: inline !important; }
+    body.pt .lang-pt-block { display: block !important; }
+
+    
+      .lang-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  display: flex; justify-content: flex-end; align-items: center;
+  padding: 0.5rem 1.5rem;
+  background: rgba(10,18,14,0.85); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(52,211,153,0.1);
+}
+.lang-dropdown-wrap select {
+  padding: 0.4rem 2rem 0.4rem 0.8rem;
+  border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06); color: #e8ede8;
+  font-size: 0.8rem; font-family: inherit; cursor: pointer;
+  outline: none;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2334d399' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.6rem center;
+  transition: border-color 0.2s;
+}
+.lang-dropdown-wrap select:hover { border-color: #34d399; }
+.lang-dropdown-wrap select option {
+  background: #1a2b1f; color: #e8ede8;
+}
+    
+    .lang-btn {
+      background: transparent; border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.5); padding: 0.2rem 0.6rem; border-radius: 4px;
+      font-size: 0.75rem; font-family: inherit; cursor: pointer; transition: all 0.2s;
+    }
+    .lang-btn.active { color: #34d399; border-color: #34d399; background: rgba(52,211,153,0.1); }
+
+    nav {
+      position: fixed; top: 2rem; left: 0; right: 0; z-index: 999;
+      display: flex; justify-content: center;
+    }
+    nav ul {
+      display: flex; align-items: center; gap: 0.25rem;
+      background: rgba(10,18,14,0.85); backdrop-filter: blur(12px);
+      border: 1px solid rgba(52,211,153,0.12);
+      border-radius: 100px; padding: 0.4rem 0.8rem;
+      list-style: none; flex-wrap: wrap; justify-content: center;
+    }
+    nav a {
+      padding: 0.4rem 0.8rem; border-radius: 100px;
+      font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.6);
+      transition: all 0.2s; white-space: nowrap;
+    }
+    nav a:hover { color: #fff; background: rgba(52,211,153,0.1); }
+
+    section { padding: 5rem 1.5rem; max-width: 1200px; margin: 0 auto; }
+    .section-tag {
+      display: inline-block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #34d399; margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-size: 2rem; font-weight: 700; margin-bottom: 1rem;
+      background: linear-gradient(135deg,#fff 60%,rgba(255,255,255,0.5));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .section-sub { font-size: 1rem; color: rgba(255,255,255,0.55); max-width: 600px; line-height: 1.7; }
+
+    .hero {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 6rem 1.5rem 4rem;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(52,211,153,0.08) 0%, transparent 70%),
+                  radial-gradient(ellipse 50% 40% at 30% 70%, rgba(16,185,129,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 760px; }
+    .hero-icon {
+      width: 80px; height: 80px; margin: 0 auto 1.5rem;
+      border-radius: 22px; display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .hero-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .hero h1 {
+      font-size: clamp(2.5rem,6vw,4.5rem); font-weight: 800; line-height: 1.1;
+      margin-bottom: 1.25rem; letter-spacing: -0.03em;
+    }
+    .hero h1 span { background: linear-gradient(135deg,#34d399,#10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero p {
+      font-size: 1.15rem; color: rgba(255,255,255,0.55); max-width: 580px;
+      margin: 0 auto 2.5rem; line-height: 1.7;
+    }
+    .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-store {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.7rem 1.5rem; border-radius: 14px; font-weight: 600; font-size: 0.9rem;
+      transition: all 0.25s; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.06); color: #fff;
+    }
+    .btn-store:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); border-color: rgba(52,211,153,0.3); }
+    .btn-store svg { width: 20px; height: 20px; }
+    .btn-primary { background: #34d399; color: #0a120e; border-color: #34d399; }
+    .btn-primary:hover { background: #2bbf89; border-color: #2bbf89; }
+    .hero-stats { display: flex; justify-content: center; gap: 2.5rem; margin-top: 2.5rem; flex-wrap: wrap; }
+    .hero-stat { text-align: center; }
+    .hero-stat strong { display: block; font-size: 1.6rem; font-weight: 700; color: #34d399; }
+    .hero-stat span { font-size: 0.75rem; color: rgba(255,255,255,0.4); max-width: 160px; display: block; margin: 0 auto; }
+    .hero-compare { margin-top: 1.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.3); }
+    .hero-langs {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem;
+      margin: 1.5rem auto 0; max-width: 640px;
+    }
+    .hero-langs span {
+      padding: 0.25rem 0.7rem; border-radius: 100px;
+      font-size: 0.7rem; background: rgba(52,211,153,0.07);
+      color: rgba(255,255,255,0.5); border: 1px solid rgba(52,211,153,0.08);
+    }
+    .hero-langs span.active { background: #34d399; color: #0a120e; border-color: #34d399; font-weight: 600; }
+
+    .steps { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 1.5rem; margin-top: 2.5rem; }
+    .step {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px; padding: 2rem; transition: all 0.25s;
+    }
+    .step:hover { border-color: rgba(52,211,153,0.15); transform: translateY(-3px); }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: rgba(52,211,153,0.1); color: #34d399;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem; margin-bottom: 1rem;
+    }
+    .step h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .step p { font-size: 0.9rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; margin-top: 2.5rem; }
+    @media (max-width:800px) { .dashboard-grid { grid-template-columns: 1fr; gap: 2rem; } }
+    .dashboard-features { display: flex; flex-direction: column; gap: 1rem; }
+    .dash-item {
+      display: flex; align-items: flex-start; gap: 1rem;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px; padding: 1.2rem; transition: all 0.2s;
+    }
+    .dash-item:hover { border-color: rgba(52,211,153,0.15); }
+    .dash-icon {
+      width: 40px; height: 40px; min-width: 40px; border-radius: 10px;
+      background: rgba(52,211,153,0.1); display: flex; align-items: center; justify-content: center;
+      color: #34d399; font-size: 1.1rem;
+    }
+    .dash-text h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .dash-text p { font-size: 0.82rem; color: rgba(255,255,255,0.45); line-height: 1.5; }
+    .dash-image {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px; padding: 0.5rem; overflow: hidden;
+      max-width: 340px; width: 100%; margin: 0 auto;
+    }
+    .dash-image img { border-radius: 18px; width: 100%; }
+
+    .standards-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 1.5rem; margin-top: 2.5rem; }
+    .standard-card {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px; padding: 2rem; transition: all 0.25s;
+    }
+    .standard-card:hover { border-color: rgba(52,211,153,0.15); transform: translateY(-3px); }
+    .standard-card .icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+    .standard-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .standard-card p { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+    .standard-card .badge {
+      display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.6rem;
+      border-radius: 100px; background: rgba(52,211,153,0.1); color: #34d399; margin-top: 0.75rem;
+    }
+    .sources-box {
+      background: rgba(52,211,153,0.04); border: 1px solid rgba(52,211,153,0.1);
+      border-radius: 20px; padding: 1.75rem; margin-top: 2rem;
+    }
+    .sources-box h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.75rem; color: #34d399; }
+    .sources-box p { font-size: 0.85rem; color: rgba(255,255,255,0.55); line-height: 1.7; }
+
+    .table-wrap { overflow-x: auto; margin-top: 2rem; border: 1px solid rgba(52,211,153,0.06); border-radius: 16px; background: rgba(255,255,255,0.015); }
+    .table-wrap table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .table-wrap th {
+      text-align: left; padding: 0.75rem 1rem; font-weight: 600; font-size: 0.72rem;
+      text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: #0a120e; position: sticky; top: 0; z-index: 2;
+    }
+    .table-wrap td { padding: 0.65rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); color: rgba(255,255,255,0.7); vertical-align: top; }
+    .table-wrap tr:hover td { background: rgba(52,211,153,0.04); }
+    .region-name { font-weight: 600; color: #34d399; white-space: nowrap; font-size: 0.9rem; }
+    .table-row { opacity: 0; transform: translateX(-20px); transition: all 0.5s ease-out; }
+    .table-row.visible { opacity: 1; transform: translateX(0); }
+    .flag-emoji { display: inline-block; opacity: 0; transform: scale(0.5); transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+    .table-row.visible .flag-emoji { opacity: 1; transform: scale(1); }
+
+    .lang-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+    .lang-pill {
+      padding: 0.5rem 1rem; border-radius: 100px; font-size: 0.85rem;
+      background: rgba(52,211,153,0.08); color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(52,211,153,0.1); transition: all 0.2s;
+    }
+    .lang-pill:hover { background: rgba(52,211,153,0.15); border-color: #34d399; color: #fff; }
+    .lang-pill.active { background: #34d399; color: #0a120e; border-color: #34d399; font-weight: 600; }
+
+    .partner-banner {
+      background: linear-gradient(135deg,rgba(52,211,153,0.06),rgba(16,185,129,0.03));
+      border: 1px solid rgba(52,211,153,0.12); border-radius: 24px;
+      padding: 2.5rem; margin-top: 2.5rem; display: grid;
+      grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;
+    }
+    @media (max-width:640px) { .partner-banner { grid-template-columns: 1fr; } }
+    .partner-banner .badge-group { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .partner-banner .badge-group span {
+      padding: 0.25rem 0.75rem; border-radius: 100px; font-size: 0.7rem; font-weight: 600;
+      background: rgba(52,211,153,0.1); color: #34d399;
+    }
+    .partner-banner h3 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.75rem; }
+    .partner-banner p { font-size: 0.9rem; color: rgba(255,255,255,0.55); line-height: 1.7; }
+
+    .plans-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 1.25rem; margin-top: 2.5rem; }
+    .plan-card {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px; padding: 1.75rem; transition: all 0.25s;
+      position: relative; display: flex; flex-direction: column;
+    }
+    .plan-card.featured { border-color: #34d399; background: linear-gradient(135deg,rgba(52,211,153,0.06),rgba(16,185,129,0.02)); }
+    .plan-card.featured .badge-save {
+      position: absolute; top: -0.6rem; right: 1.2rem;
+      background: #34d399; color: #0a120e; font-size: 0.6rem; font-weight: 700;
+      padding: 0.2rem 0.7rem; border-radius: 100px; letter-spacing: 0.03em;
+    }
+    .plan-card:hover { transform: translateY(-4px); }
+    .plan-card .plan-name { font-size: 1rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .plan-card .plan-price { font-size: 1.8rem; font-weight: 800; color: #34d399; margin-bottom: 0.2rem; }
+    .plan-card .plan-price span { font-size: 0.95rem; font-weight: 400; color: rgba(255,255,255,0.4); }
+    .plan-card .plan-period { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin-bottom: 0.5rem; }
+    .plan-card .plan-desc { font-size: 0.82rem; color: rgba(255,255,255,0.5); margin-bottom: 1rem; min-height: 2.5em; }
+    .plan-card .plan-metric {
+      font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-bottom: 1rem;
+      padding: 0.3rem 0.6rem; background: rgba(52,211,153,0.06); border-radius: 8px; display: inline-block;
+    }
+    .plan-card ul { list-style: none; padding: 0; margin-bottom: 1.5rem; flex: 1; }
+    .plan-card li { padding: 0.3rem 0; font-size: 0.82rem; color: rgba(255,255,255,0.65); display: flex; align-items: center; gap: 0.5rem; }
+    .plan-card li::before { content: '✓'; color: #34d399; font-weight: 700; font-size: 0.7rem; }
+    .plan-card .btn-plan {
+      display: block; text-align: center; padding: 0.65rem; border-radius: 12px;
+      font-weight: 600; font-size: 0.85rem; transition: all 0.25s; cursor: pointer;
+      background: rgba(52,211,153,0.1); color: #34d399; border: 1px solid rgba(52,211,153,0.15);
+    }
+    .plan-card .btn-plan:hover { background: rgba(52,211,153,0.2); }
+    .plan-card.featured .btn-plan { background: #34d399; color: #0a120e; border-color: #34d399; }
+    .plan-card.featured .btn-plan:hover { background: #2bbf89; }
+
+    .paygo-card {
+      margin-top: 1.5rem; padding: 1.75rem;
+      background: rgba(52,211,153,0.04); border: 1px solid rgba(52,211,153,0.15);
+      border-radius: 20px; text-align: center;
+    }
+    .paygo-header { font-size: 1.2rem; font-weight: 700; color: #34d399; margin-bottom: 0.3rem; }
+    .paygo-desc { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 1.25rem; }
+    .paygo-price { font-size: 2.2rem; font-weight: 800; color: #34d399; margin-bottom: 0.2rem; }
+    .paygo-price span { font-size: 1rem; font-weight: 400; color: rgba(255,255,255,0.4); }
+    .paygo-metric { font-size: 0.8rem; color: rgba(255,255,255,0.35); margin-bottom: 1rem; }
+    .paygo-slider-wrap { max-width: 360px; margin: 0 auto 1.25rem; }
+    .paygo-slider-wrap input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 6px;
+      background: rgba(255,255,255,0.1); border-radius: 3px; outline: none;
+    }
+    .paygo-slider-wrap input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #34d399; cursor: pointer;
+      box-shadow: 0 0 12px rgba(52,211,153,0.4);
+    }
+    .paygo-labels { display: flex; justify-content: space-between; margin-top: 0.4rem; font-size: 0.7rem; color: rgba(255,255,255,0.3); }
+    .paygo-labels span.active { color: #34d399; font-weight: 600; }
+    .paygo-card .btn-plan { max-width: 280px; margin: 0 auto; }
+
+    footer {
+      max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem 2rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+    }
+    footer .copy { font-size: 0.8rem; color: rgba(255,255,255,0.3); }
+    footer .links { display: flex; gap: 1.5rem; }
+    footer .links a { font-size: 0.8rem; color: rgba(255,255,255,0.4); transition: color 0.2s; }
+    footer .links a:hover { color: #34d399; }
+
+    .reveal { opacity: 0; transform: translateY(30px); transition: all 0.6s ease-out; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width:600px) {
+      section { padding: 3rem 1.25rem; }
+      .section-title { font-size: 1.6rem; }
+      .hero h1 { font-size: 2.2rem; }
+      .hero-stats { gap: 1.5rem; }
+      nav ul { gap: 0; padding: 0.3rem 0.4rem; }
+      nav a { font-size: 0.7rem; padding: 0.3rem 0.5rem; }
+      .plan-card.featured .badge-save { right: 0.8rem; font-size: 0.55rem; }
+    }
+    /* ===== COUNTRY DROPDOWN ===== */
+.country-selector {
+  max-width: 320px; margin: 1.5rem auto 0; text-align: center;
+}
+.country-selector label {
+  font-size: 0.8rem; color: rgba(255,255,255,0.4);
+  display: block; margin-bottom: 0.5rem;
+}
+.country-selector select {
+  width: 100%; padding: 0.7rem 1rem; border-radius: 12px;
+  background: rgba(255,255,255,0.06); color: #e8ede8;
+  border: 1px solid rgba(52,211,153,0.2); font-size: 0.9rem;
+  font-family: inherit; cursor: pointer; outline: none;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2334d399' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 1rem center;
+  transition: border-color 0.2s;
+}
+.country-selector select:hover { border-color: #34d399; }
+.country-selector select option {
+  background: #1a2b1f; color: #e8ede8;
+}
+.country-avg {
+  font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 0.5rem;
+}
+  </style>
+</head>
+<body>
+  <div class="lang-bar">
+  <div class="lang-dropdown-wrap">
+    <select id="langSelect" onchange="switchLang(this.value)">
+      <option value="en">🇬🇧 English</option>
+      <option value="pt">🇧🇷 Português</option>
+      <option value="es">🇪🇸 Español</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="it">🇮🇹 Italiano</option>
+      <option value="zh">🇨🇳 中文</option>
+      <option value="ja">🇯🇵 日本語</option>
+      <option value="ko">🇰🇷 한국어</option>
+      <option value="ru">🇷🇺 Русский</option>
+      <option value="ar">🇸🇦 العربية</option>
+      <option value="hi">🇮🇳 हिन्दी</option>
+    </select>
+  </div>
+</div>
+</div>
+
+<nav>
+  <ul>
+    <li><a href="#how" data-i18n="How it works">How it works</a><a href="#how" class="lang-pt" data-i18n="chave_pt">Como funciona</a></li>
+    <li><a href="#dashboard" data-i18n="App">App</a><a href="#dashboard" class="lang-pt" data-i18n="chave_pt">App</a></li>
+    <li><a href="#standards" data-i18n="Standards">Standards</a><a href="#standards" class="lang-pt" data-i18n="chave_pt">Padrões</a></li>
+    <li><a href="#global" data-i18n="Global">Global</a><a href="#global" class="lang-pt" data-i18n="chave_pt">Global</a></li>
+    <li><a href="#partner" data-i18n="Partners">Partners</a><a href="#partner" class="lang-pt" data-i18n="chave_pt">Parceiros</a></li>
+    <li><a href="#plans" data-i18n="Plans">Plans</a><a href="#plans" class="lang-pt" data-i18n="chave_pt">Planos</a></li>
+  </ul>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <div class="hero-icon"><img src="icon.png" alt="CarbonPocket" /></div>
+    <h1 class="lang-en" data-i18n="chave_en">Know your <span>carbon</span> story</h1>
+    <h1 class="lang-pt-block" data-i18n="chave_pt_block">Conheça sua <span>história</span> de carbono</h1>
+    <p class="lang-en" data-i18n="chave_en">CarbonPocket calculates your personal footprint based on real emission factors for <strong>96 countries</strong> — and helps you reduce it.</p>
+    <p class="lang-pt-block" data-i18n="chave_pt_block">O CarbonPocket calcula sua pegada pessoal com base em fatores reais de emissão para <strong>96 países</strong> — e ajuda você a reduzí-la.</p>
+
+    <div class="hero-buttons">
+      <a href="#" class="btn-store btn-primary">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+        <span data-i18n="Download on the App Store">Download on the App Store</span><span class="lang-pt" data-i18n="chave_pt">Baixar na App Store</span>
+      </a>
+      <a href="#" class="btn-store">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.807 1.626a1 1 0 010 1.732l-2.807 1.626L15.206 12l2.492-2.492zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z"/></svg>
+        <span data-i18n="Get it on Google Play">Get it on Google Play</span><span class="lang-pt" data-i18n="chave_pt">Disponível no Google Play</span>
+      </a>
+    </div>
+
+    <div class="hero-langs">
+      <span class="active">English</span> <span>Português</span> <span>Español</span>
+      <span>Français</span> <span>Deutsch</span> <span>Italiano</span>
+      <span>中文</span> <span>日本語</span> <span>한국어</span>
+      <span>Русский</span> <span>العربية</span> <span>हिन्दी</span>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>12</strong><span data-i18n="Languages">Languages</span><span class="lang-pt" data-i18n="chave_pt">Idiomas</span></div>
+      <div class="hero-stat"><strong>3 min</strong><span data-i18n="to get started">to get started</span><span class="lang-pt" data-i18n="chave_pt">para começar</span></div>
+      <div class="hero-stat"><strong>96</strong><span data-i18n="Countries supported">Countries supported</span><span class="lang-pt" data-i18n="chave_pt">Países suportados</span></div>
+    </div>
+  
+  </div>
+</section>
+
+<section id="how" class="reveal">
+  <span data-i18n="How it works">How it works</span><span class="section-tag lang-pt-block">Como funciona</span>
+  <h2 class="section-title" data-i18n="Your carbon journey in 3 steps">Your carbon journey in 3 steps</h2>
+  <h2 class="section-title lang-pt-block">Sua jornada de carbono em 3 passos</h2>
+  <p class="section-sub" data-i18n="From onboarding to offset — CarbonPocket guides you through every stage.">From onboarding to offset — CarbonPocket guides you through every stage.</p>
+  <p class="section-sub lang-pt-block">Do cadastro à compensação — o CarbonPocket guia você em cada etapa.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3 data-i18n="Onboard">Onboard</h3><h3 class="lang-pt" data-i18n="chave_pt">Cadastro</h3>
+      <p class="lang-en" data-i18n="chave_en">Select your country and tell us about your lifestyle. We use real emission factors tailored to your region.</p>
+      <p class="lang-pt" data-i18n="chave_pt">Selecione seu país e conte seu estilo de vida. Usamos fatores de emissão reais para sua região.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3 data-i18n="Track">Track</h3><h3 class="lang-pt" data-i18n="chave_pt">Monitore</h3>
+      <p class="lang-en" data-i18n="chave_en">See your carbon footprint broken down by Transport, Diet, Housing and Consumption — updated monthly.</p>
+      <p class="lang-pt" data-i18n="chave_pt">Veja sua pegada detalhada por Transporte, Dieta, Moradia e Consumo — atualizada mensalmente.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3 data-i18n="Reduce & Offset">Reduce & Offset</h3><h3 class="lang-pt" data-i18n="chave_pt">Reduza & Compense</h3>
+      <p class="lang-en" data-i18n="chave_en">Get personalized recommendations and offset your footprint through verified REDD+ credits from the Amazon.</p>
+      <p class="lang-pt" data-i18n="chave_pt">Receba recomendações personalizadas e compense sua pegada com créditos REDD+ verificados da Amazônia.</p>
+    </div>
+  </div>
+</section>
+
+<section id="dashboard" class="reveal">
+  <span data-i18n="Dashboard">Dashboard</span><span class="section-tag lang-pt-block">Painel</span>
+  <h2 class="section-title" data-i18n="Your footprint at a glance">Your footprint at a glance</h2>
+  <h2 class="section-title lang-pt-block">Sua pegada em um olhar</h2>
+  <p class="section-sub" data-i18n="A clean, dark-mode dashboard with real-time metrics, category breakdown and progress toward your target.">A clean, dark-mode dashboard with real-time metrics, category breakdown and progress toward your target.</p>
+  <p class="section-sub lang-pt-block">Um painel clean em dark mode com métricas em tempo real, detalhamento por categoria e progresso até sua meta.</p>
+  <div class="dashboard-grid">
+    <div class="dashboard-features">
+      <div class="dash-item">
+        <div class="dash-icon">📊</div>
+        <div class="dash-text">
+          <h4 class="lang-en" data-i18n="chave_en">Monthly carbon total</h4><h4 class="lang-pt" data-i18n="chave_pt">Total de carbono mensal</h4>
+          <p class="lang-en" data-i18n="chave_en">See your kg CO₂e compared to national averages and your personal target.</p>
+          <p class="lang-pt" data-i18n="chave_pt">Veja seu kg CO₂e comparado às médias nacionais e sua meta pessoal.</p>
+        </div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-icon">🍽️</div>
+        <div class="dash-text">
+          <h4 class="lang-en" data-i18n="chave_en">Category breakdown</h4><h4 class="lang-pt" data-i18n="chave_pt">Detalhamento por categoria</h4>
+          <p class="lang-en" data-i18n="chave_en">Transport, Diet, Housing and Consumption — color-coded with progress bars.</p>
+          <p class="lang-pt" data-i18n="chave_pt">Transporte, Dieta, Moradia e Consumo — codificados por cores com barras de progresso.</p>
+        </div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-icon">🎯</div>
+        <div class="dash-text">
+          <h4 class="lang-en" data-i18n="chave_en">Goal tracking</h4><h4 class="lang-pt" data-i18n="chave_pt">Acompanhamento de metas</h4>
+          <p class="lang-en" data-i18n="chave_en">Set a reduction target and monitor your progress month by month.</p>
+          <p class="lang-pt" data-i18n="chave_pt">Defina uma meta de redução e acompanhe seu progresso mês a mês.</p>
+        </div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-icon">👥</div>
+        <div class="dash-text">
+          <h4 class="lang-en" data-i18n="chave_en">Social leaderboard</h4><h4 class="lang-pt" data-i18n="chave_pt">Ranking social</h4>
+          <p class="lang-en" data-i18n="chave_en">Compare, compete and celebrate progress with friends.</p>
+          <p class="lang-pt" data-i18n="chave_pt">Compare, compita e celebre o progresso com amigos.</p>
+        </div>
+      </div>
+    </div>
+    <div class="dash-image">
+      <img src="02-dashboard-dark.jpg" alt="CarbonPocket Dashboard" />
+    </div>
+  </div>
+</section>
+<section id="standards" class="reveal">
+  <span data-i18n="Standards">Standards</span><span class="section-tag lang-pt-block">Padrões</span>
+  <h2 class="section-title" data-i18n="International carbon standards">International carbon standards</h2>
+  <h2 class="section-title lang-pt-block">Padrões internacionais de carbono</h2>
+  <p class="section-sub" data-i18n="CarbonPocket follows globally recognized frameworks to ensure accurate, auditable and transparent carbon accounting.">CarbonPocket follows globally recognized frameworks to ensure accurate, auditable and transparent carbon accounting.</p>
+  <p class="section-sub lang-pt-block">O CarbonPocket segue frameworks globalmente reconhecidos para garantir contabilidade de carbono precisa, auditável e transparente.</p>
+  <div class="standards-grid">
+    <div class="standard-card">
+      <div class="icon">📋</div>
+      <h3>GHG Protocol</h3>
+      <p class="lang-en" data-i18n="chave_en">The most widely used international accounting tool. CarbonPocket follows the Corporate Standard for Scope 1, 2 and 3 calculations.</p>
+      <p class="lang-pt" data-i18n="chave_pt">A ferramenta de contabilidade mais usada globalmente. O CarbonPocket segue o Corporate Standard para Escopos 1, 2 e 3.</p>
+      <span class="badge">ISO 14064-1</span>
+    </div>
+    <div class="standard-card">
+      <div class="icon">✅</div>
+      <h3>Verra Standard (VCS)</h3>
+      <p class="lang-en" data-i18n="chave_en">World's leading voluntary carbon credit certification. All CarbonPocket offset credits are Verra-certified.</p>
+      <p class="lang-pt" data-i18n="chave_pt">Principal certificação de créditos de carbono voluntário do mundo. Todos os créditos são certificados Verra.</p>
+      <span class="badge">VCS</span>
+    </div>
+    <div class="standard-card">
+      <div class="icon">🌳</div>
+      <h3>REDD+</h3>
+      <p class="lang-en" data-i18n="chave_en">Reducing Emissions from Deforestation and Forest Degradation. Our credits fund forest protection in the Brazilian Amazon.</p>
+      <p class="lang-pt" data-i18n="chave_pt">Redução de Emissões por Desmatamento e Degradação Florestal. Nossos créditos financiam proteção florestal na Amazônia.</p>
+      <span class="badge">UNFCCC</span>
+    </div>
+    <div class="standard-card">
+      <div class="icon">🔬</div>
+      <h3>ISO 14064</h3>
+      <p class="lang-en" data-i18n="chave_en">International standard for GHG inventories and verification. CarbonPocket's methodology aligns with ISO 14064-1.</p>
+      <p class="lang-pt" data-i18n="chave_pt">Norma internacional para inventários de GEE e verificação. Metodologia alinhada à ISO 14064-1.</p>
+      <span class="badge">ISO</span>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th class="lang-en" data-i18n="chave_en">Standard</th><th class="lang-pt" data-i18n="chave_pt">Padrão</th><th class="lang-en" data-i18n="chave_en">Scope</th><th class="lang-pt" data-i18n="chave_pt">Escopo</th><th class="lang-en" data-i18n="chave_en">Use in CarbonPocket</th><th class="lang-pt" data-i18n="chave_pt">Uso no CarbonPocket</th></tr></thead>
+      <tbody>
+        <tr><td><strong>GHG Protocol</strong></td><td class="lang-en" data-i18n="chave_en">Corporate Standard</td><td class="lang-pt" data-i18n="chave_pt">Corporate Standard</td><td class="lang-en" data-i18n="chave_en">Footprint calculation methodology</td><td class="lang-pt" data-i18n="chave_pt">Metodologia de cálculo da pegada</td></tr>
+        <tr><td><strong>Verra VCS</strong></td><td class="lang-en" data-i18n="chave_en">Carbon Credits</td><td class="lang-pt" data-i18n="chave_pt">Créditos de Carbono</td><td class="lang-en" data-i18n="chave_en">Certification and retirement of offset credits</td><td class="lang-pt" data-i18n="chave_pt">Certificação e aposentadoria dos créditos</td></tr>
+        <tr><td><strong>REDD+</strong></td><td class="lang-en" data-i18n="chave_en">Forest Protection</td><td class="lang-pt" data-i18n="chave_pt">Proteção Florestal</td><td class="lang-en" data-i18n="chave_en">Nature-based carbon removals in the Amazon</td><td class="lang-pt" data-i18n="chave_pt">Remoções de carbono na Amazônia</td></tr>
+        <tr><td><strong>ISO 14064</strong></td><td class="lang-en" data-i18n="chave_en">Verification</td><td class="lang-pt" data-i18n="chave_pt">Verificação</td><td class="lang-en" data-i18n="chave_en">Inventory structure aligned with international verification</td><td class="lang-pt" data-i18n="chave_pt">Estrutura alinhada à verificação internacional</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sources-box">
+    <h4 class="lang-en" data-i18n="chave_en">📊 Data Sources</h4>
+    <h4 class="lang-pt-block" data-i18n="chave_pt_block">📊 Fontes de dados</h4>
+    <p class="lang-en" data-i18n="chave_en">All emission factors used in CarbonPocket are derived from the <strong>GHG Protocol</strong> country-specific datasets and national GHG inventories submitted to the <strong>UNFCCC</strong>. The platform covers electricity emission factors for <strong>96 countries</strong> and transport emission factors across <strong>8 modes</strong> (Car, Bus, Metro/Train, Train, Motorcycle, Flight, Bicycle, Walking) — sourced from peer-reviewed databases and official government submissions.</p>
+    <p class="lang-pt-block" data-i18n="chave_pt_block">Todos os fatores de emissão usados no CarbonPocket são derivados dos datasets do <strong>GHG Protocol</strong> e inventários nacionais submetidos à <strong>UNFCCC</strong>. A plataforma cobre fatores de emissão de eletricidade para <strong>96 países</strong> e transporte em <strong>8 modos</strong> — de bases científicas e submissões oficiais.</p>
+  </div>
+</section>
+
+<section id="global" class="reveal">
+  <span data-i18n="Global">Global</span><span class="section-tag lang-pt-block">Global</span>
+  <h2 class="section-title" data-i18n="Built for the world">Built for the world</h2>
+  <h2 class="section-title lang-pt-block">Feito para o mundo</h2>
+  <p class="section-sub" data-i18n="Available in 12 languages with country-specific emission factors for 96 countries — making carbon tracking accurate everywhere.">Available in 12 languages with country-specific emission factors for 96 countries — making carbon tracking accurate everywhere.</p>
+  <p class="section-sub lang-pt-block">Disponível em 12 idiomas com fatores de emissão específicos para 96 países — rastreamento preciso em qualquer lugar.</p>
+  <div class="lang-grid">
+    <span class="lang-pill active">English</span> <span class="lang-pill">Português</span> <span class="lang-pill">Español</span>
+    <span class="lang-pill">Français</span> <span class="lang-pill">Deutsch</span> <span class="lang-pill">Italiano</span>
+    <span class="lang-pill">中文</span> <span class="lang-pill">日本語</span> <span class="lang-pill">한국어</span>
+    <span class="lang-pill">Русский</span> <span class="lang-pill">العربية</span> <span class="lang-pill">हिन्दी</span>
+  </div>
+  <div class="table-wrap" style="margin-top:2rem">
+    <table>
+      <thead><tr><th class="lang-en" data-i18n="chave_en">Region</th><th class="lang-pt" data-i18n="chave_pt">Região</th><th class="lang-en" data-i18n="chave_en">Countries</th><th class="lang-pt" data-i18n="chave_pt">Países</th></tr></thead>
+      <tbody>
+        <tr class="table-row"><td class="region-name">🌎 South America</td><td><span class="flag-emoji">🇧🇷</span> Brazil, <span class="flag-emoji">🇦🇷</span> Argentina, <span class="flag-emoji">🇨🇱</span> Chile, <span class="flag-emoji">🇨🇴</span> Colombia, <span class="flag-emoji">🇵🇪</span> Peru, <span class="flag-emoji">🇧🇴</span> Bolivia, <span class="flag-emoji">🇪🇨</span> Ecuador, <span class="flag-emoji">🇻🇪</span> Venezuela, <span class="flag-emoji">🇺🇾</span> Uruguay, <span class="flag-emoji">🇵🇾</span> Paraguay, <span class="flag-emoji">🇬🇾</span> Guyana, <span class="flag-emoji">🇸🇷</span> Suriname</td></tr>
+        <tr class="table-row"><td class="region-name">🌎 Central & Caribbean</td><td><span class="flag-emoji">🇲🇽</span> Mexico, <span class="flag-emoji">🇨🇷</span> Costa Rica, <span class="flag-emoji">🇵🇦</span> Panama, <span class="flag-emoji">🇬🇹</span> Guatemala, <span class="flag-emoji">🇭🇳</span> Honduras, <span class="flag-emoji">🇸🇻</span> El Salvador, <span class="flag-emoji">🇳🇮</span> Nicaragua, <span class="flag-emoji">🇧🇿</span> Belize, <span class="flag-emoji">🇩🇴</span> Dominican Republic, <span class="flag-emoji">🇯🇲</span> Jamaica, <span class="flag-emoji">🇨🇺</span> Cuba, <span class="flag-emoji">🇭🇹</span> Haiti, <span class="flag-emoji">🇹🇹</span> Trinidad & Tobago, <span class="flag-emoji">🇧🇸</span> Bahamas, <span class="flag-emoji">🇧🇧</span> Barbados, <span class="flag-emoji">🇵🇷</span> Puerto Rico</td></tr>
+        <tr class="table-row"><td class="region-name">🌎 North America</td><td><span class="flag-emoji">🇺🇸</span> United States, <span class="flag-emoji">🇨🇦</span> Canada</td></tr>
+        <tr class="table-row"><td class="region-name">🌍 Europe</td><td><span class="flag-emoji">🇬🇧</span> United Kingdom, <span class="flag-emoji">🇫🇷</span> France, <span class="flag-emoji">🇩🇪</span> Germany, <span class="flag-emoji">🇮🇹</span> Italy, <span class="flag-emoji">🇪🇸</span> Spain, <span class="flag-emoji">🇵🇹</span> Portugal, <span class="flag-emoji">🇵🇱</span> Poland, <span class="flag-emoji">🇳🇴</span> Norway, <span class="flag-emoji">🇸🇪</span> Sweden, <span class="flag-emoji">🇫🇮</span> Finland, <span class="flag-emoji">🇩🇰</span> Denmark, <span class="flag-emoji">🇳🇱</span> Netherlands, <span class="flag-emoji">🇨🇭</span> Switzerland, <span class="flag-emoji">🇦🇹</span> Austria, <span class="flag-emoji">🇧🇪</span> Belgium, <span class="flag-emoji">🇷🇴</span> Romania, <span class="flag-emoji">🇧🇬</span> Bulgaria, <span class="flag-emoji">🇬🇷</span> Greece, <span class="flag-emoji">🇭🇺</span> Hungary, <span class="flag-emoji">🇮🇪</span> Ireland, <span class="flag-emoji">🇨🇿</span> Czech Republic, <span class="flag-emoji">🇭🇷</span> Croatia, <span class="flag-emoji">🇪🇪</span> Estonia, <span class="flag-emoji">🇱🇹</span> Lithuania, <span class="flag-emoji">🇷🇸</span> Serbia, <span class="flag-emoji">🇸🇰</span> Slovakia, <span class="flag-emoji">🇷🇺</span> Russia, <span class="flag-emoji">🇺🇦</span> Ukraine, <span class="flag-emoji">🇹🇷</span> Turkey</td></tr>
+        <tr class="table-row"><td class="region-name">🌍 Middle East & Central Asia</td><td><span class="flag-emoji">🇰🇿</span> Kazakhstan, <span class="flag-emoji">🇮🇱</span> Israel, <span class="flag-emoji">🇸🇦</span> Saudi Arabia, <span class="flag-emoji">🇦🇪</span> UAE, <span class="flag-emoji">🇶🇦</span> Qatar, <span class="flag-emoji">🇮🇷</span> Iran, <span class="flag-emoji">🇮🇶</span> Iraq, <span class="flag-emoji">🇰🇼</span> Kuwait, <span class="flag-emoji">🇴🇲</span> Oman, <span class="flag-emoji">🇧🇭</span> Bahrain, <span class="flag-emoji">🇯🇴</span> Jordan, <span class="flag-emoji">🇱🇧</span> Lebanon</td></tr>
+        <tr class="table-row"><td class="region-name">🌍 Africa</td><td><span class="flag-emoji">🇪🇬</span> Egypt, <span class="flag-emoji">🇿🇦</span> South Africa, <span class="flag-emoji">🇳🇬</span> Nigeria, <span class="flag-emoji">🇩🇿</span> Algeria</td></tr>
+        <tr class="table-row"><td class="region-name">🌏 East Asia</td><td><span class="flag-emoji">🇨🇳</span> China (incl. HK), <span class="flag-emoji">🇭🇰</span> Hong Kong, <span class="flag-emoji">🇹🇼</span> Taiwan, <span class="flag-emoji">🇯🇵</span> Japan, <span class="flag-emoji">🇰🇷</span> South Korea, <span class="flag-emoji">🇲🇳</span> Mongolia</td></tr>
+        <tr class="table-row"><td class="region-name">🌏 South & Southeast Asia</td><td><span class="flag-emoji">🇮🇳</span> India, <span class="flag-emoji">🇮🇩</span> Indonesia, <span class="flag-emoji">🇲🇾</span> Malaysia, <span class="flag-emoji">🇵🇭</span> Philippines, <span class="flag-emoji">🇸🇬</span> Singapore, <span class="flag-emoji">🇹🇭</span> Thailand, <span class="flag-emoji">🇻🇳</span> Vietnam, <span class="flag-emoji">🇧🇩</span> Bangladesh, <span class="flag-emoji">🇵🇰</span> Pakistan, <span class="flag-emoji">🇱🇰</span> Sri Lanka, <span class="flag-emoji">🇳🇵</span> Nepal, <span class="flag-emoji">🇲🇲</span> Myanmar, <span class="flag-emoji">🇰🇭</span> Cambodia</td></tr>
+        <tr class="table-row"><td class="region-name">🌏 Oceania</td><td><span class="flag-emoji">🇦🇺</span> Australia, <span class="flag-emoji">🇳🇿</span> New Zealand</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="partner" class="reveal">
+  <span data-i18n="Partner">Partner</span><span class="section-tag lang-pt-block">Parceiro</span>
+  <h2 class="section-title" data-i18n="Verified credits you can trust">Verified credits you can trust</h2>
+  <h2 class="section-title lang-pt-block">Créditos verificados em que você confia</h2>
+  <p class="section-sub" data-i18n="All offset credits in CarbonPocket are sourced through our partnership with BR Carbon, a leader in environmental credit trading in Brazil.">All offset credits in CarbonPocket are sourced through our partnership with BR Carbon, a leader in environmental credit trading in Brazil.</p>
+  <p class="section-sub lang-pt-block">Todos os créditos de compensação são fornecidos através da parceria com a BR Carbon, líder em comercialização de créditos ambientais no Brasil.</p>
+  <div class="partner-banner">
+    <div>
+      <div class="badge-group"><span>Verra Standard</span><span>REDD+</span><span>Verified Carbon Units</span></div>
+      <h3 data-i18n="Powered by BR Carbon">Powered by BR Carbon</h3><h3 class="lang-pt-block" data-i18n="chave_pt_block">Powered by BR Carbon</h3>
+      <p class="lang-en" data-i18n="chave_en">Credits are sourced from REDD+ forest protection projects in the Brazilian Amazon with Verra Standard certification. Your offsets support local communities while protecting the world's most vital ecosystem.</p>
+      <p class="lang-pt-block" data-i18n="chave_pt_block">Créditos originados de projetos REDD+ de proteção florestal na Amazônia brasileira com certificação Verra Standard. Suas compensações apoiam comunidades locais enquanto protegem o ecossistema mais vital do mundo.</p>
+      <a href="https://brcarbon.com.br" target="_blank" style="display:inline-flex;align-items:center;gap:0.4rem;margin-top:1rem;font-size:0.85rem;color:#34d399;font-weight:500;"><span data-i18n="Visit brcarbon.com.br">Visit brcarbon.com.br</span><span class="lang-pt" data-i18n="chave_pt">Visite brcarbon.com.br</span> →</a>
+    </div>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(52,211,153,0.1);border-radius:20px;padding:2rem;text-align:center;">
+      <div style="width:60px;height:60px;margin:0 auto 0.75rem;border:2px solid rgba(52,211,153,0.2);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:#34d399;">BR</div>
+      <strong style="display:block;font-size:1.1rem;">BR Carbon</strong>
+      <span style="font-size:0.8rem;color:rgba(255,255,255,0.4);" data-i18n="Environmental Credits">Environmental Credits</span>
+      <span style="font-size:0.8rem;color:rgba(255,255,255,0.4);" class="lang-pt-block" data-i18n="chave_pt_block">Créditos Ambientais</span>
+      <span style="display:block;font-size:0.7rem;color:rgba(255,255,255,0.25);margin-top:0.3rem;">brcarbon.com.br</span>
+    </div>
+  </div>
+</section>
+<section id="plans" class="reveal">
+  <span data-i18n="Plans">Plans</span><span class="section-tag lang-pt-block">Planos</span>
+  <h2 class="section-title" data-i18n="Choose your plan">Choose your plan</h2>
+  <h2 class="section-title lang-pt-block">Escolha seu plano</h2>
+  <p class="section-sub" data-i18n="Priced at just <strong>$20 per ton of CO₂</strong>. Select your country to see personalized pricing based on national averages.">Priced at just <strong>$20 per ton of CO₂</strong>. Select your country to see personalized pricing based on national averages.</p>
+  <p class="section-sub lang-pt-block">Preço base de <strong>$20 por tonelada de CO₂</strong>. Selecione seu país para ver preços baseados nas médias nacionais.</p>
+
+  <!-- COUNTRY DROPDOWN -->
+  <div class="country-selector">
+    <label class="lang-en" data-i18n="chave_en">🌍 Select your country</label>
+    <label class="lang-pt-block" data-i18n="chave_pt_block">🌍 Selecione seu país</label>
+    <select id="countrySelect" onchange="updateCountry(this.value)">
+      <option value="BR">🇧🇷 Brazil (440 kg/mo)</option>
+      <option value="US">🇺🇸 United States</option>
+      <option value="CA">🇨🇦 Canada</option>
+      <option value="GB">🇬🇧 United Kingdom</option>
+      <option value="FR">🇫🇷 France</option>
+      <option value="DE">🇩🇪 Germany</option>
+      <option value="IT">🇮🇹 Italy</option>
+      <option value="ES">🇪🇸 Spain</option>
+      <option value="PT">🇵🇹 Portugal</option>
+      <option value="AR">🇦🇷 Argentina</option>
+      <option value="CL">🇨🇱 Chile</option>
+      <option value="CO">🇨🇴 Colombia</option>
+      <option value="MX">🇲🇽 Mexico</option>
+      <option value="CN">🇨🇳 China</option>
+      <option value="JP">🇯🇵 Japan</option>
+      <option value="KR">🇰🇷 South Korea</option>
+      <option value="IN">🇮🇳 India</option>
+      <option value="AU">🇦🇺 Australia</option>
+      <option value="RU">🇷🇺 Russia</option>
+      <option value="ZA">🇿🇦 South Africa</option>
+      <option value="NL">🇳🇱 Netherlands</option>
+      <option value="SE">🇸🇪 Sweden</option>
+      <option value="CH">🇨🇭 Switzerland</option>
+      <option value="NO">🇳🇴 Norway</option>
+      <option value="DK">🇩🇰 Denmark</option>
+    </select>
+    <div class="country-avg" id="countryAvg">
+      <span data-i18n="National average: <strong id="avgDisplay">440</strong> kg CO₂e/month">National average: <strong id="avgDisplay">440</strong> kg CO₂e/month</span>
+      <span class="lang-pt-block" data-i18n="chave_pt_block">Média nacional: <strong id="avgDisplayPt">440</strong> kg CO₂e/mês</span>
+    </div>
+  </div>
+
+  <div class="plans-grid">
+    <div class="plan-card">
+      <div class="plan-name lang-en">Free</div><div class="plan-name lang-pt">Grátis</div>
+      <div class="plan-price">$0<span>/mo</span></div>
+      <div class="plan-desc lang-en">Track your footprint and get personalized recommendations.</div>
+      <div class="plan-desc lang-pt">Monitore sua pegada e receba recomendações personalizadas.</div>
+      <ul>
+        <li class="lang-en" data-i18n="chave_en"><span>Full carbon dashboard</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Painel completo de carbono</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>Personalized reduction tips</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Dicas personalizadas de redução</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>Monthly footprint tracking</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Acompanhamento mensal da pegada</span></li>
+      </ul>
+      <a href="#" data-i18n="Get started">Get started</a><a href="#" class="btn-plan lang-pt-block">Começar</a>
+    </div>
+
+    <div class="plan-card" id="starterCard">
+      <div class="plan-name lang-en">Starter Offset</div><div class="plan-name lang-pt">Starter Offset</div>
+      <div class="plan-price"><span id="starterPrice">$6.46</span><span>/mo</span></div>
+      <div class="plan-metric" id="starterMetric">Offsets <strong>323</strong> kg CO₂e/mo</div>
+      <div class="plan-desc lang-en">Offset your full monthly footprint — cancel whenever you want.</div>
+      <div class="plan-desc lang-pt-block">Compense sua pegada mensal completa — cancele quando quiser.</div>
+      <ul>
+        <li class="lang-en" data-i18n="chave_en"><span>Everything in Free</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Tudo do plano Grátis</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>Full monthly offset</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Compensação mensal total</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>Verra-certified REDD+ credits</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Créditos REDD+ certificados Verra</span></li>
+      </ul>
+      <a href="#" data-i18n="Choose Starter">Choose Starter</a><a href="#" class="btn-plan lang-pt-block">Escolher Starter</a>
+    </div>
+
+    <div class="plan-card featured" id="aiCard">
+      <span data-i18n="✦ Save 10%">✦ Save 10%</span><span class="badge-save lang-pt-block">✦ Economize 10%</span>
+      <div class="plan-name lang-en">Carbon Neutral + AI</div><div class="plan-name lang-pt">Carbon Neutral + IA</div>
+      <div class="plan-price"><span id="aiPrice">$216</span><span>/yr</span></div>
+      <div class="plan-period" id="aiPeriod">$18/mo — 10% off the monthly price</div>
+      <div class="plan-metric" id="aiMetric">Offsets <strong>323</strong> kg CO₂e/mo + AI Coach</div>
+      <div class="plan-desc lang-en">Go annual and save 10%. Offset your full footprint and unlock the AI carbon coach.</div>
+      <div class="plan-desc lang-pt-block">Plano anual com 10% de desconto. Compense sua pegada total e desbloqueie o coach de carbono IA.</div>
+      <ul>
+        <li class="lang-en" data-i18n="chave_en"><span>Everything in Starter</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Tudo do Starter</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>AI carbon coach — personalized advice</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Coach de carbono IA — conselhos personalizados</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>Founders badge & early supporter perks</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Badge de fundador e benefícios exclusivos</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>10% annual discount</span></li><li class="lang-pt" data-i18n="chave_pt"><span>10% de desconto anual</span></li>
+      </ul>
+      <a href="#" data-i18n="Go Annual">Go Annual</a><a href="#" class="btn-plan lang-pt-block">Anual</a>
+    </div>
+
+    <div class="plan-card" id="oneTimeCard">
+      <div class="plan-name lang-en">One-Time Offset</div><div class="plan-name lang-pt">Compensação Única</div>
+      <div class="plan-price"><span id="oneTimePrice">$6.46</span></div>
+      <div class="plan-metric" id="oneTimeMetric">Offsets <strong>323</strong> kg CO₂e · $20/ton</div>
+      <div class="plan-desc lang-en">Offset your current footprint once — priced at $20/ton CO₂.</div>
+      <div class="plan-desc lang-pt-block">Compense sua pegada atual uma vez — preço de $20/ton CO₂.</div>
+      <ul>
+        <li class="lang-en" data-i18n="chave_en"><span>Single offset purchase</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Compra única de compensação</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>No subscription required</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Sem assinatura</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>Verra-certified REDD+ credits</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Créditos REDD+ certificados Verra</span></li>
+      </ul>
+      <a href="#" data-i18n="Offset now">Offset now</a><a href="#" class="btn-plan lang-pt-block">Compensar agora</a>
+    </div>
+  </div>
+
+  <div class="paygo-card" id="paygoCard">
+    <div class="paygo-header lang-en">Pay-as-you-go</div>
+    <div class="paygo-header lang-pt-block">Pague pelo que usar</div>
+    <p class="paygo-desc lang-en">Set your own monthly contribution — every bit helps.</p>
+    <p class="paygo-desc lang-pt-block">Defina sua própria contribuição mensal — todo pouco ajuda.</p>
+    <div id="paygo-display">
+      <div class="paygo-price" id="paygo-price">$3.24<span>/mo</span></div>
+      <div class="paygo-metric" id="paygo-metric">Offsets 162 kg CO₂e/mo</div>
+    </div>
+    <div class="paygo-slider-wrap">
+      <input type="range" id="paygo-slider" min="10" max="100" value="50" step="1" oninput="updatePaygo(this.value)" />
+      <div class="paygo-labels">
+        <span>10%</span>
+        <span class="active">50%</span>
+        <span>100%</span>
+      </div>
+    </div>
+    <a href="#" data-i18n="Offset now">Offset now</a>
+    <a href="#" class="btn-plan lang-pt-block">Compensar agora</a>
+  </div>
+</section>
+
+  <div class="plans-grid">
+    <div class="plan-card">
+      <div class="plan-name lang-en">Free</div><div class="plan-name lang-pt">Grátis</div>
+      <div class="plan-price">$0<span>/mo</span></div>
+      <div class="plan-desc lang-en">Track your footprint and get personalized recommendations.</div>
+      <div class="plan-desc lang-pt">Monitore sua pegada e receba recomendações personalizadas.</div>
+      <ul>
+        <li class="lang-en" data-i18n="chave_en"><span>Full carbon dashboard</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Painel completo de carbono</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>Personalized reduction tips</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Dicas personalizadas de redução</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>Monthly footprint tracking</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Acompanhamento mensal da pegada</span></li>
+      </ul>
+      <a href="#" data-i18n="Get started">Get started</a><a href="#" class="btn-plan lang-pt-block">Começar</a>
+    </div>
+
+    <div class="plan-card">
+      <div class="plan-name lang-en">Starter Offset</div><div class="plan-name lang-pt">Starter Offset</div>
+      <div class="plan-price">$6.46<span>/mo</span></div>
+      <div class="plan-metric lang-en">Offsets 323 kg CO₂e/mo</div><div class="plan-metric lang-pt-block">Compensa 323 kg CO₂e/mês</div>
+      <div class="plan-desc lang-en">Offset your full monthly footprint — cancel whenever you want.</div>
+      <div class="plan-desc lang-pt-block">Compense sua pegada mensal completa — cancele quando quiser.</div>
+      <ul>
+        <li class="lang-en" data-i18n="chave_en"><span>Everything in Free</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Tudo do plano Grátis</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>Full monthly offset (323 kg CO₂e)</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Compensação mensal total (323 kg CO₂e)</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>Verra-certified REDD+ credits</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Créditos REDD+ certificados Verra</span></li>
+      </ul>
+      <a href="#" data-i18n="Choose Starter">Choose Starter</a><a href="#" class="btn-plan lang-pt-block">Escolher Starter</a>
+    </div>
+
+    <div class="plan-card featured">
+      <span data-i18n="✦ Save 10%">✦ Save 10%</span><span class="badge-save lang-pt-block">✦ Economize 10%</span>
+      <div class="plan-name lang-en">Carbon Neutral + AI</div><div class="plan-name lang-pt">Carbon Neutral + IA</div>
+      <div class="plan-price">$216<span>/yr</span></div>
+      <div class="plan-period lang-en">$18/mo — 10% off the monthly price</div>
+      <div class="plan-period lang-pt-block">$18/mês — 10% de desconto</div>
+      <div class="plan-metric lang-en">Offsets 323 kg CO₂e/mo + AI Coach</div><div class="plan-metric lang-pt-block">Compensa 323 kg CO₂e/mês + Coach IA</div>
+      <div class="plan-desc lang-en">Go annual and save 10%. Offset your full footprint and unlock the AI carbon coach.</div>
+      <div class="plan-desc lang-pt-block">Plano anual com 10% de desconto. Compense sua pegada total e desbloqueie o coach de carbono IA.</div>
+      <ul>
+        <li class="lang-en" data-i18n="chave_en"><span>Everything in Starter</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Tudo do Starter</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>AI carbon coach — personalized advice</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Coach de carbono IA — conselhos personalizados</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>Founders badge & early supporter perks</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Badge de fundador e benefícios exclusivos</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>10% annual discount</span></li><li class="lang-pt" data-i18n="chave_pt"><span>10% de desconto anual</span></li>
+      </ul>
+      <a href="#" data-i18n="Go Annual — $216/yr">Go Annual — $216/yr</a><a href="#" class="btn-plan lang-pt-block">Anual — $216/ano</a>
+    </div>
+
+    <div class="plan-card">
+      <div class="plan-name lang-en">One-Time Offset</div><div class="plan-name lang-pt">Compensação Única</div>
+      <div class="plan-price">$6.46</div>
+      <div class="plan-metric lang-en">Offsets 323 kg CO₂e · $20/ton</div><div class="plan-metric lang-pt-block">Compensa 323 kg CO₂e · $20/ton</div>
+      <div class="plan-desc lang-en">Offset your current footprint once — priced at $20/ton CO₂.</div>
+      <div class="plan-desc lang-pt-block">Compense sua pegada atual uma vez — preço de $20/ton CO₂.</div>
+      <ul>
+        <li class="lang-en" data-i18n="chave_en"><span>Single offset purchase</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Compra única de compensação</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>No subscription required</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Sem assinatura</span></li>
+        <li class="lang-en" data-i18n="chave_en"><span>Verra-certified REDD+ credits</span></li><li class="lang-pt" data-i18n="chave_pt"><span>Créditos REDD+ certificados Verra</span></li>
+      </ul>
+      <a href="#" data-i18n="Offset now">Offset now</a><a href="#" class="btn-plan lang-pt-block">Compensar agora</a>
+    </div>
+  </div>
+
+  <div class="paygo-card">
+    <div class="paygo-header lang-en">Pay-as-you-go</div>
+    <div class="paygo-header lang-pt-block">Pague pelo que usar</div>
+    <p class="paygo-desc lang-en">Set your own monthly contribution — every bit helps.</p>
+    <p class="paygo-desc lang-pt-block">Defina sua própria contribuição mensal — todo pouco ajuda.</p>
+    <div id="paygo-display">
+      <div class="paygo-price" id="paygo-price">$3.24<span>/mo</span></div>
+      <div class="paygo-metric" id="paygo-metric">Offsets 162 kg CO₂e/mo</div>
+    </div>
+    <div class="paygo-slider-wrap">
+      <input type="range" id="paygo-slider" min="10" max="100" value="50" step="1" oninput="updatePaygo(this.value)" />
+      <div class="paygo-labels">
+        <span>10%</span>
+        <span class="active">50%</span>
+        <span>100%</span>
+      </div>
+    </div>
+    <a href="#" data-i18n="Offset now">Offset now</a>
+    <a href="#" class="btn-plan lang-pt-block">Compensar agora</a>
+  </div>
+</section>
+
+<footer>
+  <div class="copy">&copy; 2026 <strong>CarbonPocket</strong>. <span data-i18n="All rights reserved.">All rights reserved.</span><span class="lang-pt" data-i18n="chave_pt">Todos os direitos reservados.</span></div>
+  <div class="links">
+    <a href="#hero" data-i18n="Back to top">Back to top</a><a href="#hero" class="lang-pt" data-i18n="chave_pt">Voltar ao topo</a>
+    <a href="mailto:hello@carbonpocket.com">Contact</a>
+  </div>
+</footer>
+
+<script>
+// ===== TRADUÇÕES CENTRALIZADAS =====
+// ⚠️ PREENCHA CADA LÍNGUA AOS POUCOS
+const translations = {
+  en: {
+    // ----- LANG BAR -----
+    lang_select: '🌐 Language',
+
+    // ----- NAV -----
+    nav_how: 'How it works',
+    nav_app: 'App',
+    nav_standards: 'Standards',
+    nav_global: 'Global',
+    nav_partners: 'Partners',
+    nav_plans: 'Plans',
+
+    // ----- HERO -----
+    hero_title: 'Know your <span>carbon</span> story',
+    hero_sub: 'CarbonPocket calculates your personal footprint based on real emission factors for <strong>96 countries</strong> — and helps you reduce it.',
+    btn_appstore: 'Download on the App Store',
+    btn_playstore: 'Get it on Google Play',
+    stat_languages: 'Languages',
+    stat_started: 'to get started',
+    stat_countries: 'Countries supported',
+    compare: 'Compare your expenses with national averages',
+
+    // ----- HOW IT WORKS -----
+    tag_how: 'How it works',
+    section_how_title: 'Your carbon journey in 3 steps',
+    section_how_sub: 'From onboarding to offset — CarbonPocket guides you through every stage.',
+    step1_title: 'Onboard',
+    step1_text: 'Select your country and tell us about your lifestyle. We use real emission factors tailored to your region.',
+    step2_title: 'Track',
+    step2_text: 'See your carbon footprint broken down by Transport, Diet, Housing and Consumption — updated monthly.',
+    step3_title: 'Reduce & Offset',
+    step3_text: 'Get personalized recommendations and offset your footprint through verified REDD+ credits from the Amazon.',
+
+    // ----- DASHBOARD -----
+    tag_dashboard: 'Dashboard',
+    section_dash_title: 'Your footprint at a glance',
+    section_dash_sub: 'A clean, dark-mode dashboard with real-time metrics, category breakdown and progress toward your target.',
+    dash_item1_title: 'Monthly carbon total',
+    dash_item1_text: 'See your kg CO₂e compared to national averages and your personal target.',
+    dash_item2_title: 'Category breakdown',
+    dash_item2_text: 'Transport, Diet, Housing and Consumption — color-coded with progress bars.',
+    dash_item3_title: 'Goal tracking',
+    dash_item3_text: 'Set a reduction target and monitor your progress month by month.',
+    dash_item4_title: 'Social leaderboard',
+    dash_item4_text: 'Compare, compete and celebrate progress with friends.',
+
+    // ----- STANDARDS -----
+    tag_standards: 'Standards',
+    section_std_title: 'International carbon standards',
+    section_std_sub: 'CarbonPocket follows globally recognized frameworks to ensure accurate, auditable and transparent carbon accounting.',
+    std1_title: 'GHG Protocol',
+    std1_text: 'The most widely used international accounting tool. CarbonPocket follows the Corporate Standard for Scope 1, 2 and 3 calculations.',
+    std2_title: 'Verra Standard (VCS)',
+    std2_text: "World's leading voluntary carbon credit certification. All CarbonPocket offset credits are Verra-certified.",
+    std3_title: 'REDD+',
+    std3_text: 'Reducing Emissions from Deforestation and Forest Degradation. Our credits fund forest protection in the Brazilian Amazon.',
+    std4_title: 'ISO 14064',
+    std4_text: 'International standard for GHG inventories and verification. CarbonPocket\'s methodology aligns with ISO 14064-1.',
+    th_standard: 'Standard',
+    th_scope: 'Scope',
+    th_use: 'Use in CarbonPocket',
+    row_ghg_scope: 'Corporate Standard',
+    row_ghg_use: 'Footprint calculation methodology for all emission sources',
+    row_verra_scope: 'Carbon Credits',
+    row_verra_use: 'Certification and retirement of offset credits',
+    row_redd_scope: 'Forest Protection',
+    row_redd_use: 'Nature-based carbon removals in the Amazon',
+    row_iso_scope: 'Verification',
+    row_iso_use: 'Inventory structure aligned with international verification',
+    sources_title: '📊 Data Sources',
+    sources_text: 'All emission factors used in CarbonPocket are derived from the <strong>GHG Protocol</strong> country-specific datasets and national GHG inventories submitted to the <strong>UNFCCC</strong>. The platform covers electricity emission factors for <strong>96 countries</strong> and transport emission factors across <strong>8 modes</strong> (Car, Bus, Metro/Train, Train, Motorcycle, Flight, Bicycle, Walking) — sourced from peer-reviewed databases and official government submissions.',
+
+    // ----- GLOBAL -----
+    tag_global: 'Global',
+    section_global_title: 'Built for the world',
+    section_global_sub: 'Available in 12 languages with country-specific emission factors for 96 countries — making carbon tracking accurate everywhere.',
+    th_region: 'Region',
+    th_countries: 'Countries',
+
+    // ----- PARTNER -----
+    tag_partner: 'Partner',
+    section_partner_title: 'Verified credits you can trust',
+    section_partner_sub: 'All offset credits in CarbonPocket are sourced through our partnership with BR Carbon, a leader in environmental credit trading in Brazil.',
+    partner_title: 'Powered by BR Carbon',
+    partner_text: 'Credits are sourced from REDD+ forest protection projects in the Brazilian Amazon with Verra Standard certification. Your offsets support local communities while protecting the world\'s most vital ecosystem.',
+    partner_visit: 'Visit brcarbon.com.br →',
+
+    // ----- PLANS -----
+    tag_plans: 'Plans',
+    section_plans_title: 'Choose your plan',
+    section_plans_sub: 'Priced at just <strong>$20 per ton of CO₂</strong>. Select your country to see personalized pricing based on national averages.',
+    country_label: '🌍 Select your country',
+    avg_label: 'National average:',
+    avg_unit: 'kg CO₂e/month',
+    plan_free_name: 'Free',
+    plan_free_price: '$0',
+    plan_free_period: '/mo',
+    plan_free_desc: 'Track your footprint and get personalized recommendations.',
+    plan_free_f1: 'Full carbon dashboard',
+    plan_free_f2: 'Personalized reduction tips',
+    plan_free_f3: 'Monthly footprint tracking',
+    plan_free_cta: 'Get started',
+    plan_starter_name: 'Starter Offset',
+    plan_starter_period: '/mo',
+    plan_starter_desc: 'Offset your full monthly footprint — cancel whenever you want.',
+    plan_starter_f1: 'Everything in Free',
+    plan_starter_f2: 'Full monthly offset',
+    plan_starter_f3: 'Verra-certified REDD+ credits',
+    plan_starter_cta: 'Choose Starter',
+    plan_ai_name: 'Carbon Neutral + AI',
+    plan_ai_period: '/yr',
+    plan_ai_save: '✦ Save 10%',
+    plan_ai_desc: 'Go annual and save 10%. Offset your full footprint and unlock the AI carbon coach.',
+    plan_ai_f1: 'Everything in Starter',
+    plan_ai_f2: 'AI carbon coach — personalized advice',
+    plan_ai_f3: 'Founders badge & early supporter perks',
+    plan_ai_f4: '10% annual discount',
+    plan_ai_cta: 'Go Annual',
+    plan_onetime_name: 'One-Time Offset',
+    plan_onetime_desc: 'Offset your current footprint once — priced at $20/ton CO₂.',
+    plan_onetime_f1: 'Single offset purchase',
+    plan_onetime_f2: 'No subscription required',
+    plan_onetime_f3: 'Verra-certified REDD+ credits',
+    plan_onetime_cta: 'Offset now',
+    paygo_name: 'Pay-as-you-go',
+    paygo_desc: 'Set your own monthly contribution — every bit helps.',
+    paygo_cta: 'Offset now',
+
+    // ----- FOOTER -----
+    footer_copy: 'All rights reserved.',
+    footer_top: 'Back to top',
+    footer_contact: 'Contact',
+  },
+  pt: {
+    lang_select: '🌐 Idioma',
+
+    nav_how: 'Como funciona',
+    nav_app: 'App',
+    nav_standards: 'Padrões',
+    nav_global: 'Global',
+    nav_partners: 'Parceiros',
+    nav_plans: 'Planos',
+
+    hero_title: 'Conheça sua <span>história</span> de carbono',
+    hero_sub: 'O CarbonPocket calcula sua pegada pessoal com base em fatores reais de emissão para <strong>96 países</strong> — e ajuda você a reduzí-la.',
+    btn_appstore: 'Baixar na App Store',
+    btn_playstore: 'Disponível no Google Play',
+    stat_languages: 'Idiomas',
+    stat_started: 'para começar',
+    stat_countries: 'Países suportados',
+    compare: 'Compare seus gastos com as médias nacionais',
+
+    tag_how: 'Como funciona',
+    section_how_title: 'Sua jornada de carbono em 3 passos',
+    section_how_sub: 'Do cadastro à compensação — o CarbonPocket guia você em cada etapa.',
+    step1_title: 'Cadastro',
+    step1_text: 'Selecione seu país e conte seu estilo de vida. Usamos fatores de emissão reais para sua região.',
+    step2_title: 'Monitore',
+    step2_text: 'Veja sua pegada detalhada por Transporte, Dieta, Moradia e Consumo — atualizada mensalmente.',
+    step3_title: 'Reduza & Compense',
+    step3_text: 'Receba recomendações personalizadas e compense sua pegada com créditos REDD+ verificados da Amazônia.',
+
+    tag_dashboard: 'Painel',
+    section_dash_title: 'Sua pegada em um olhar',
+    section_dash_sub: 'Um painel clean em dark mode com métricas em tempo real, detalhamento por categoria e progresso até sua meta.',
+    dash_item1_title: 'Total de carbono mensal',
+    dash_item1_text: 'Veja seu kg CO₂e comparado às médias nacionais e sua meta pessoal.',
+    dash_item2_title: 'Detalhamento por categoria',
+    dash_item2_text: 'Transporte, Dieta, Moradia e Consumo — codificados por cores com barras de progresso.',
+    dash_item3_title: 'Acompanhamento de metas',
+    dash_item3_text: 'Defina uma meta de redução e acompanhe seu progresso mês a mês.',
+    dash_item4_title: 'Ranking social',
+    dash_item4_text: 'Compare, compita e celebre o progresso com amigos.',
+
+    tag_standards: 'Padrões',
+    section_std_title: 'Padrões internacionais de carbono',
+    section_std_sub: 'O CarbonPocket segue frameworks globalmente reconhecidos para garantir contabilidade de carbono precisa, auditável e transparente.',
+    std1_title: 'GHG Protocol',
+    std1_text: 'A ferramenta de contabilidade mais usada globalmente. O CarbonPocket segue o Corporate Standard para Escopos 1, 2 e 3.',
+    std2_title: 'Verra Standard (VCS)',
+    std2_text: 'Principal certificação de créditos de carbono voluntário do mundo. Todos os créditos são certificados Verra.',
+    std3_title: 'REDD+',
+    std3_text: 'Redução de Emissões por Desmatamento e Degradação Florestal. Nossos créditos financiam proteção florestal na Amazônia.',
+    std4_title: 'ISO 14064',
+    std4_text: 'Norma internacional para inventários de GEE e verificação. Metodologia alinhada à ISO 14064-1.',
+    th_standard: 'Padrão',
+    th_scope: 'Escopo',
+    th_use: 'Uso no CarbonPocket',
+    row_ghg_scope: 'Corporate Standard',
+    row_ghg_use: 'Metodologia de cálculo da pegada para todas as fontes',
+    row_verra_scope: 'Créditos de Carbono',
+    row_verra_use: 'Certificação e aposentadoria dos créditos',
+    row_redd_scope: 'Proteção Florestal',
+    row_redd_use: 'Remoções de carbono na Amazônia',
+    row_iso_scope: 'Verificação',
+    row_iso_use: 'Estrutura alinhada à verificação internacional',
+    sources_title: '📊 Fontes de dados',
+    sources_text: 'Todos os fatores de emissão usados no CarbonPocket são derivados dos datasets do <strong>GHG Protocol</strong> e inventários nacionais submetidos à <strong>UNFCCC</strong>. A plataforma cobre fatores de emissão de eletricidade para <strong>96 países</strong> e transporte em <strong>8 modos</strong> — de bases científicas e submissões oficiais.',
+
+    tag_global: 'Global',
+    section_global_title: 'Feito para o mundo',
+    section_global_sub: 'Disponível em 12 idiomas com fatores de emissão específicos para 96 países — rastreamento preciso em qualquer lugar.',
+    th_region: 'Região',
+    th_countries: 'Países',
+
+    tag_partner: 'Parceiro',
+    section_partner_title: 'Créditos verificados em que você confia',
+    section_partner_sub: 'Todos os créditos de compensação são fornecidos através da parceria com a BR Carbon, líder em comercialização de créditos ambientais no Brasil.',
+    partner_title: 'Powered by BR Carbon',
+    partner_text: 'Créditos originados de projetos REDD+ de proteção florestal na Amazônia brasileira com certificação Verra Standard. Suas compensações apoiam comunidades locais enquanto protegem o ecossistema mais vital do mundo.',
+    partner_visit: 'Visite brcarbon.com.br →',
+
+    tag_plans: 'Planos',
+    section_plans_title: 'Escolha seu plano',
+    section_plans_sub: 'Preço base de <strong>$20 por tonelada de CO₂</strong>. Selecione seu país para ver preços baseados nas médias nacionais.',
+    country_label: '🌍 Selecione seu país',
+    avg_label: 'Média nacional:',
+    avg_unit: 'kg CO₂e/mês',
+    plan_free_name: 'Grátis',
+    plan_free_price: '$0',
+    plan_free_period: '/mês',
+    plan_free_desc: 'Monitore sua pegada e receba recomendações personalizadas.',
+    plan_free_f1: 'Painel completo de carbono',
+    plan_free_f2: 'Dicas personalizadas de redução',
+    plan_free_f3: 'Acompanhamento mensal da pegada',
+    plan_free_cta: 'Começar',
+    plan_starter_name: 'Starter Offset',
+    plan_starter_period: '/mês',
+    plan_starter_desc: 'Compense sua pegada mensal completa — cancele quando quiser.',
+    plan_starter_f1: 'Tudo do plano Grátis',
+    plan_starter_f2: 'Compensação mensal total',
+    plan_starter_f3: 'Créditos REDD+ certificados Verra',
+    plan_starter_cta: 'Escolher Starter',
+    plan_ai_name: 'Carbon Neutral + IA',
+    plan_ai_period: '/ano',
+    plan_ai_save: '✦ Economize 10%',
+    plan_ai_desc: 'Plano anual com 10% de desconto. Compense sua pegada total e desbloqueie o coach de carbono IA.',
+    plan_ai_f1: 'Tudo do Starter',
+    plan_ai_f2: 'Coach de carbono IA — conselhos personalizados',
+    plan_ai_f3: 'Badge de fundador e benefícios exclusivos',
+    plan_ai_f4: '10% de desconto anual',
+    plan_ai_cta: 'Anual',
+    plan_onetime_name: 'Compensação Única',
+    plan_onetime_desc: 'Compense sua pegada atual uma vez — preço de $20/ton CO₂.',
+    plan_onetime_f1: 'Compra única de compensação',
+    plan_onetime_f2: 'Sem assinatura',
+    plan_onetime_f3: 'Créditos REDD+ certificados Verra',
+    plan_onetime_cta: 'Compensar agora',
+    paygo_name: 'Pague pelo que usar',
+    paygo_desc: 'Defina sua própria contribuição mensal — todo pouco ajuda.',
+    paygo_cta: 'Compensar agora',
+
+    footer_copy: 'Todos os direitos reservados.',
+    footer_top: 'Voltar ao topo',
+    footer_contact: 'Contato',
+  },
+  es: {
+    lang_select: '🌐 Idioma',
+
+    nav_how: 'Cómo funciona',
+    nav_app: 'App',
+    nav_standards: 'Estándares',
+    nav_global: 'Global',
+    nav_partners: 'Socios',
+    nav_plans: 'Planes',
+
+    hero_title: 'Conoce tu <span>historia</span> de carbono',
+    hero_sub: 'CarbonPocket calcula tu huella personal basada en factores reales de emisión para <strong>96 países</strong> — y te ayuda a reducirla.',
+    btn_appstore: 'Descargar en App Store',
+    btn_playstore: 'Disponible en Google Play',
+    stat_languages: 'Idiomas',
+    stat_started: 'para empezar',
+    stat_countries: 'Países soportados',
+    compare: 'Compara tus gastos con los promedios nacionales',
+
+    tag_how: 'Cómo funciona',
+    section_how_title: 'Tu viaje de carbono en 3 pasos',
+    section_how_sub: 'Del registro a la compensación — CarbonPocket te guía en cada etapa.',
+    step1_title: 'Registro',
+    step1_text: 'Selecciona tu país y cuéntanos tu estilo de vida. Usamos factores de emisión reales para tu región.',
+    step2_title: 'Monitorea',
+    step2_text: 'Ve tu huella detallada por Transporte, Dieta, Vivienda y Consumo — actualizada mensualmente.',
+    step3_title: 'Reduce & Compensa',
+    step3_text: 'Recibe recomendaciones personalizadas y compensa tu huella con créditos REDD+ verificados de la Amazonía.',
+
+    tag_dashboard: 'Panel',
+    section_dash_title: 'Tu huella de un vistazo',
+    section_dash_sub: 'Un panel en modo oscuro con métricas en tiempo real, desglose por categorías y progreso hacia tu meta.',
+    dash_item1_title: 'Total de carbono mensual',
+    dash_item1_text: 'Ve tu kg CO₂e comparado con promedios nacionales y tu meta personal.',
+    dash_item2_title: 'Desglose por categoría',
+    dash_item2_text: 'Transporte, Dieta, Vivienda y Consumo — codificados por colores con barras de progreso.',
+    dash_item3_title: 'Seguimiento de metas',
+    dash_item3_text: 'Define una meta de reducción y monitorea tu progreso mes a mes.',
+    dash_item4_title: 'Ranking social',
+    dash_item4_text: 'Compara, compite y celebra el progreso con amigos.',
+
+    tag_standards: 'Estándares',
+    section_std_title: 'Estándares internacionales de carbono',
+    section_std_sub: 'CarbonPocket sigue marcos globalmente reconocidos para garantizar una contabilidad de carbono precisa, auditab' +
+      'le y transparente.',
+    std1_title: 'GHG Protocol',
+    std1_text: 'La herramienta de contabilidad más usada globalmente. CarbonPocket sigue el Corporate Standard para Alcances 1, 2 y 3.',
+    std2_title: 'Verra Standard (VCS)',
+    std2_text: 'Principal certificación de créditos de carbono voluntario del mundo. Todos los créditos son certificados Verra.',
+    std3_title: 'REDD+',
+    std3_text: 'Reducción de Emisiones por Deforestación y Degradación Forestal. Nuestros créditos financian protección forestal en la Amazonía.',
+    std4_title: 'ISO 14064',
+    std4_text: 'Norma internacional para inventarios de GEI y verificación. Metodología alineada con ISO 14064-1.',
+    th_standard: 'Estándar',
+    th_scope: 'Alcance',
+    th_use: 'Uso en CarbonPocket',
+    row_ghg_scope: 'Corporate Standard',
+    row_ghg_use: 'Metodología de cálculo de la huella para todas las fuentes',
+    row_verra_scope: 'Créditos de Carbono',
+    row_verra_use: 'Certificación y retiro de los créditos de compensación',
+    row_redd_scope: 'Protección Forestal',
+    row_redd_use: 'Remociones de carbono basadas en naturaleza en la Amazonía',
+    row_iso_scope: 'Verificación',
+    row_iso_use: 'Estructura del inventario alineada con verificación internacional',
+    sources_title: '📊 Fuentes de datos',
+    sources_text: 'Todos los factores de emisión usados en CarbonPocket provienen de los datasets del <strong>GHG Protocol</strong> e inventarios nacionales de GEI presentados ante la <strong>UNFCCC</strong>. La plataforma cubre factores de emisión eléctrica para <strong>96 países</strong> y factores de transporte en <strong>8 modos</strong> — de bases científicas y presentaciones oficiales.',
+
+    tag_global: 'Global',
+    section_global_title: 'Construido para el mundo',
+    section_global_sub: 'Disponible en 12 idiomas con factores de emisión específicos para 96 países — medición precisa en cualquier lugar.',
+    th_region: 'Región',
+    th_countries: 'Países',
+
+    tag_partner: 'Socio',
+    section_partner_title: 'Créditos verificados en los que confías',
+    section_partner_sub: 'Todos los créditos de compensación se proporcionan a través de la asociación con BR Carbon, líder en comercialización de créditos ambientales en Brasil.',
+    partner_title: 'Powered by BR Carbon',
+    partner_text: 'Créditos originados de proyectos REDD+ de protección forestal en la Amazonía brasileña con certificación Verra Standard. Tus compensaciones apoyan a comunidades locales mientras protegen el ecosistema más vital del mundo.',
+    partner_visit: 'Visita brcarbon.com.br →',
+
+    tag_plans: 'Planes',
+    section_plans_title: 'Elige tu plan',
+    section_plans_sub: 'Precio base de <strong>$20 por tonelada de CO₂</strong>. Selecciona tu país para ver precios basados en promedios nacionales.',
+    country_label: '🌍 Selecciona tu país',
+    avg_label: 'Promedio nacional:',
+    avg_unit: 'kg CO₂e/mes',
+    plan_free_name: 'Gratis',
+    plan_free_price: '$0',
+    plan_free_period: '/mes',
+    plan_free_desc: 'Monitorea tu huella y recibe recomendaciones personalizadas.',
+    plan_free_f1: 'Panel completo de carbono',
+    plan_free_f2: 'Consejos personalizados de reducción',
+    plan_free_f3: 'Seguimiento mensual de la huella',
+    plan_free_cta: 'Comenzar',
+    plan_starter_name: 'Starter Offset',
+    plan_starter_period: '/mes',
+    plan_starter_desc: 'Compensa tu huella mensual completa — cancela cuando quieras.',
+    plan_starter_f1: 'Todo del plan Gratis',
+    plan_starter_f2: 'Compensación mensual total',
+    plan_starter_f3: 'Créditos REDD+ certificados Verra',
+    plan_starter_cta: 'Elegir Starter',
+    plan_ai_name: 'Carbon Neutral + IA',
+    plan_ai_period: '/año',
+    plan_ai_save: '✦ Ahorra 10%',
+    plan_ai_desc: 'Plan anual con 10% de descuento. Compensa tu huella total y desbloquea el coach de carbono IA.',
+    plan_ai_f1: 'Todo del Starter',
+    plan_ai_f2: 'Coach de carbono IA — consejos personalizados',
+    plan_ai_f3: 'Badge de fundador y beneficios exclusivos',
+    plan_ai_f4: '10% de descuento anual',
+    plan_ai_cta: 'Anual',
+    plan_onetime_name: 'Compensación Única',
+    plan_onetime_desc: 'Compensa tu huella actual una vez — precio de $20/ton CO₂.',
+    plan_onetime_f1: 'Compra única de compensación',
+    plan_onetime_f2: 'Sin suscripción',
+    plan_onetime_f3: 'Créditos REDD+ certificados Verra',
+    plan_onetime_cta: 'Compensar ahora',
+    paygo_name: 'Paga por uso',
+    paygo_desc: 'Define tu propia contribución mensual — cada poco ayuda.',
+    paygo_cta: 'Compensar ahora',
+
+    footer_copy: 'Todos los derechos reservados.',
+    footer_top: 'Volver arriba',
+    footer_contact: 'Contacto',
+  },
+  fr: { /* preencher depois */ },
+  de: { /* preencher depois */ },
+  it: {
+    lang_select: '🌐 Lingua',
+
+    nav_how: 'Come funziona',
+    nav_app: 'App',
+    nav_standards: 'Standard',
+    nav_global: 'Globale',
+    nav_partners: 'Partner',
+    nav_plans: 'Piani',
+
+    hero_title: 'Conosci la tua <span>storia</span> di carbonio',
+    hero_sub: 'CarbonPocket calcola la tua impronta personale basata su fattori di emissione reali per <strong>96 paesi</strong> — e ti aiuta a ridurla.',
+    btn_appstore: 'Scarica su App Store',
+    btn_playstore: 'Disponibile su Google Play',
+    stat_languages: 'Lingue',
+    stat_started: 'per iniziare',
+    stat_countries: 'Paesi supportati',
+    compare: 'Confronta le tue spese con le medie nazionali',
+
+    tag_how: 'Come funziona',
+    section_how_title: 'Il tuo viaggio del carbonio in 3 passi',
+    section_how_sub: 'Dalla registrazione alla compensazione — CarbonPocket ti guida in ogni fase.',
+    step1_title: 'Registrazione',
+    step1_text: 'Seleziona il tuo paese e raccontaci il tuo stile di vita. Usiamo fattori di emissione reali per la tua regione.',
+    step2_title: 'Monitora',
+    step2_text: 'Vedi la tua impronta dettagliata per Trasporti, Dieta, Abitazione e Consumo — aggiornata mensilmente.',
+    step3_title: 'Riduci & Compensa',
+    step3_text: 'Ricevi raccomandazioni personalizzate e compensa la tua impronta con crediti REDD+ verificati dall\'Amazzonia.',
+
+    tag_dashboard: 'Dashboard',
+    section_dash_title: 'La tua impronta a colpo d\'occhio',
+    section_dash_sub: 'Un pannello in modalità scura con metriche in tempo reale, suddivisione per categorie e progresso verso il tuo obiettivo.',
+    dash_item1_title: 'Totale carbonio mensile',
+    dash_item1_text: 'Vedi il tuo kg CO₂e confrontato con le medie nazionali e il tuo obiettivo personale.',
+    dash_item2_title: 'Suddivisione per categoria',
+    dash_item2_text: 'Trasporti, Dieta, Abitazione e Consumo — codificati a colori con barre di progresso.',
+    dash_item3_title: 'Monitoraggio obiettivi',
+    dash_item3_text: 'Imposta un obiettivo di riduzione e monitora i tuoi progressi mese dopo mese.',
+    dash_item4_title: 'Classifica sociale',
+    dash_item4_text: 'Confronta, competi e celebra i progressi con gli amici.',
+
+    tag_standards: 'Standard',
+    section_std_title: 'Standard internazionali del carbonio',
+    section_std_sub: 'CarbonPocket segue framework riconosciuti globalmente per garantire una contabilità del carbonio accurata, verificabile e trasparente.',
+    std1_title: 'GHG Protocol',
+    std1_text: 'Lo strumento di contabilità più usato globalmente. CarbonPocket segue il Corporate Standard per Ambiti 1, 2 e 3.',
+    std2_title: 'Verra Standard (VCS)',
+    std2_text: 'Principale certificazione mondiale di crediti di carbonio volontari. Tutti i crediti CarbonPocket sono certificati Verra.',
+    std3_title: 'REDD+',
+    std3_text: 'Riduzione delle Emissioni da Deforestazione e Degradazione Forestale. I nostri crediti finanziano la protezione delle foreste in Amazzonia.',
+    std4_title: 'ISO 14064',
+    std4_text: 'Norma internazionale per inventari di GHG e verifica. La metodologia CarbonPocket è allineata alla ISO 14064-1.',
+    th_standard: 'Standard',
+    th_scope: 'Ambito',
+    th_use: 'Uso in CarbonPocket',
+    row_ghg_scope: 'Corporate Standard',
+    row_ghg_use: 'Metodologia di calcolo dell\'impronta per tutte le fonti',
+    row_verra_scope: 'Crediti di Carbonio',
+    row_verra_use: 'Certificazione e ritiro dei crediti di compensazione',
+    row_redd_scope: 'Protezione Forestale',
+    row_redd_use: 'Rimozione di carbonio basata sulla natura in Amazzonia',
+    row_iso_scope: 'Verifica',
+    row_iso_use: 'Struttura dell\'inventario allineata alla verifica internazionale',
+    sources_title: '📊 Fonti dei dati',
+    sources_text: 'Tutti i fattori di emissione usati in CarbonPocket derivano dai dataset del <strong>GHG Protocol</strong> e dagli inventari nazionali di GHG presentati alla <strong>UNFCCC</strong>. La piattaforma copre fattori di emissione elettrica per <strong>96 paesi</strong> e fattori di trasporto in <strong>8 modalità</strong> — da database scientifici e comunicazioni ufficiali.',
+
+    tag_global: 'Globale',
+    section_global_title: 'Costruito per il mondo',
+    section_global_sub: 'Disponibile in 12 lingue con fattori di emissione specifici per 96 paesi — monitoraggio preciso ovunque.',
+    th_region: 'Regione',
+    th_countries: 'Paesi',
+
+    tag_partner: 'Partner',
+    section_partner_title: 'Crediti verificati di cui ti puoi fidare',
+    section_partner_sub: 'Tutti i crediti di compensazione sono forniti attraverso la partnership con BR Carbon, leader nel trading di crediti ambientali in Brasile.',
+    partner_title: 'Powered by BR Carbon',
+    partner_text: 'I crediti provengono da progetti REDD+ di protezione forestale in Amazzonia con certificazione Verra Standard. Le tue compensazioni supportano le comunità locali proteggendo l\'ecosistema più vitale del mondo.',
+    partner_visit: 'Visita brcarbon.com.br →',
+
+    tag_plans: 'Piani',
+    section_plans_title: 'Scegli il tuo piano',
+    section_plans_sub: 'Prezzo base di <strong>$20 per tonnellata di CO₂</strong>. Seleziona il tuo paese per vedere prezzi basati sulle medie nazionali.',
+    country_label: '🌍 Seleziona il tuo paese',
+    avg_label: 'Media nazionale:',
+    avg_unit: 'kg CO₂e/mese',
+    plan_free_name: 'Gratuito',
+    plan_free_price: '$0',
+    plan_free_period: '/mese',
+    plan_free_desc: 'Monitora la tua impronta e ricevi raccomandazioni personalizzate.',
+    plan_free_f1: 'Dashboard completo del carbonio',
+    plan_free_f2: 'Suggerimenti personalizzati di riduzione',
+    plan_free_f3: 'Monitoraggio mensile dell\'impronta',
+    plan_free_cta: 'Inizia',
+    plan_starter_name: 'Starter Offset',
+    plan_starter_period: '/mese',
+    plan_starter_desc: 'Compensa la tua impronta mensile completa — annulla quando vuoi.',
+    plan_starter_f1: 'Tutto dal piano Gratuito',
+    plan_starter_f2: 'Compensazione mensile totale',
+    plan_starter_f3: 'Crediti REDD+ certificati Verra',
+    plan_starter_cta: 'Scegli Starter',
+    plan_ai_name: 'Carbon Neutral + IA',
+    plan_ai_period: '/anno',
+    plan_ai_save: '✦ Risparmia 10%',
+    plan_ai_desc: 'Piano annuale con 10% di sconto. Compensa la tua impronta totale e sblocca il coach di carbonio IA.',
+    plan_ai_f1: 'Tutto dello Starter',
+    plan_ai_f2: 'Coach di carbonio IA — consigli personalizzati',
+    plan_ai_f3: 'Badge di fondatore e vantaggi esclusivi',
+    plan_ai_f4: '10% di sconto annuale',
+    plan_ai_cta: 'Annual',
+    plan_onetime_name: 'Compensazione Unica',
+    plan_onetime_desc: 'Compensa la tua impronta attuale una volta — prezzo di $20/ton CO₂.',
+    plan_onetime_f1: 'Acquisto unico di compensazione',
+    plan_onetime_f2: 'Nessun abbonamento',
+    plan_onetime_f3: 'Crediti REDD+ certificati Verra',
+    plan_onetime_cta: 'Compensa ora',
+    paygo_name: 'Paga quanto usi',
+    paygo_desc: 'Imposta il tuo contributo mensile — ogni piccolo aiuto conta.',
+    paygo_cta: 'Compensa ora',
+
+    footer_copy: 'Tutti i diritti riservati.',
+    footer_top: 'Torna su',
+    footer_contact: 'Contatti',
+  },
+  zh: { /* preencher depois */ },
+  ja: { /* preencher depois */ },
+  ko: { /* preencher depois */ },
+  ru: { /* preencher depois */ },
+  ar: { /* preencher depois */ },
+  hi: { /* preencher depois */ },
+};
+
+// Fallback: se uma chave não existir no idioma, usa inglês
+function t(key, lang) {
+  return translations[lang]?.[key] || translations['en']?.[key] || key;
+}
+
+function switchLang(lang) {
+  document.getElementById('langSelect').value = lang;
+  localStorage.setItem('carbonpocket-lang', lang);
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    el.innerHTML = t(key, lang);
+  });
+}
+
+// Carrega idioma salvo
+var savedLang = localStorage.getItem('carbonpocket-lang') || 'en';
+switchLang(savedLang);
+
+// Carrega idioma salvo
+var savedLang = localStorage.getItem('carbonpocket-lang') || 'en';
+switchLang(savedLang);
+</script>
+
+// ===== COUNTRY DATA =====
+var countryData = {
+  BR: { name: 'Brazil', avg: 440, flag: '🇧🇷' },
+  US: { name: 'United States', avg: 1200, flag: '🇺🇸' },
+  CA: { name: 'Canada', avg: 1100, flag: '🇨🇦' },
+  GB: { name: 'United Kingdom', avg: 700, flag: '🇬🇧' },
+  FR: { name: 'France', avg: 600, flag: '🇫🇷' },
+  DE: { name: 'Germany', avg: 800, flag: '🇩🇪' },
+  IT: { name: 'Italy', avg: 650, flag: '🇮🇹' },
+  ES: { name: 'Spain', avg: 600, flag: '🇪🇸' },
+  PT: { name: 'Portugal', avg: 550, flag: '🇵🇹' },
+  AR: { name: 'Argentina', avg: 450, flag: '🇦🇷' },
+  CL: { name: 'Chile', avg: 470, flag: '🇨🇱' },
+  CO: { name: 'Colombia', avg: 380, flag: '🇨🇴' },
+  MX: { name: 'Mexico', avg: 450, flag: '🇲🇽' },
+  CN: { name: 'China', avg: 750, flag: '🇨🇳' },
+  JP: { name: 'Japan', avg: 850, flag: '🇯🇵' },
+  KR: { name: 'South Korea', avg: 950, flag: '🇰🇷' },
+  IN: { name: 'India', avg: 250, flag: '🇮🇳' },
+  AU: { name: 'Australia', avg: 1100, flag: '🇦🇺' },
+  RU: { name: 'Russia', avg: 1000, flag: '🇷🇺' },
+  ZA: { name: 'South Africa', avg: 700, flag: '🇿🇦' },
+  NL: { name: 'Netherlands', avg: 800, flag: '🇳🇱' },
+  SE: { name: 'Sweden', avg: 550, flag: '🇸🇪' },
+  CH: { name: 'Switzerland', avg: 650, flag: '🇨🇭' },
+  NO: { name: 'Norway', avg: 600, flag: '🇳🇴' },
+  DK: { name: 'Denmark', avg: 580, flag: '🇩🇰' }
+};
+
+function updateCountry(code) {
+  var c = countryData[code];
+  if (!c) return;
+  var avg = c.avg;
+  var pricePerTon = 20;
+  var monthlyCost = (avg / 1000) * pricePerTon;
+  var annualCost = monthlyCost * 12 * 0.9; // 10% off
+
+  // Update display
+  document.getElementById('avgDisplay').textContent = avg;
+  if (document.getElementById('avgDisplayPt')) {
+    document.getElementById('avgDisplayPt').textContent = avg;
+  }
+
+  // Starter
+  document.getElementById('starterPrice').textContent = '$' + monthlyCost.toFixed(2);
+  document.getElementById('starterMetric').innerHTML = 'Offsets <strong>' + avg + '</strong> kg CO₂e/mo';
+
+  // AI Plan (annual)
+  document.getElementById('aiPrice').textContent = '$' + annualCost.toFixed(2);
+  var monthlyFromAnnual = (annualCost / 12).toFixed(2);
+  document.getElementById('aiPeriod').textContent = '$' + monthlyFromAnnual + '/mo — 10% off the monthly price';
+  document.getElementById('aiMetric').innerHTML = 'Offsets <strong>' + avg + '</strong> kg CO₂e/mo + AI Coach';
+
+  // One-Time
+  document.getElementById('oneTimePrice').textContent = '$' + monthlyCost.toFixed(2);
+  document.getElementById('oneTimeMetric').innerHTML = 'Offsets <strong>' + avg + '</strong> kg CO₂e · $20/ton';
+
+  // Update dropdown description
+  document.querySelectorAll('#countrySelect option').forEach(function(o) {
+    if (o.value === code) {
+      o.textContent = c.flag + ' ' + c.name + ' (' + avg + ' kg/mo)';
+    } else {
+      var other = countryData[o.value];
+      if (other) o.textContent = other.flag + ' ' + other.name;
+    }
+  });
+
+  // Re-trigger paygo update
+  var slider = document.getElementById('paygo-slider');
+  updatePaygo(slider.value);
+}
+
+// ===== PAYGO SLIDER =====
+function updatePaygo(val) {
+  var pct = parseInt(val);
+  var select = document.getElementById('countrySelect');
+  var c = countryData[select.value];
+  var avg = c ? c.avg : 440;
+  var pricePerTon = 20;
+
+  var kg = Math.round(avg * pct / 100);
+  var price = ((avg / 1000) * pricePerTon * pct / 100).toFixed(2);
+  document.getElementById('paygo-price').innerHTML = '$' + price + '<span>/mo</span>';
+  document.getElementById('paygo-metric').textContent = 'Offsets ' + kg + ' kg CO₂e/mo';
+
+  var lbls = document.querySelectorAll('.paygo-labels span');
+  lbls.forEach(function(s) { s.classList.remove('active'); });
+  var idx = val <= 10 ? 0 : val <= 50 ? 1 : 2;
+  if (lbls[idx]) lbls[idx].classList.add('active');
+}
+
+// Initialize with default (Brazil)
+updateCountry('BR');
+updatePaygo(50);
+
+// ===== SCROLL ANIMATIONS =====
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.2 });
+document.querySelectorAll('.table-row').forEach(function(el) { obs.observe(el); });
+
+var rv = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(function(el) { rv.observe(el); });
+</script>
+<script src="translations.js"></script>
+</body>
+</html>
