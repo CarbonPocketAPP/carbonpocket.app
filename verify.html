@@ -1,127 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Verification - CarbonPocket</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #f0fdf4;
-        }
-        .card {
-            background: white;
-            padding: 48px 40px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 4px 32px rgba(0,0,0,0.06);
-            max-width: 440px;
-            width: 90%;
-        }
-        .icon { font-size: 56px; margin-bottom: 16px; }
-        h1 { font-size: 24px; color: #111; margin-bottom: 8px; }
-        p { color: #555; line-height: 1.6; font-size: 15px; }
-        .btn {
-            display: inline-block;
-            margin-top: 28px;
-            padding: 14px 36px;
-            background: #22c55e;
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 15px;
-            transition: background 0.2s;
-        }
-        .btn:hover { background: #16a34a; }
-        .error { background: #fef2f2; }
-        .error .icon { color: #ef4444; }
-        .error h1 { color: #dc2626; }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #e5e7eb;
-            border-top-color: #22c55e;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .hidden { display: none; }
-        .footer { margin-top: 32px; font-size: 13px; color: #999; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Verification - CarbonPocket</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0fdf4;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 48px 40px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .icon { font-size: 56px; margin-bottom: 16px; }
+    h1 { font-size: 24px; color: #111; margin-bottom: 8px; }
+    p { font-size: 15px; color: #666; line-height: 1.6; margin-bottom: 8px; }
+    .email { font-weight: 600; color: #333; }
+    .loader {
+      width: 40px; height: 40px;
+      border: 3px solid #e5e7eb;
+      border-top-color: #22c55e;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 24px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .success { color: #16a34a; }
+    .error { color: #dc2626; }
+    .btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 28px;
+      background: #111;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .btn:hover { background: #333; }
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
+  <div class="card">
+    <div class="icon" id="icon">🌱</div>
+    <h1 id="title">Verifying your email...</h1>
+    <p id="message">Please wait while we verify your email address.</p>
+    <div class="loader" id="loader"></div>
+    <div id="emailDisplay" class="hidden"></div>
+    <a href="/" class="btn hidden" id="btnHome">Back to Home</a>
+  </div>
 
-<div class="card" id="loadingCard">
-    <div class="spinner"></div>
-    <p>Verifying your email...</p>
-</div>
+  <script>
+    const apiUrl = 'https://carbonpocket-verify.bold-firefly-b719.workers.dev';
 
-<div class="card hidden" id="successCard">
-    <div class="icon">✅</div>
-    <h1>Email Verified!</h1>
-    <p>Your email has been successfully verified.<br>You can now log in and start tracking your carbon footprint.</p>
-    <a href="https://carbonpocket.app" class="btn">Go to CarbonPocket</a>
-</div>
-
-<div class="card error hidden" id="errorCard">
-    <div class="icon">❌</div>
-    <h1 id="errorTitle">Invalid or Expired Link</h1>
-    <p id="errorMessage">This verification link is invalid or has expired. Please request a new one.</p>
-    <a href="https://carbonpocket.app" class="btn" style="background:#6b7280;">Back to CarbonPocket</a>
-</div>
-
-<div class="card error hidden" id="noTokenCard">
-    <div class="icon">🔗</div>
-    <h1>Missing Token</h1>
-    <p>No verification token found in the URL.<br>Please use the full link from your email.</p>
-    <a href="https://carbonpocket.app" class="btn" style="background:#6b7280;">Go to CarbonPocket</a>
-</div>
-
-<p class="footer">CarbonPocket — Track your impact. Reduce your footprint.</p>
-
-<script>
-    // 1. Pega o token da URL
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
+    const statusEl = document.getElementById('title');
+    const msgEl = document.getElementById('message');
+    const iconEl = document.getElementById('icon');
+    const loaderEl = document.getElementById('loader');
+    const emailEl = document.getElementById('emailDisplay');
+    const btnEl = document.getElementById('btnHome');
 
-    // 2. Se não tiver token, mostra o erro
     if (!token) {
-        document.getElementById('loadingCard').classList.add('hidden');
-        document.getElementById('noTokenCard').classList.remove('hidden');
+      iconEl.textContent = '❌';
+      statusEl.textContent = 'Invalid Link';
+      msgEl.textContent = 'No verification token found in the URL.';
+      loaderEl.classList.add('hidden');
+      btnEl.classList.remove('hidden');
     } else {
-        // 3. Envia o token para o backend validar
-        const apiUrl = 'https://carbonpocket-verify.bold-firefly-b719.workers.dev'; // ← MUDE AQUI
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      })
+      .then(res => res.json())
+      .then(data => {
+        loaderEl.classList.add('hidden');
+        btnEl.classList.remove('hidden');
 
-        fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: token })
-        })
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('loadingCard').classList.add('hidden');
-
-            if (data.success) {
-                document.getElementById('successCard').classList.remove('hidden');
-            } else {
-                document.getElementById('errorTitle').textContent = data.title || 'Invalid or Expired Link';
-                document.getElementById('errorMessage').textContent = data.message || 'This verification link is invalid or has expired.';
-                document.getElementById('errorCard').classList.remove('hidden');
-            }
-        })
-        .catch(err => {
-            document.getElementById('loadingCard').classList.add('hidden');
-            document.getElementById('errorTitle').textContent = 'Something went wrong';
-            document.getElementById('errorMessage').textContent = 'Could not connect to the server. Please try again later.';
-            document.getElementById('errorCard').classList.remove('hidden');
-        });
+        if (data.success) {
+          iconEl.textContent = '✅';
+          statusEl.textContent = 'Email Verified!';
+          msgEl.textContent = 'Your email has been successfully verified.';
+          emailEl.textContent = data.email || '';
+          emailEl.classList.remove('hidden');
+        } else {
+          iconEl.textContent = '❌';
+          statusEl.textContent = data.title || 'Verification Failed';
+          msgEl.textContent = data.message || 'Something went wrong. Please try again.';
+        }
+      })
+      .catch(err => {
+        loaderEl.classList.add('hidden');
+        btnEl.classList.remove('hidden');
+        iconEl.textContent = '❌';
+        statusEl.textContent = 'Connection Error';
+        msgEl.textContent = 'Could not reach the verification server. Please try again later.';
+      });
     }
+  </script>
+</body>
+</html>
 </script>
 
 </body>
