@@ -1,1 +1,3 @@
-carbonpocket.app
+git add CNAME
+git commit -m "Adiciona CNAME para domínio personalizado"
+git push
