@@ -1,8 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+SECURITY HEADERS REQUIRED ON SERVER (Apache/Nginx):
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+-->
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self';" />
   <title>CarbonPocket — Know your carbon story</title>
   <meta name="description" content="CarbonPocket calculates your personal footprint based on real emission factors for your country — and helps you reduce it." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -345,8 +353,14 @@
     footer .links a { font-size: 0.8rem; color: rgba(255,255,255,0.4); transition: color 0.2s; }
     footer .links a:hover { color: #34d399; }
 
-    .reveal { opacity: 0; transform: translateY(30px); transition: all 0.6s ease-out; }
+    .reveal { opacity: 0; transform: translateY(30px); transition: none; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    .section {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: none;
+    }
 
     @media (max-width:600px) {
       section { padding: 3rem 1.25rem; }
@@ -363,7 +377,7 @@
 </head>
 <body>
   <div class="lang-bar">
-    <select id="langSelect" class="lang-select" onchange="switchLang(this.value)">
+    <select id="langSelect" class="lang-select">
       <option value="en">🇬🇧 English</option>
       <option value="pt">🇧🇷 Português</option>
       <option value="es">🇪🇸 Español</option>
@@ -390,7 +404,7 @@
   </nav>
 
   <main>
-    <section class="hero reveal" id="hero">
+    <section class="hero reveal section" id="hero">
       <div class="hero-content">
         <div class="hero-icon">
           <img src="icon.png" alt="CarbonPocket" />
@@ -417,24 +431,24 @@
           <div class="hero-stat"><strong data-i18n="stat_countries">96</strong><span data-i18n="stat_countries_text">Countries supported</span></div>
         </div>
         <div class="hero-langs" aria-label="Select language">
-          <span class="active" data-lang="en" onclick="switchLang('en')">English</span>
-          <span data-lang="pt" onclick="switchLang('pt')">Português</span>
-          <span data-lang="es" onclick="switchLang('es')">Español</span>
-          <span data-lang="fr" onclick="switchLang('fr')">Français</span>
-          <span data-lang="de" onclick="switchLang('de')">Deutsch</span>
-          <span data-lang="it" onclick="switchLang('it')">Italiano</span>
-          <span data-lang="ja" onclick="switchLang('ja')">日本語</span>
-          <span data-lang="ko" onclick="switchLang('ko')">한국어</span>
-          <span data-lang="zh" onclick="switchLang('zh')">中文</span>
-          <span data-lang="ru" onclick="switchLang('ru')">Русский</span>
-          <span data-lang="ar" onclick="switchLang('ar')">العربية</span>
-          <span data-lang="sv" onclick="switchLang('sv')">Svenska</span>
+          <span class="active" data-lang="en">English</span>
+          <span data-lang="pt">Português</span>
+          <span data-lang="es">Español</span>
+          <span data-lang="fr">Français</span>
+          <span data-lang="de">Deutsch</span>
+          <span data-lang="it">Italiano</span>
+          <span data-lang="ja">日本語</span>
+          <span data-lang="ko">한국어</span>
+          <span data-lang="zh">中文</span>
+          <span data-lang="ru">Русский</span>
+          <span data-lang="ar">العربية</span>
+          <span data-lang="sv">Svenska</span>
         </div>
         <!-- hero compare and country note removed -->
       </div>
     </section>
 
-    <section id="how" class="reveal">
+    <section id="how" class="reveal section">
       <span class="section-tag" data-i18n="tag_how">How it works</span>
       <h2 class="section-title" data-i18n="section_how_title">Your carbon journey in 3 steps</h2>
       <p class="section-sub" data-i18n="section_how_sub">From setup to offsetting — CarbonPocket guides you through every step of your climate journey.</p>
@@ -457,7 +471,7 @@
       </div>
     </section>
 
-    <section id="app" class="reveal">
+    <section id="app" class="reveal section">
       <span class="section-tag" data-i18n="tag_dashboard">Dashboard</span>
       <h2 class="section-title" data-i18n="section_dash_title">Your footprint at a glance</h2>
       <p class="section-sub" data-i18n="section_dash_sub">A dark-mode carbon dashboard with real-time metrics, category breakdowns, and progress toward your goal.</p>
@@ -492,7 +506,7 @@
       </div>
     </section>
 
-    <section id="standards" class="reveal">
+    <section id="standards" class="reveal section">
       <span class="section-tag" data-i18n="tag_standards">Standards</span>
       <h2 class="section-title" data-i18n="section_std_title">International carbon standards</h2>
       <p class="section-sub" data-i18n="section_std_sub">CarbonPocket follows globally recognized frameworks to keep carbon accounting accurate, auditable, and transparent.</p>
@@ -562,23 +576,23 @@
       </div>
     </section>
 
-    <section id="global" class="reveal">
+    <section id="global" class="reveal section">
       <span class="section-tag" data-i18n="tag_global">Global</span>
       <h2 class="section-title" data-i18n="section_global_title">Built for the world</h2>
       <p class="section-sub" data-i18n="section_global_sub">Available in 12 languages with emission factors for 96 countries — accurate tracking anywhere.</p>
       <div class="lang-grid">
-        <span class="lang-pill active" data-lang="en" onclick="switchLang('en')">English</span>
-        <span class="lang-pill" data-lang="pt" onclick="switchLang('pt')">Português</span>
-        <span class="lang-pill" data-lang="es" onclick="switchLang('es')">Español</span>
-        <span class="lang-pill" data-lang="fr" onclick="switchLang('fr')">Français</span>
-        <span class="lang-pill" data-lang="de" onclick="switchLang('de')">Deutsch</span>
-        <span class="lang-pill" data-lang="it" onclick="switchLang('it')">Italiano</span>
-        <span class="lang-pill" data-lang="ja" onclick="switchLang('ja')">日本語</span>
-        <span class="lang-pill" data-lang="ko" onclick="switchLang('ko')">한국어</span>
-        <span class="lang-pill" data-lang="zh" onclick="switchLang('zh')">中文</span>
-        <span class="lang-pill" data-lang="ru" onclick="switchLang('ru')">Русский</span>
-        <span class="lang-pill" data-lang="ar" onclick="switchLang('ar')">العربية</span>
-        <span class="lang-pill" data-lang="sv" onclick="switchLang('sv')">Svenska</span>
+        <span class="lang-pill active" data-lang="en">English</span>
+        <span class="lang-pill" data-lang="pt">Português</span>
+        <span class="lang-pill" data-lang="es">Español</span>
+        <span class="lang-pill" data-lang="fr">Français</span>
+        <span class="lang-pill" data-lang="de">Deutsch</span>
+        <span class="lang-pill" data-lang="it">Italiano</span>
+        <span class="lang-pill" data-lang="ja">日本語</span>
+        <span class="lang-pill" data-lang="ko">한국어</span>
+        <span class="lang-pill" data-lang="zh">中文</span>
+        <span class="lang-pill" data-lang="ru">Русский</span>
+        <span class="lang-pill" data-lang="ar">العربية</span>
+        <span class="lang-pill" data-lang="sv">Svenska</span>
       </div>
       <div class="table-wrap">
         <table>
@@ -600,7 +614,7 @@
       </div>
     </section>
 
-    <section id="partners" class="reveal">
+    <section id="partners" class="reveal section">
       <span class="section-tag" data-i18n="tag_partner">Partner</span>
       <h2 class="section-title" data-i18n="section_partner_title">Verified credits you can trust</h2>
       <p class="section-sub" data-i18n="section_partner_sub">All offset credits in CarbonPocket are sourced through our partnership with BR Carbon, a leader in environmental credit trading in Brazil.</p>
@@ -624,13 +638,13 @@
       </div>
     </section>
 
-    <section id="plans" class="reveal">
+    <section id="plans" class="reveal section">
       <span class="section-tag" data-i18n="tag_plans">Plans</span>
       <h2 class="section-title" data-i18n="section_plans_title">Choose your plan</h2>
       <p class="section-sub" data-i18n="section_plans_sub">Priced at just <strong>$20 per ton of CO₂</strong>. Select your country to see personalized pricing based on national averages.</p>
       <div class="country-selector">
         <label for="countrySelect" data-i18n="country_label">🌍 Select your country</label>
-        <select id="countrySelect" onchange="updateCountry(this.value)">
+        <select id="countrySelect">
           <option value="DZ">🇩🇿 Algeria (350 kg/mo)</option>
           <option value="AR">🇦🇷 Argentina (480 kg/mo)</option>
           <option value="AU">🇦🇺 Australia (1300 kg/mo)</option>
@@ -775,7 +789,7 @@
         <div class="paygo-price" id="paygo-price">$20<span>/mo</span></div>
         <div class="paygo-metric" id="paygo-metric">Standard monthly offset contribution.</div>
         <div class="paygo-slider-wrap">
-          <input type="range" id="paygo-slider" min="10" max="100" step="10" value="50" oninput="updatePaygo(this.value)" />
+          <input type="range" id="paygo-slider" min="10" max="100" step="10" value="50" />
         </div>
         <div class="paygo-pct" id="paygoPct">50%</div>
         <a href="#" class="btn-plan" data-i18n="plan_free_cta">Get started</a>
@@ -787,7 +801,7 @@
     <div class="copy" data-i18n="footer_copy">All rights reserved.</div>
     <div class="links">
       <a href="#hero" data-i18n="footer_top">Back to top</a>
-      <a href="mailto:info@carbonpocket.app" data-i18n="footer_contact">Contact</a>
+      <a href="#" id="contactLink" data-i18n="footer_contact">Contact</a>
     </div>
   </footer>
 
@@ -2436,7 +2450,12 @@
     function renderPage(lang) {
       document.querySelectorAll('[data-i18n]').forEach(function(el) {
         var key = el.getAttribute('data-i18n');
-        el.innerHTML = t(key, lang);
+        var value = t(key, lang);
+        if (value.indexOf('<') !== -1) {
+          el.innerHTML = value;
+        } else {
+          el.textContent = value;
+        }
       });
     }
 
@@ -2451,11 +2470,20 @@
         el.classList.toggle('active', el.dataset.lang === normalizedLang);
       });
 
-      localStorage.setItem('carbonpocket-lang', normalizedLang);
+      try {
+        localStorage.setItem('carbonpocket-lang', normalizedLang);
+      } catch (e) {}
 
       document.querySelectorAll('[data-i18n]').forEach(function(el) {
         var key = el.getAttribute('data-i18n');
-        el.innerHTML = t(key, normalizedLang);
+        var value = t(key, normalizedLang);
+        el.textContent = value;
+      });
+
+      var htmlKeys = ['hero_title', 'hero_sub', 'section_plans_sub'];
+      htmlKeys.forEach(function(k) {
+        var el = document.querySelector('[data-i18n="' + k + '"]');
+        if (el) el.innerHTML = t(k, normalizedLang);
       });
 
       document.documentElement.lang = normalizedLang;
@@ -2632,15 +2660,177 @@
       }
     }
 
+    function handleLanguageInteraction(e) {
+      if (e.type === 'click') {
+        var langBtn = e.target.closest('[data-lang]');
+        if (langBtn) {
+          switchLang(langBtn.dataset.lang);
+          return;
+        }
+
+        var storeButton = e.target.closest('.btn-store[href="#"]');
+        if (storeButton) {
+          e.preventDefault();
+        }
+      }
+
+      if (e.type === 'change' && e.target && e.target.id === 'langSelect') {
+        switchLang(e.target.value);
+      }
+    }
+
+    document.addEventListener('click', handleLanguageInteraction);
+    document.addEventListener('change', handleLanguageInteraction);
+
     document.addEventListener('DOMContentLoaded', () => {
+      var countrySelect = document.getElementById('countrySelect');
+      if (countrySelect) {
+        countrySelect.addEventListener('change', function() {
+          updateCountry(this.value);
+        });
+      }
+
+      var paygoSlider = document.getElementById('paygo-slider');
+      if (paygoSlider) {
+        paygoSlider.addEventListener('input', function() {
+          updatePaygo(this.value);
+        });
+      }
+
       updateCountry('BR');
       updatePaygo(50);
       initReveal();
       (function() {
+        var validLangs = ['en','pt','es','fr','de','it','ja','ko','zh','ru','ar','sv'];
         var saved = localStorage.getItem('carbonpocket-lang') || 'en';
+        if (validLangs.indexOf(saved) === -1) saved = 'en';
         switchLang(saved);
       })();
+
+      var cl = document.getElementById('contactLink');
+      if (cl) {
+        var u = 'info', d = 'carbonpocket', t = 'app';
+        cl.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.location.href = 'mailto:' + u + '@' + d + '.' + t;
+        });
+      }
+    });
+
+    // Anime.js Scroll Animations
+    document.addEventListener('DOMContentLoaded', function() {
+      const sections = document.querySelectorAll('.section');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const section = entry.target;
+            anime({
+              targets: section,
+              opacity: [0, 1],
+              translateY: [40, 0],
+              duration: 800,
+              easing: 'easeOutCubic',
+              delay: 200
+            });
+            observer.unobserve(section);
+          }
+        });
+      }, { threshold: 0.15 });
+
+      sections.forEach(s => observer.observe(s));
+
+      // Dashboard cards stagger on scroll
+      const dashObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const items = entry.target.querySelectorAll('.dash-item');
+            anime({
+              targets: items,
+              opacity: [0, 1],
+              translateY: [20, 0],
+              duration: 400,
+              delay: anime.stagger(80),
+              easing: 'easeOutCubic'
+            });
+            const img = entry.target.querySelector('.dash-visual img');
+            if (img) {
+              anime({
+                targets: img,
+                opacity: [0, 1],
+                scale: [0.9, 1],
+                duration: 600,
+                delay: 200,
+                easing: 'easeOutCubic'
+              });
+            }
+            dashObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+
+      const dashLayout = document.querySelector('.dashboard-layout');
+      if (dashLayout) dashObserver.observe(dashLayout);
+
+      // Partner section fade-in
+      const partnerObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            anime({
+              targets: '.partner-banner',
+              opacity: [0, 1],
+              translateY: [30, 0],
+              duration: 700,
+              easing: 'easeOutCubic'
+            });
+            anime({
+              targets: '.partner-tags span',
+              opacity: [0, 1],
+              scale: [0.8, 1],
+              duration: 400,
+              delay: anime.stagger(80),
+              easing: 'easeOutBack(1.2)'
+            });
+            partnerObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.2 });
+
+      const partnerSection = document.querySelector('.partner-banner');
+      if (partnerSection) partnerObserver.observe(partnerSection);
+
+      function pulsePaygo() {
+        anime({
+          targets: '#paygo-price',
+          scale: [1, 1.08, 1],
+          duration: 250,
+          easing: 'easeOutCubic'
+        });
+        anime({
+          targets: '#paygoPct',
+          scale: [1, 1.15, 1],
+          duration: 200,
+          easing: 'easeOutBack(1.5)'
+        });
+      }
+
+      const originalUpdate = window.updatePaygo;
+      if (originalUpdate) {
+        window.updatePaygo = function(val) {
+          originalUpdate(val);
+          pulsePaygo();
+        };
+      }
+
+      anime({
+        targets: '.hero-stat strong',
+        innerHTML: [0, function(el) { return parseInt(el.textContent) || 96; }],
+        duration: 1500,
+        round: 1,
+        easing: 'easeOutCubic',
+        delay: 500
+      });
     });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@4.0.0/lib/anime.min.js" integrity="sha384-9P1jsUTtmTldCqxDx/A2AiJFGGR2scFODQCNKF3Ln+4G7bnvYp2g1EePEZWnNYw" crossorigin="anonymous"></script>
 </body>
 </html>
