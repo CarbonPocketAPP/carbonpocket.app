@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Deletion Request - CarbonPocket</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .nav-link {
+            color: #22c55e; text-decoration: none; font-size: 14px; font-weight: 500;
+            display: inline-flex; align-items: center; margin-bottom: 40px; transition: opacity 0.2s;
+        }
+        .nav-link:hover { opacity: 0.8; }
+        h1 { font-size: 32px; font-weight: 700; margin-bottom: 24px; letter-spacing: -0.02em; }
+        h2 {
+            font-size: 20px; font-weight: 600; margin: 40px 0 16px 0;
+            color: #22c55e; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        h3 { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+        p { color: #a1a1aa; margin-bottom: 16px; }
+        ul { list-style: none; margin-bottom: 24px; }
+        ul li {
+            color: #a1a1aa; padding-left: 24px; position: relative; margin-bottom: 8px;
+        }
+        ul li::before { content: "•"; color: #22c55e; position: absolute; left: 0; font-weight: bold; }
+        .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 32px 0; }
+        @media (max-width: 600px) { .method-grid { grid-template-columns: 1fr; } }
+        .card { background-color: #171717; border: 1px solid #262626; border-radius: 12px; padding: 24px; }
+        .card-tag {
+            display: inline-block; background-color: rgba(34, 197, 94, 0.1);
+            color: #22c55e; font-size: 12px; font-weight: 600;
+            padding: 4px 12px; border-radius: 20px; margin-bottom: 16px;
+        }
+        a { color: #22c55e; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid #262626; text-align: center; }
+        .footer-text { font-size: 13px; color: #52525b; }
+        .bottom-nav { margin-top: 24px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="https://carbonpocket.app" class="nav-link">← Back to CarbonPocket</a>
+        <h1>Account Deletion Request</h1>
+
+        <section>
+            <p>CarbonPocket respects your right to control your personal data. If you wish to permanently delete your account and all associated data, you can request it through one of the methods below.</p>
+        </section>
+
+        <section>
+            <h2>What data will be deleted</h2>
+            <ul>
+                <li>Your account information (name, email address, profile photo)</li>
+                <li>Your carbon footprint history (transportation, food, energy, flights, purchases)</li>
+                <li>Your friend connections, rankings, and streaks</li>
+                <li>Usage analytics and device information</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>What data may be retained</h2>
+            <p>Some data may be retained for legal or compliance reasons if required by applicable law (e.g., tax or audit records). This data will be anonymized and kept only for the minimum period required by law.</p>
+        </section>
+
+        <section>
+            <h2>How to request deletion</h2>
+            <div class="method-grid">
+                <div class="card">
+                    <span class="card-tag">Recommended</span>
+                    <h3>Method 1 — In-App</h3>
+                    <p style="font-size: 14px;">• Open CarbonPocket on your device</p>
+                    <p style="font-size: 14px;">• Go to Settings → Account → Delete Account</p>
+                    <p style="font-size: 14px;">• Follow the confirmation prompts</p>
+                    <p style="font-size: 14px;">• Your account will be deleted immediately</p>
+                </div>
+                <div class="card">
+                    <span class="card-tag" style="background: transparent; border: 1px solid #404040; color: #a1a1aa;">Manual</span>
+                    <h3>Method 2 — Email Request</h3>
+                    <p style="font-size: 14px;">• Send an email to <a href="mailto:carbonpocket@neocert.com.br">carbonpocket@neocert.com.br</a> with the subject "Account Deletion Request"</p>
+                    <p style="font-size: 14px;">• Include the email address associated with your CarbonPocket account</p>
+                    <p style="font-size: 14px;">• We will process your request within 30 days and send a confirmation email</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Processing Time</h2>
+            <p>We will process your deletion request within 30 days of verification. You will receive a confirmation email once the deletion is complete.</p>
+        </section>
+
+        <section>
+            <h2>Contact</h2>
+            <p>For questions about account deletion or data privacy, contact our Data Protection Officer at: <a href="mailto:carbonpocket@neocert.com.br">carbonpocket@neocert.com.br</a></p>
+        </section>
+
+        <footer>
+            <div class="bottom-nav">
+                <a href="https://carbonpocket.app" class="nav-link">Back to CarbonPocket</a>
+            </div>
+            <p class="footer-text">© 2026 CarbonPocket. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
