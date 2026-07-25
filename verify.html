@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://carbonpocket-verify.bold-firefly-b719.workers.dev; frame-ancestors 'none';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://carbonpocket-verify.bold-firefly-b719.workers.dev; frame-ancestors 'none';" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta name="referrer" content="no-referrer" />
     <title>Email Verification - CarbonPocket</title>
@@ -94,85 +94,71 @@
     var rawToken = params.get('token');
     var token = rawToken ? rawToken.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 256) : null;
 
-    // 2. Client-side rate limiting (max 3 attempts per page load)
-    var attempts = 0;
-    var MAX_ATTEMPTS = 3;
-
     // Clean URL - remove token from address bar
     window.history.replaceState({}, document.title, window.location.pathname);
 
-    // 3. If no token, show the error
+    // 2. If no token, show the error immediately
     if (!token) {
         document.getElementById('loadingCard').classList.add('hidden');
         document.getElementById('noTokenCard').classList.remove('hidden');
+    } else if (typeof token !== 'string' || token.length < 10 || token.length > 256 || !/^[a-zA-Z0-9_-]+$/.test(token)) {
+        // 3. Validate token format
+        document.getElementById('loadingCard').classList.add('hidden');
+        document.getElementById('errorTitle').textContent = 'Invalid Token';
+        document.getElementById('errorMessage').textContent = 'The verification link appears to be malformed.';
+        document.getElementById('errorCard').classList.remove('hidden');
     } else {
-        attempts++;
-        if (attempts > MAX_ATTEMPTS) {
-            document.getElementById('loadingCard').classList.add('hidden');
-            document.getElementById('errorTitle').textContent = 'Too Many Attempts';
-            document.getElementById('errorMessage').textContent = 'Please reload the page and try again.';
-            document.getElementById('errorCard').classList.remove('hidden');
-        } else {
-            // Validate token format before sending
-            if (typeof token !== 'string' || token.length < 10 || token.length > 256 || !/^[a-zA-Z0-9_-]+$/.test(token)) {
+        // 4. Proceed with API call
+        const apiUrl = 'https://carbonpocket-verify.bold-firefly-b719.workers.dev';
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
+
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': 'verify-page'
+            },
+            body: JSON.stringify({ token: token }),
+            signal: controller.signal
+        })
+        .then(res => {
+            clearTimeout(timeout);
+            return res.json();
+        })
+        .then(data => {
+            // Validate response schema
+            var isValid = data && typeof data === 'object' &&
+                (data.success === true || data.success === false);
+
+            if (!isValid) {
                 document.getElementById('loadingCard').classList.add('hidden');
-                document.getElementById('errorTitle').textContent = 'Invalid Token';
-                document.getElementById('errorMessage').textContent = 'The verification link appears to be malformed.';
+                document.getElementById('errorTitle').textContent = 'Invalid Response';
+                document.getElementById('errorMessage').textContent = 'The server returned an unexpected response. Please try again.';
                 document.getElementById('errorCard').classList.remove('hidden');
-            } else {
-                const apiUrl = 'https://carbonpocket-verify.bold-firefly-b719.workers.dev';
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 10000);
-
-                fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': 'verify-page'
-                    },
-                    body: JSON.stringify({ token: token }),
-                    signal: controller.signal
-                })
-                .then(res => {
-                    clearTimeout(timeout);
-                    return res.json();
-                })
-                .then(data => {
-                    // Validate response schema
-                    var isValid = data && typeof data === 'object' &&
-                        (data.success === true || data.success === false);
-
-                    if (!isValid) {
-                        document.getElementById('loadingCard').classList.add('hidden');
-                        document.getElementById('errorTitle').textContent = 'Invalid Response';
-                        document.getElementById('errorMessage').textContent = 'The server returned an unexpected response. Please try again.';
-                        document.getElementById('errorCard').classList.remove('hidden');
-                        return;
-                    }
-
-                    document.getElementById('loadingCard').classList.add('hidden');
-
-                    if (data.success) {
-                        document.getElementById('successCard').classList.remove('hidden');
-                    } else {
-                        // Sanitize error text — strip RTL override and control characters
-                        var title = (data.title || 'Invalid or Expired Link').replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '');
-                        var message = (data.message || 'This verification link is invalid or has expired.').replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '');
-                        document.getElementById('errorTitle').textContent = title;
-                        document.getElementById('errorMessage').textContent = message;
-                        document.getElementById('errorCard').classList.remove('hidden');
-                    }
-                })
-                .catch(function() {
-                    clearTimeout(timeout);
-                    document.getElementById('loadingCard').classList.add('hidden');
-                    document.getElementById('errorTitle').textContent = 'Connection Error';
-                    document.getElementById('errorMessage').textContent = 'Could not connect to the server. Please try again later.';
-                    document.getElementById('errorCard').classList.remove('hidden');
-                    // Do NOT log error details to console
-                });
+                return;
             }
-        }
+
+            document.getElementById('loadingCard').classList.add('hidden');
+
+            if (data.success) {
+                document.getElementById('successCard').classList.remove('hidden');
+            } else {
+                // Sanitize error text — strip RTL override and control characters
+                var title = (data.title || 'Invalid or Expired Link').replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '');
+                var message = (data.message || 'This verification link is invalid or has expired.').replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '');
+                document.getElementById('errorTitle').textContent = title;
+                document.getElementById('errorMessage').textContent = message;
+                document.getElementById('errorCard').classList.remove('hidden');
+            }
+        })
+        .catch(function() {
+            clearTimeout(timeout);
+            document.getElementById('loadingCard').classList.add('hidden');
+            document.getElementById('errorTitle').textContent = 'Connection Error';
+            document.getElementById('errorMessage').textContent = 'Could not connect to the server. Please try again later.';
+            document.getElementById('errorCard').classList.remove('hidden');
+        });
     }
 </script>
 
