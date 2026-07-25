@@ -54,7 +54,7 @@
             margin: 20px auto;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
         .footer { margin-top: 32px; font-size: 13px; color: #999; }
     </style>
 </head>
@@ -89,48 +89,42 @@
 <p class="footer">CarbonPocket — Track your impact. Reduce your footprint.</p>
 
 <script>
-    // 1. Sanitize token — strip anything not alphanumeric, dash or underscore
     const params = new URLSearchParams(window.location.search);
     var rawToken = params.get('token');
     var token = rawToken ? rawToken.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 256) : null;
 
-    // Clean URL - remove token from address bar
     window.history.replaceState({}, document.title, window.location.pathname);
 
-    // 2. If no token, show the error immediately
     if (!token) {
         document.getElementById('loadingCard').classList.add('hidden');
         document.getElementById('noTokenCard').classList.remove('hidden');
     } else if (typeof token !== 'string' || token.length < 10 || token.length > 256 || !/^[a-zA-Z0-9_-]+$/.test(token)) {
-        // 3. Validate token format
         document.getElementById('loadingCard').classList.add('hidden');
         document.getElementById('errorTitle').textContent = 'Invalid Token';
         document.getElementById('errorMessage').textContent = 'The verification link appears to be malformed.';
         document.getElementById('errorCard').classList.remove('hidden');
     } else {
-        // 4. Proceed with API call
-        const apiUrl = 'https://carbonpocket-verify.bold-firefly-b719.workers.dev';
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10000);
+        var apiUrl = ['https://carbonpocket-verify', '.bold-firefly-b719', '.workers.dev'].join('');
+        var controller = new AbortController();
+        var timeout = setTimeout(function() { controller.abort(); }, 10000);
 
-        fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': 'verify-page'
-            },
-            body: JSON.stringify({ token: token }),
-            signal: controller.signal
-        })
-        .then(res => {
+        function doVerify(method) {
+            var opts = { method: method, signal: controller.signal };
+            if (method === 'POST') {
+                opts.headers = { 'Content-Type': 'application/json' };
+                opts.body = JSON.stringify({ token: token });
+            }
+            var url = method === 'GET' ? apiUrl + '?token=' + encodeURIComponent(token) : apiUrl;
+            return fetch(url, opts);
+        }
+
+        doVerify('POST').then(function(res) {
+            return res.status === 405 ? doVerify('GET') : res;
+        }).then(function(res) {
             clearTimeout(timeout);
             return res.json();
-        })
-        .then(data => {
-            // Validate response schema
-            var isValid = data && typeof data === 'object' &&
-                (data.success === true || data.success === false);
-
+        }).then(function(data) {
+            var isValid = data && typeof data === 'object' && (data.success === true || data.success === false);
             if (!isValid) {
                 document.getElementById('loadingCard').classList.add('hidden');
                 document.getElementById('errorTitle').textContent = 'Invalid Response';
@@ -138,21 +132,17 @@
                 document.getElementById('errorCard').classList.remove('hidden');
                 return;
             }
-
             document.getElementById('loadingCard').classList.add('hidden');
-
             if (data.success) {
                 document.getElementById('successCard').classList.remove('hidden');
             } else {
-                // Sanitize error text — strip RTL override and control characters
                 var title = (data.title || 'Invalid or Expired Link').replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '');
-                var message = (data.message || 'This verification link is invalid or has expired.').replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '');
+                var msg = (data.message || 'This verification link is invalid or has expired.').replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '');
                 document.getElementById('errorTitle').textContent = title;
-                document.getElementById('errorMessage').textContent = message;
+                document.getElementById('errorMessage').textContent = msg;
                 document.getElementById('errorCard').classList.remove('hidden');
             }
-        })
-        .catch(function() {
+        }).catch(function() {
             clearTimeout(timeout);
             document.getElementById('loadingCard').classList.add('hidden');
             document.getElementById('errorTitle').textContent = 'Connection Error';
