@@ -1,6 +1,10 @@
-# Sensible
+# Sensitive and local config
 .env
 .env.local
+.env*
+!.env.example
+.dev.vars*
+!.dev.vars.example
 *.key
 *.pem
 config.js
@@ -13,6 +17,8 @@ _*.py
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Node
+# Node and Wrangler
 node_modules/
+.wrangler
