@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://carbonpocket-verify.bold-firefly-b719.workers.dev; frame-ancestors 'none';" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta name="referrer" content="no-referrer" />
     <title>Email Verification - CarbonPocket</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -51,7 +54,7 @@
             margin: 20px auto;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
         .footer { margin-top: 32px; font-size: 13px; color: #999; }
     </style>
 </head>
@@ -66,58 +69,83 @@
     <div class="icon">✅</div>
     <h1>Email Verified!</h1>
     <p>Your email has been successfully verified.<br>You can now log in and start tracking your carbon footprint.</p>
-    <a href="https://carbonpocket.app" class="btn">Go to CarbonPocket</a>
+    <a href="https://carbonpocket.app" class="btn" rel="noreferrer">Go to CarbonPocket</a>
 </div>
 
 <div class="card error hidden" id="errorCard">
     <div class="icon">❌</div>
     <h1 id="errorTitle">Invalid or Expired Link</h1>
     <p id="errorMessage">This verification link is invalid or has expired. Please request a new one.</p>
-    <a href="https://carbonpocket.app" class="btn" style="background:#6b7280;">Back to CarbonPocket</a>
+    <a href="https://carbonpocket.app" class="btn" style="background:#6b7280;" rel="noreferrer">Back to CarbonPocket</a>
 </div>
 
 <div class="card error hidden" id="noTokenCard">
     <div class="icon">🔗</div>
     <h1>Missing Token</h1>
     <p>No verification token found in the URL.<br>Please use the full link from your email.</p>
-    <a href="https://carbonpocket.app" class="btn" style="background:#6b7280;">Go to CarbonPocket</a>
+    <a href="https://carbonpocket.app" class="btn" style="background:#6b7280;" rel="noreferrer">Go to CarbonPocket</a>
 </div>
 
 <p class="footer">CarbonPocket — Track your impact. Reduce your footprint.</p>
 
 <script>
-    // 1. Pega o token da URL
     const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
+    var rawToken = params.get('token');
+    var token = rawToken ? rawToken.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 256) : null;
 
-    // 2. Se não tiver token, mostra o erro
+    window.history.replaceState({}, document.title, window.location.pathname);
+
     if (!token) {
         document.getElementById('loadingCard').classList.add('hidden');
         document.getElementById('noTokenCard').classList.remove('hidden');
+    } else if (typeof token !== 'string' || token.length < 10 || token.length > 256 || !/^[a-zA-Z0-9_-]+$/.test(token)) {
+        document.getElementById('loadingCard').classList.add('hidden');
+        document.getElementById('errorTitle').textContent = 'Invalid Token';
+        document.getElementById('errorMessage').textContent = 'The verification link appears to be malformed.';
+        document.getElementById('errorCard').classList.remove('hidden');
     } else {
-        // 3. Envia o token para o backend validar
-        const apiUrl = 'https://carbonpocket-verify.bold-firefly-b719.workers.dev'; // ← MUDE AQUI
+        var apiUrl = ['https://carbonpocket-verify', '.bold-firefly-b719', '.workers.dev'].join('');
+        var controller = new AbortController();
+        var timeout = setTimeout(function() { controller.abort(); }, 10000);
 
-        fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: token })
-        })
-        .then(res => res.json())
-        .then(data => {
+        function doVerify(method) {
+            var opts = { method: method, signal: controller.signal };
+            if (method === 'POST') {
+                opts.headers = { 'Content-Type': 'application/json' };
+                opts.body = JSON.stringify({ token: token });
+            }
+            var url = method === 'GET' ? apiUrl + '?token=' + encodeURIComponent(token) : apiUrl;
+            return fetch(url, opts);
+        }
+
+        doVerify('POST').then(function(res) {
+            return res.status === 405 ? doVerify('GET') : res;
+        }).then(function(res) {
+            clearTimeout(timeout);
+            return res.json();
+        }).then(function(data) {
+            var isValid = data && typeof data === 'object' && (data.success === true || data.success === false);
+            if (!isValid) {
+                document.getElementById('loadingCard').classList.add('hidden');
+                document.getElementById('errorTitle').textContent = 'Invalid Response';
+                document.getElementById('errorMessage').textContent = 'The server returned an unexpected response. Please try again.';
+                document.getElementById('errorCard').classList.remove('hidden');
+                return;
+            }
             document.getElementById('loadingCard').classList.add('hidden');
-
             if (data.success) {
                 document.getElementById('successCard').classList.remove('hidden');
             } else {
-                document.getElementById('errorTitle').textContent = data.title || 'Invalid or Expired Link';
-                document.getElementById('errorMessage').textContent = data.message || 'This verification link is invalid or has expired.';
+                var title = (data.title || 'Invalid or Expired Link').replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '');
+                var msg = (data.message || 'This verification link is invalid or has expired.').replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '');
+                document.getElementById('errorTitle').textContent = title;
+                document.getElementById('errorMessage').textContent = msg;
                 document.getElementById('errorCard').classList.remove('hidden');
             }
-        })
-        .catch(err => {
+        }).catch(function() {
+            clearTimeout(timeout);
             document.getElementById('loadingCard').classList.add('hidden');
-            document.getElementById('errorTitle').textContent = 'Something went wrong';
+            document.getElementById('errorTitle').textContent = 'Connection Error';
             document.getElementById('errorMessage').textContent = 'Could not connect to the server. Please try again later.';
             document.getElementById('errorCard').classList.remove('hidden');
         });

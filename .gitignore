@@ -1,0 +1,18 @@
+# Sensible
+.env
+.env.local
+*.key
+*.pem
+config.js
+_*.py
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
