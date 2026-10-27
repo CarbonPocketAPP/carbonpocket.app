@@ -1,0 +1,40 @@
+.distance-slider {
+  display: block;
+  width: 100%;
+  margin: 18px 0 8px;
+  accent-color: #72e19a;
+  cursor: pointer;
+}
+
+.distance-slider:focus-visible {
+  outline: 2px solid #72e19a;
+  outline-offset: 5px;
+  border-radius: 999px;
+}
+
+.distance-slider-labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #7f9587;
+  font-size: 11px;
+}
+
+.distance-slider-labels output {
+  color: #eaf5e9;
+  font-size: 14px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+}
+
+@media (max-width: 420px) {
+  .distance-slider-labels { gap: 6px; font-size: 10px; }
+  .distance-slider-labels output { font-size: 12px; }
+}
