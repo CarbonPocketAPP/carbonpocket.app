@@ -291,6 +291,7 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
     .plan-card .plan-period { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin-bottom: 0.5rem; }
     .plan-card .plan-desc { font-size: 0.82rem; color: rgba(255,255,255,0.5); margin-bottom: 1rem; min-height: 2.5em; }
     .plan-card .plan-metric { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-bottom: 1rem; padding: 0.3rem 0.6rem; background: rgba(52,211,153,0.06); border-radius: 8px; display: inline-block; }
+    .plan-card .plan-metric-highlight { color: #a7f3d0; background: linear-gradient(135deg,rgba(52,211,153,0.18),rgba(52,211,153,0.1)); border: 1px solid rgba(52,211,153,0.38); box-shadow: 0 0 18px rgba(52,211,153,0.16), inset 0 1px 0 rgba(255,255,255,0.08); font-weight: 600; }
     .plan-card ul { list-style: none; padding: 0; margin-bottom: 1.5rem; flex: 1; }
     .plan-card li { padding: 0.3rem 0; font-size: 0.82rem; color: rgba(255,255,255,0.65); display: flex; align-items: center; gap: 0.5rem; }
     .plan-card li::before { content: '✓'; color: #34d399; font-weight: 700; font-size: 0.7rem; }
@@ -778,10 +779,11 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
           <div class="plan-name" data-i18n="plan_starter_name">Starter Offset</div>
           <div class="plan-price" id="starterPrice">$20</div>
           <div class="plan-period" data-i18n="plan_starter_period">/mo</div>
-          <div class="plan-desc" data-i18n="plan_starter_desc">Offset your full monthly footprint - cancel whenever you want. Includes a Sprout badge.</div>
+          <div class="plan-desc" data-i18n="plan_starter_desc">Offset your full monthly footprint - cancel whenever you want.</div>
           <div class="plan-metric" data-i18n="plan_starter_f1">Everything in Free</div>
           <div class="plan-metric" id="starterMetric">Full monthly offset</div>
           <div class="plan-metric" data-i18n="plan_starter_f3">Verra-certified REDD+ credits</div>
+          <div class="plan-metric plan-metric-highlight" data-i18n="plan_starter_f4">Includes a Sprout badge</div>
           <a href="/carbonpocket-calculator/" class="btn-plan" data-i18n="plan_starter_cta">Get started</a>
         </article>
       </div>
