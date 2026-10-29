@@ -6,6 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://carbonpocket-verify.bold-firefly-b719.workers.dev; frame-ancestors 'none';" />
     <meta name="referrer" content="no-referrer" />
     <link rel="icon" type="image/png" href="/carbonpocket-calculator/carbonpocket-app-icon.png" />
+    <link rel="stylesheet" href="../brand.css" />
     <title>CarbonPocket | Email Verification</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -56,9 +57,14 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .hidden { display: none !important; }
         .footer { margin-top: 32px; font-size: 13px; color: #999; }
+        .site-header { position: absolute; top: 28px; left: 0; right: 0; text-align: center; }
     </style>
 </head>
 <body>
+
+<header class="site-header">
+    <a class="site-brand" href="https://carbonpocket.app" aria-label="CarbonPocket home">Carbon<span>Pocket</span></a>
+</header>
 
 <div class="card" id="loadingCard">
     <div class="spinner"></div>

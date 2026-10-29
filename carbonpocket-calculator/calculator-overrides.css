@@ -34,7 +34,40 @@
   transform: none;
 }
 
+.topbar {
+  position: relative;
+  justify-content: center;
+}
+
+.brand {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  gap: 0;
+  color: transparent;
+  background: linear-gradient(90deg, #f3f1e7 0%, #f3f1e7 46%, #20d879 46%, #20d879 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+
+.brand-mark {
+  display: none;
+}
+
+.header-note {
+  margin-left: auto;
+}
+
 @media (max-width: 420px) {
   .distance-slider-labels { gap: 6px; font-size: 10px; }
   .distance-slider-labels output { font-size: 12px; }
+}
+
+@media (max-width: 560px) {
+  .brand { font-size: 20px; }
 }

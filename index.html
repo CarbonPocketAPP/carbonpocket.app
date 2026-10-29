@@ -16,6 +16,7 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
   <meta name="description" content="CarbonPocket calculates your personal footprint based on real emission factors for your country - and helps you reduce it." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/brand.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -103,8 +104,12 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
     .lang-pill:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
 
     nav {
-      position: fixed; top: 3.8rem; left: 0; right: 0; z-index: 999;
+      position: static;
       display: flex; justify-content: center;
+    }
+    .site-header {
+      position: fixed; top: 3.8rem; left: 0; right: 0; z-index: 999;
+      display: flex; flex-direction: column; align-items: center; gap: 0.65rem;
     }
     nav ul {
       display: flex; align-items: center; gap: 0.25rem;
@@ -394,16 +399,19 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
       <option value="sv">🇸🇪 Svenska</option>
     </select>
   </div>
-  <nav aria-label="Primary navigation">
-    <ul>
-      <li><a href="#how" data-i18n="nav_how">How it works</a></li>
-      <li><a href="#app" data-i18n="nav_app">App</a></li>
-      <li><a href="#standards" data-i18n="nav_standards">Standards</a></li>
-      <li><a href="#global" data-i18n="nav_global">Global</a></li>
-      <li><a href="#partners" data-i18n="nav_partners">Partners</a></li>
-      <li><a href="#plans" data-i18n="nav_plans">Plans</a></li>
-    </ul>
-  </nav>
+  <header class="site-header">
+    <a class="site-brand" href="/" aria-label="CarbonPocket home">Carbon<span>Pocket</span></a>
+    <nav aria-label="Primary navigation">
+      <ul>
+        <li><a href="#how" data-i18n="nav_how">How it works</a></li>
+        <li><a href="#app" data-i18n="nav_app">App</a></li>
+        <li><a href="#standards" data-i18n="nav_standards">Standards</a></li>
+        <li><a href="#global" data-i18n="nav_global">Global</a></li>
+        <li><a href="#partners" data-i18n="nav_partners">Partners</a></li>
+        <li><a href="#plans" data-i18n="nav_plans">Plans</a></li>
+      </ul>
+    </nav>
+  </header>
 
   <main>
     <section class="hero reveal section" id="hero">

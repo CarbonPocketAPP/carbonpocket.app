@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="/carbonpocket-calculator/carbonpocket-app-icon.png">
+<link rel="stylesheet" href="../brand.css">
 <title>CarbonPocket | Carbon Neutralization Service Terms</title>
 <style>
   :root{
@@ -27,13 +28,12 @@
   .wrap{max-width:860px;margin:0 auto;padding:24px 20px 60px;}
 
   header{
-    display:flex;align-items:center;justify-content:space-between;
+    display:flex;flex-direction:column;align-items:center;gap:16px;
     padding:18px 24px;background:var(--bg2);border-bottom:1px solid var(--border);
     position:sticky;top:0;z-index:10;
   }
-  .logo{font-weight:800;font-size:20px;letter-spacing:-.3px;}
-  .logo span{color:var(--green);}
-  .nav a{color:var(--muted);text-decoration:none;font-size:14px;margin-left:18px;}
+  .nav{display:flex;justify-content:center;flex-wrap:wrap;gap:18px;}
+  .nav a{color:var(--muted);text-decoration:none;font-size:14px;}
   .nav a:hover{color:var(--green);}
 
   .hero{padding:54px 20px 30px;text-align:center;}
@@ -93,7 +93,7 @@
 <body>
 
 <header>
-  <div class="logo">Carbon<span>Pocket</span></div>
+  <a class="site-brand" href="https://carbonpocket.app/" aria-label="CarbonPocket home">Carbon<span>Pocket</span></a>
   <nav class="nav">
     <a href="https://carbonpocket.app/">Home</a>
     <a href="#">How it works</a>

@@ -1,0 +1,33 @@
+.site-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #f3f1e7;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -1.1px;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-brand span {
+  color: #20d879;
+}
+
+.site-brand:hover span {
+  color: #57e99d;
+}
+
+.site-brand:focus-visible {
+  outline: 2px solid #20d879;
+  outline-offset: 5px;
+  border-radius: 2px;
+}
+
+@media (max-width: 600px) {
+  .site-brand {
+    font-size: 22px;
+  }
+}

@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../brand.css">
     <style>
         :root {
             color-scheme: dark;
@@ -53,6 +54,12 @@
             border: 1px solid rgba(52, 211, 153, 0.16);
             border-radius: 20px;
             background: radial-gradient(ellipse at top, rgba(52, 211, 153, 0.09), transparent 70%), var(--surface);
+        }
+
+        header .site-brand {
+            display: flex;
+            width: fit-content;
+            margin: 0 auto 24px;
         }
 
         h1 {
@@ -112,6 +119,7 @@
     <a href="https://carbonpocket.app" class="nav-link">← Back to CarbonPocket</a>
 
     <header>
+        <a class="site-brand" href="https://carbonpocket.app" aria-label="CarbonPocket home">Carbon<span>Pocket</span></a>
         <h1>Privacy Policy</h1>
         <p class="subtitle">CarbonPocket - Carbon Footprint Tracker</p>
         <p class="subtitle">Global Data Protection Compliance (GDPR, LGPD, CCPA)</p>
