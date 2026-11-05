@@ -10,5 +10,11 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
+  ],
+  "routes": [
+    {
+      "pattern": "carbonpocket.app/*",
+      "zone_name": "carbonpocket.app"
+    }
   ]
 }
