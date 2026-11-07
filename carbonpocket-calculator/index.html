@@ -115,7 +115,9 @@
         const destino = painelReduzir || ancoraResultado;
 
         if (existente) {
-          destino.appendChild(existente);
+          if (existente.parentElement !== destino) {
+            destino.appendChild(existente);
+          }
           ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
           return;
         }
