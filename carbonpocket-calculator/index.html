@@ -163,6 +163,12 @@
       }
 
       function atualizarConteudoPagina() {
+        document.querySelectorAll('[data-testid="panel-recommendations"] .recommendation-footer > span').forEach((texto) => {
+          if (texto.textContent.trim() === 'Your estimate is a starting point, not a judgment.') {
+            texto.remove();
+          }
+        });
+
         document.querySelectorAll('footer p').forEach((paragrafo) => {
           if (paragrafo.textContent.trim() === 'Estimates are educational, not a measure of personal worth.') {
             paragrafo.textContent = 'Calculations are an estimate to serve as a way to support carbon projects.';

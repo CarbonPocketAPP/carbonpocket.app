@@ -89,6 +89,10 @@
   border: 1px solid rgba(234, 245, 233, 0.12);
 }
 
+[data-testid="panel-recommendations"] > .checkout-compensacao {
+  margin-top: 24px;
+}
+
 .checkout-titulo {
   margin: 0 0 18px;
   font-size: 18px;
