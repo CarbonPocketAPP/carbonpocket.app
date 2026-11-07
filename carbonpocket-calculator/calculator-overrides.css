@@ -114,13 +114,13 @@
 .checkout-parceiro-logo {
   display: grid;
   place-items: center;
-  width: 54px;
-  height: 54px;
-  flex: 0 0 54px;
+  width: 60px;
+  height: 60px;
+  flex: 0 0 60px;
   border: 2px solid rgba(52, 211, 153, 0.2);
-  border-radius: 14px;
+  border-radius: 16px;
   color: #34d399;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 800;
 }
 
