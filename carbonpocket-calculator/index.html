@@ -116,13 +116,19 @@
         painel.className = 'checkout-compensacao';
         painel.innerHTML = `
           <p class="checkout-titulo">Compensate your footprint</p>
+          <div class="checkout-parceiro-cabecalho">
+            <div class="checkout-parceiro-logo" aria-hidden="true">BR</div>
+            <div>
+              <p class="checkout-parceiro-nome">Partner: Brcarbon</p>
+              <p class="checkout-parceiro-site">brcarbon.com.br</p>
+            </div>
+          </div>
           <div class="checkout-campos">
             <input id="nome" type="text" placeholder="Contributor name">
             <input id="email" type="email" placeholder="you@email.com">
           </div>
           <p id="resumo-valor" class="checkout-resumo"></p>
           <aside class="checkout-parceiro" aria-label="Partner information">
-            <p>Partner: Brcarbon</p>
             <p>Credits are sourced from REDD+ forest protection projects in the Brazilian
             Amazon with Verra Standard certification. Your offsets support local
             communities while protecting the world's most vital ecosystem.</p>
