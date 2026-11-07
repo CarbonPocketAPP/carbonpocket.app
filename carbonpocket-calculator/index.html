@@ -115,10 +115,10 @@
         painel.id = 'checkout-compensacao';
         painel.className = 'checkout-compensacao';
         painel.innerHTML = `
-          <p class="checkout-titulo">Compense sua pegada</p>
+          <p class="checkout-titulo">Compensate your footprint</p>
           <div class="checkout-campos">
-            <input id="nome" type="text" placeholder="Nome do contribuinte">
-            <input id="email" type="email" placeholder="seu@email.com">
+            <input id="nome" type="text" placeholder="Contributor name">
+            <input id="email" type="email" placeholder="you@email.com">
           </div>
           <p id="resumo-valor" class="checkout-resumo"></p>
           <aside class="checkout-parceiro" aria-label="Partner information">
@@ -130,40 +130,19 @@
             <!-- TODO: incluir o registro Verra quando o numero for fornecido. -->
           </aside>
           <div class="checkout-acoes">
-            <button type="button" class="button button-primary" data-categoria="unico">Compensar uma vez</button>
-            <button type="button" class="button button-primary" data-categoria="mensal">Assinar mensal</button>
-            <button type="button" class="button button-primary" data-categoria="anual">Assinar anual — 15% off</button>
+            <button type="button" class="button button-primary" data-categoria="unico">Compensate once</button>
+            <button type="button" class="button button-primary" data-categoria="mensal">Monthly subscription</button>
+            <button type="button" class="button button-primary" data-categoria="anual">Annual subscription — 15% off</button>
           </div>
         `;
 
         ancoraResultado.appendChild(painel);
+        ancoraResultado.classList.add('checkout-visible');
         painel.querySelectorAll('[data-categoria]').forEach((botao) => {
           botao.addEventListener('click', () => {
             // TODO: ligar ao irParaCheckout apos a API ser corrigida.
           });
         });
-      }
-
-      function atualizarBotaoCompensacao() {
-        const total = document.querySelector('[data-testid="text-total"]');
-        const blocoResultado = total ? total.closest('.total-block') : null;
-        if (!total || !blocoResultado) return;
-
-        let botao = document.getElementById('botao-compensar-emissoes');
-        if (!botao) {
-          botao = document.createElement('button');
-          botao.id = 'botao-compensar-emissoes';
-          botao.type = 'button';
-          botao.className = 'button button-secondary';
-          botao.textContent = 'Compensate emissions';
-          botao.addEventListener('click', criarPainelCheckout);
-          // TODO: ligar ao irParaCheckout apos a API ser corrigida.
-          blocoResultado.appendChild(botao);
-        }
-
-        const textoValor = total.textContent.trim();
-        const valor = Number(textoValor.replace(/[^\d.-]/g, ''));
-        botao.hidden = !textoValor || !Number.isFinite(valor) || valor <= 0;
       }
 
       function atualizarConteudoPagina() {
@@ -202,7 +181,6 @@
           criarPainelCheckout();
           exibirValor(emissaoKg);
         }
-        atualizarBotaoCompensacao();
         atualizarConteudoPagina();
       }
 
