@@ -102,6 +102,13 @@
   margin-bottom: 18px;
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(234, 245, 233, 0.1);
+  color: inherit;
+  text-decoration: none;
+}
+
+.checkout-parceiro-cabecalho:hover .checkout-parceiro-nome,
+.checkout-parceiro-cabecalho:hover .checkout-parceiro-site {
+  color: #72e19a;
 }
 
 .checkout-parceiro-logo {

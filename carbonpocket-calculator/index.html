@@ -106,23 +106,32 @@
       }
 
       function criarPainelCheckout() {
-        if (document.getElementById('checkout-compensacao')) return;
+        const existente = document.getElementById('checkout-compensacao');
 
         const ancoraResultado = document.getElementById('result-panel-anchor');
         if (!ancoraResultado) return;
+
+        const painelReduzir = document.querySelector('[data-testid="panel-recommendations"]');
+        const destino = painelReduzir || ancoraResultado;
+
+        if (existente) {
+          destino.appendChild(existente);
+          ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
+          return;
+        }
 
         const painel = document.createElement('section');
         painel.id = 'checkout-compensacao';
         painel.className = 'checkout-compensacao';
         painel.innerHTML = `
           <p class="checkout-titulo">Compensate your footprint</p>
-          <div class="checkout-parceiro-cabecalho">
+          <a class="checkout-parceiro-cabecalho" href="https://brcarbon.com.br/" target="_blank" rel="noopener noreferrer">
             <div class="checkout-parceiro-logo" aria-hidden="true">BR</div>
             <div>
               <p class="checkout-parceiro-nome">Partner: Brcarbon</p>
               <p class="checkout-parceiro-site">brcarbon.com.br</p>
             </div>
-          </div>
+          </a>
           <div class="checkout-campos">
             <input id="nome" type="text" placeholder="Contributor name">
             <input id="email" type="email" placeholder="you@email.com">
@@ -142,8 +151,8 @@
           </div>
         `;
 
-        ancoraResultado.appendChild(painel);
-        ancoraResultado.classList.add('checkout-visible');
+        destino.appendChild(painel);
+        ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
         painel.querySelectorAll('[data-categoria]').forEach((botao) => {
           botao.addEventListener('click', () => {
             // TODO: ligar ao irParaCheckout apos a API ser corrigida.
