@@ -22,5 +22,198 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Configuracao do checkout de compensacao.
+      // TODO: substituir pela URL real do deploy da API na Vercel.
+      const CHECKOUT_API = 'https://SEU-PROJETO.vercel.app/api/checkout';
+      const KG_MINIMO = 25;
+      const PRECO_KG = 0.02;
+      const PRECO_KG_ANUAL = 0.204;
+
+      function quantidadeKg(emissoesKg) {
+        return Math.max(KG_MINIMO, Math.round(Number(emissoesKg) || 0));
+      }
+
+      function calcularValores(emissoesKg) {
+        const kg = quantidadeKg(emissoesKg);
+        return {
+          kg: kg.toFixed(0),
+          unico: (kg * PRECO_KG).toFixed(2),
+          mensal: (kg * PRECO_KG).toFixed(2),
+          anual: (kg * PRECO_KG_ANUAL).toFixed(2),
+        };
+      }
+
+      function exibirValor(emissoesKg) {
+        const valores = calcularValores(emissoesKg);
+        let resumo = document.getElementById('resumo-valor');
+
+        if (!resumo) {
+          resumo = document.createElement('p');
+          resumo.id = 'resumo-valor';
+          resumo.className = 'checkout-resumo';
+          const ancoraResultado = document.getElementById('result-panel-anchor');
+          (ancoraResultado || document.getElementById('root')).appendChild(resumo);
+        }
+
+        const textoResumo =
+          `Compensação de X kg: US$ Y uma vez, US$ Z/mês ou US$ W/ano`
+            .replace('X', valores.kg)
+            .replace('Y', valores.unico)
+            .replace('Z', valores.mensal)
+            .replace('W', valores.anual);
+        if (resumo.textContent !== textoResumo) {
+          resumo.textContent = textoResumo;
+        }
+      }
+
+      async function irParaCheckout(categoria, emissoesKg) {
+        const nomeInput = document.getElementById('nome');
+        const emailInput = document.getElementById('email');
+        const nome = nomeInput ? nomeInput.value.trim() : '';
+        const email = emailInput ? emailInput.value.trim() : '';
+
+        if (!email) {
+          alert('Informe seu e-mail para continuar.');
+          return;
+        }
+
+        try {
+          const resposta = await fetch(CHECKOUT_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              categoria,
+              emissaoKg: quantidadeKg(emissoesKg),
+              nome,
+              email,
+            }),
+          });
+
+          if (!resposta.ok) {
+            throw new Error('Resposta inesperada do servidor.');
+          }
+
+          const dados = await resposta.json();
+          if (!dados.url) {
+            throw new Error('URL de pagamento ausente.');
+          }
+          window.location.href = dados.url;
+        } catch (erro) {
+          console.error('Falha ao iniciar o checkout do Stripe:', erro);
+          alert('Nao foi possivel iniciar o pagamento. Tente novamente.');
+        }
+      }
+
+      function criarPainelCheckout() {
+        if (document.getElementById('checkout-compensacao')) return;
+
+        const ancoraResultado = document.getElementById('result-panel-anchor');
+        if (!ancoraResultado) return;
+
+        const painel = document.createElement('section');
+        painel.id = 'checkout-compensacao';
+        painel.className = 'checkout-compensacao';
+        painel.innerHTML = `
+          <p class="checkout-titulo">Compense sua pegada</p>
+          <div class="checkout-campos">
+            <input id="nome" type="text" placeholder="Nome do contribuinte">
+            <input id="email" type="email" placeholder="seu@email.com">
+          </div>
+          <p id="resumo-valor" class="checkout-resumo"></p>
+          <aside class="checkout-parceiro" aria-label="Partner information">
+            <p>Partner: Brcarbon</p>
+            <p>Credits are sourced from REDD+ forest protection projects in the Brazilian
+            Amazon with Verra Standard certification. Your offsets support local
+            communities while protecting the world's most vital ecosystem.</p>
+            <p>Link: <a href="https://brcarbon.com.br/" target="_blank" rel="noopener noreferrer">https://brcarbon.com.br/</a></p>
+            <!-- TODO: incluir o registro Verra quando o numero for fornecido. -->
+          </aside>
+          <div class="checkout-acoes">
+            <button type="button" class="button button-primary" data-categoria="unico">Compensar uma vez</button>
+            <button type="button" class="button button-primary" data-categoria="mensal">Assinar mensal</button>
+            <button type="button" class="button button-primary" data-categoria="anual">Assinar anual — 15% off</button>
+          </div>
+        `;
+
+        ancoraResultado.appendChild(painel);
+        painel.querySelectorAll('[data-categoria]').forEach((botao) => {
+          botao.addEventListener('click', () => {
+            // TODO: ligar ao irParaCheckout apos a API ser corrigida.
+          });
+        });
+      }
+
+      function atualizarBotaoCompensacao() {
+        const total = document.querySelector('[data-testid="text-total"]');
+        const blocoResultado = total ? total.closest('.total-block') : null;
+        if (!total || !blocoResultado) return;
+
+        let botao = document.getElementById('botao-compensar-emissoes');
+        if (!botao) {
+          botao = document.createElement('button');
+          botao.id = 'botao-compensar-emissoes';
+          botao.type = 'button';
+          botao.className = 'button button-secondary';
+          botao.textContent = 'Compensate emissions';
+          botao.addEventListener('click', criarPainelCheckout);
+          // TODO: ligar ao irParaCheckout apos a API ser corrigida.
+          blocoResultado.appendChild(botao);
+        }
+
+        const textoValor = total.textContent.trim();
+        const valor = Number(textoValor.replace(/[^\d.-]/g, ''));
+        botao.hidden = !textoValor || !Number.isFinite(valor) || valor <= 0;
+      }
+
+      function atualizarConteudoPagina() {
+        document.querySelectorAll('footer p').forEach((paragrafo) => {
+          if (paragrafo.textContent.trim() === 'Estimates are educational, not a measure of personal worth.') {
+            paragrafo.textContent = 'Calculations are an estimate to serve as a way to support carbon projects.';
+            // TODO: corrigir idealmente o texto na fonte React.
+          }
+        });
+
+        if (!document.getElementById('neutralization-service-link') && document.querySelector('footer')) {
+          const rodape = document.querySelector('footer');
+          const bloco = document.createElement('div');
+          bloco.id = 'neutralization-service-link';
+          bloco.className = 'neutralization-service-link';
+          const link = document.createElement('a');
+          link.href = 'https://carbonpocket.app/neutralization-service/neutralization-service';
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = 'Learn about our neutralization service';
+          // TODO em portugues: confirmar se esta URL esta correta (o segmento aparece duplicado no caminho).
+          bloco.appendChild(link);
+          rodape.parentNode.insertBefore(bloco, rodape);
+        }
+      }
+
+      function obterEmissaoAtual() {
+        const elemento = document.querySelector('[data-testid="text-total"]');
+        if (!elemento) return 0;
+        return Number(String(elemento.textContent).replace(/[^\d.-]/g, '')) || 0;
+      }
+
+      function atualizarCheckout() {
+        const emissaoKg = obterEmissaoAtual();
+        if (document.querySelector('[data-testid="text-total"]')) {
+          criarPainelCheckout();
+          exibirValor(emissaoKg);
+        }
+        atualizarBotaoCompensacao();
+        atualizarConteudoPagina();
+      }
+
+      // Observa o resultado produzido pela calculadora React sem alterar seu calculo.
+      const observadorCalculadora = new MutationObserver(atualizarCheckout);
+      observadorCalculadora.observe(document.getElementById('root'), {
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
+      atualizarCheckout();
+    </script>
   </body>
 </html>

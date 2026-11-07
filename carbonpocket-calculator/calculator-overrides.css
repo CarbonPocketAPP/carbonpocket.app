@@ -45,7 +45,7 @@
   transform: translateX(-50%);
   gap: 0;
   color: transparent;
-  background: linear-gradient(90deg, #f3f1e7 0%, #f3f1e7 46%, #20d879 46%, #20d879 100%);
+  background: linear-gradient(90deg, #f3f1e7 0%, #f3f1e7 50%, #20d879 50%, #20d879 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -70,4 +70,106 @@
 
 @media (max-width: 560px) {
   .brand { font-size: 20px; }
+}
+
+.checkout-compensacao {
+  width: 100%;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(234, 245, 233, 0.12);
+}
+
+.checkout-titulo {
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.checkout-campos,
+.checkout-acoes {
+  display: grid;
+  gap: 10px;
+}
+
+.checkout-campos input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid rgba(234, 245, 233, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #eaf5e9;
+}
+
+.checkout-acoes {
+  margin-top: 12px;
+}
+
+.checkout-resumo {
+  margin-top: 14px;
+  color: #b9c8bc;
+  line-height: 1.5;
+}
+
+.checkout-parceiro {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-left: 2px solid rgba(234, 245, 233, 0.18);
+  color: #9fb0a2;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.checkout-parceiro p {
+  margin: 0 0 8px;
+}
+
+.checkout-parceiro p:last-child {
+  margin-bottom: 0;
+}
+
+.checkout-parceiro a {
+  color: #72e19a;
+}
+
+.total-block #botao-compensar-emissoes {
+  margin-left: 12px;
+  vertical-align: middle;
+}
+
+.neutralization-service-link {
+  width: 100%;
+  margin-bottom: 8px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.neutralization-service-link a {
+  color: #9fb0a2;
+  text-decoration: none;
+}
+
+.neutralization-service-link a:hover {
+  color: #72e19a;
+  text-decoration: underline;
+}
+
+.checkout-sucesso {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.checkout-sucesso-card {
+  width: min(560px, 100%);
+  text-align: center;
+}
+
+.checkout-sucesso-card h1 {
+  margin-bottom: 12px;
+  font-size: 28px;
+}
+
+.checkout-sucesso-card p:not(.result-kicker) {
+  margin-bottom: 24px;
 }
