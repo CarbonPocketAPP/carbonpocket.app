@@ -25,7 +25,7 @@
     <script>
       // Configuracao do checkout de compensacao.
       // TODO: substituir pela URL real do deploy da API na Vercel.
-      const CHECKOUT_API = 'https://SEU-PROJETO.vercel.app/api/checkout';
+      const CHECKOUT_API = 'https://carbonpocketapp.vercel.app/api/checkout';
       const KG_MINIMO = 25;
       const PRECO_KG = 0.02;
       const PRECO_KG_ANUAL = 0.204;
@@ -67,42 +67,31 @@
         }
       }
 
-      async function irParaCheckout(categoria, emissoesKg) {
-        const nomeInput = document.getElementById('nome');
-        const emailInput = document.getElementById('email');
-        const nome = nomeInput ? nomeInput.value.trim() : '';
-        const email = emailInput ? emailInput.value.trim() : '';
-
+      async function irParaCheckout(categoria, emissoesKg, nome, email) {
         if (!email) {
-          alert('Informe seu e-mail para continuar.');
-          return;
+          throw new Error('Email is required');
         }
 
-        try {
-          const resposta = await fetch(CHECKOUT_API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              categoria,
-              emissaoKg: quantidadeKg(emissoesKg),
-              nome,
-              email,
-            }),
-          });
+        const resposta = await fetch(CHECKOUT_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            categoria,
+            emissaoKg: quantidadeKg(emissoesKg),
+            nome,
+            email,
+          }),
+        });
 
-          if (!resposta.ok) {
-            throw new Error('Resposta inesperada do servidor.');
-          }
-
-          const dados = await resposta.json();
-          if (!dados.url) {
-            throw new Error('URL de pagamento ausente.');
-          }
-          window.location.href = dados.url;
-        } catch (erro) {
-          console.error('Falha ao iniciar o checkout do Stripe:', erro);
-          alert('Nao foi possivel iniciar o pagamento. Tente novamente.');
+        if (!resposta.ok) {
+          throw new Error('Unexpected checkout response');
         }
+
+        const dados = await resposta.json();
+        if (!dados.url) {
+          throw new Error('Checkout URL missing');
+        }
+        window.location.href = dados.url;
       }
 
       function criarPainelCheckout() {
@@ -139,6 +128,7 @@
             <input id="email" type="email" placeholder="you@email.com">
           </div>
           <p id="resumo-valor" class="checkout-resumo"></p>
+          <p class="checkout-transparencia">Your name will be listed publicly among our contributors.</p>
           <aside class="checkout-parceiro" aria-label="Partner information">
             <p>Credits are sourced from REDD+ forest protection projects in the Brazilian
             Amazon with Verra Standard certification. Your offsets support local
@@ -156,8 +146,28 @@
         destino.appendChild(painel);
         ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
         painel.querySelectorAll('[data-categoria]').forEach((botao) => {
-          botao.addEventListener('click', () => {
-            // TODO: ligar ao irParaCheckout apos a API ser corrigida.
+          botao.addEventListener('click', async () => {
+            const emissaoKg = obterEmissaoAtual();
+            const nome = painel.querySelector('#nome').value.trim();
+            const email = painel.querySelector('#email').value.trim();
+            let mensagemErro = painel.querySelector('.checkout-erro');
+
+            if (!mensagemErro) {
+              mensagemErro = document.createElement('p');
+              mensagemErro.className = 'checkout-erro';
+              mensagemErro.setAttribute('role', 'alert');
+              painel.appendChild(mensagemErro);
+            }
+
+            mensagemErro.textContent = '';
+            botao.disabled = true;
+
+            try {
+              await irParaCheckout(botao.dataset.categoria, emissaoKg, nome, email);
+            } catch (erro) {
+              botao.disabled = false;
+              mensagemErro.textContent = 'We could not start your payment. Please try again.';
+            }
           });
         });
       }

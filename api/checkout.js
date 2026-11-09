@@ -7,7 +7,7 @@ const priceIds = {
 };
 
 export default async function handler(req, res) {
-  const base = (process.env.SITE_URL || '').replace(/\/$/, '');
+  const base = String(process.env.SITE_URL || '').replace(/\/$/, '');
 
   res.setHeader('Access-Control-Allow-Origin', base);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -18,7 +18,17 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ erro: 'Metodo nao permitido' });
+    return res.status(405).json({ erro: 'Method not allowed' });
+  }
+
+  let body;
+  try {
+    body = req.body || {};
+    if (typeof body === 'string') body = JSON.parse(body);
+    if (!body || typeof body !== 'object') throw new Error('corpo invalido');
+  } catch {
+    console.error('BODY_INVALIDO', typeof req.body);
+    return res.status(400).json({ erro: 'Invalid request' });
   }
 
   try {
@@ -36,7 +46,7 @@ export default async function handler(req, res) {
     if (missingVariables.length > 0) {
       console.error(`Variaveis obrigatorias ausentes: ${missingVariables.join(', ')}`);
       return res.status(500).json({
-        erro: 'Não foi possível iniciar o pagamento',
+        erro: 'Unable to start payment',
       });
     }
 
@@ -69,27 +79,24 @@ export default async function handler(req, res) {
         },
       ],
       ...(email ? { customer_email: email } : {}),
-      custom_fields: [
-        {
-          key: 'contribuinte',
-          label: {
-            type: 'custom',
-            custom: 'Nome do contribuinte',
-          },
-          type: 'text',
-        },
-      ],
       metadata,
       ...(categoria !== 'unico' ? { subscription_data: { metadata } } : {}),
-      success_url: `${base}/carbonpocket-calculator/sucesso.html`,
+      success_url: `${base}/carbonpocket-calculator/sucesso.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/carbonpocket-calculator/`,
     });
 
-    return res.status(200).json({ url: session.url });
+    const selectedPrice = await stripe.prices.retrieve(priceIds[categoria]);
+    const unitAmount = Number(selectedPrice.unit_amount || 0);
+    return res.status(200).json({
+      url: session.url,
+      amount_total: unitAmount * quantidade,
+      currency: selectedPrice.currency || 'usd',
+      quantity: quantidade,
+    });
   } catch (error) {
-    console.error('Falha ao criar a sessao Stripe:', error);
+    console.error('STRIPE_ERROR', error.type, error.code, error.param);
     return res.status(500).json({
-      erro: 'Não foi possível iniciar o pagamento',
+      erro: 'Unable to start payment',
     });
   }
 }

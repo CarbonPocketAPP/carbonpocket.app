@@ -169,6 +169,21 @@
   line-height: 1.5;
 }
 
+.checkout-transparencia,
+.checkout-erro {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.checkout-transparencia {
+  color: #9fb0a2;
+}
+
+.checkout-erro {
+  color: #ffb4a8;
+}
+
 .checkout-parceiro {
   margin-top: 14px;
   padding: 12px 14px;
