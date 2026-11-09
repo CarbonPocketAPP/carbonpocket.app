@@ -8,6 +8,23 @@ const priceIds = {
   anual: process.env.STRIPE_PRICE_ANUAL,
 };
 
+// Converte o valor informado pelo Stripe sem mascarar valores decimais ou nulos.
+function valorEfetivoCentavos(price) {
+  if (price.unit_amount !== null && price.unit_amount !== undefined) {
+    return price.unit_amount;
+  }
+  if (price.unit_amount_decimal) {
+    return Number(price.unit_amount_decimal);
+  }
+  return null;
+}
+
+// Formata o valor monetario retornado pelo Stripe em dolares.
+function formatarUSD(centavos) {
+  if (centavos === null || centavos === undefined) return null;
+  return 'US$ ' + (centavos / 100).toFixed(2);
+}
+
 export default async function handler(req, res) {
   const base = String(process.env.SITE_URL || '').replace(/\/$/, '');
 
@@ -86,15 +103,15 @@ export default async function handler(req, res) {
       ...(categoria !== 'unico' ? { subscription_data: { metadata } } : {}),
       success_url: `${base}/carbonpocket-calculator/sucesso.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/carbonpocket-calculator/`,
-    });
+    }, { expand: ['line_items'] });
 
-    const selectedPrice = await stripe.prices.retrieve(priceIds[categoria]);
-    const unitAmount = Number(selectedPrice.unit_amount || 0);
     return res.status(200).json({
       url: session.url,
-      amount_total: unitAmount * quantidade,
-      currency: selectedPrice.currency || 'usd',
-      quantity: quantidade,
+      amount_total: session.amount_total,
+      amount_total_display: formatarUSD(session.amount_total),
+      currency: session.currency,
+      quantity: session.line_items?.data?.[0]?.quantity ?? null,
+      mode: session.mode,
     });
   } catch (error) {
     console.error('STRIPE_ERROR', error.type, error.code, error.param);

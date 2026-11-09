@@ -26,6 +26,7 @@
       // Configuracao do checkout de compensacao.
       // TODO: substituir pela URL real do deploy da API na Vercel.
       const CHECKOUT_API = 'https://carbonpocketapp.vercel.app/api/checkout';
+      const ANNUAL_ENABLED = false;
       const KG_MINIMO = 25;
       const PRECO_KG = 0.02;
       const PRECO_KG_ANUAL = 0.204;
@@ -139,7 +140,7 @@
           <div class="checkout-acoes">
             <button type="button" class="button button-primary" data-categoria="unico">Compensate once</button>
             <button type="button" class="button button-primary" data-categoria="mensal">Monthly subscription</button>
-            <button type="button" class="button button-primary" data-categoria="anual">Annual subscription - 15% off</button>
+            ${ANNUAL_ENABLED ? '<button type="button" class="button button-primary" data-categoria="anual">Annual subscription - 15% off</button>' : ''}
           </div>
         `;
 

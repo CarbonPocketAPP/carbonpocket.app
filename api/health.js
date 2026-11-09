@@ -1,5 +1,22 @@
 import Stripe from 'stripe';
 
+// Converte o valor informado pelo Stripe sem mascarar valores decimais ou nulos.
+function valorEfetivoCentavos(price) {
+  if (price.unit_amount !== null && price.unit_amount !== undefined) {
+    return price.unit_amount;
+  }
+  if (price.unit_amount_decimal) {
+    return Number(price.unit_amount_decimal);
+  }
+  return null;
+}
+
+// Formata centavos para o exibicao publica no formato americano.
+function formatarUSD(centavos) {
+  if (centavos === null || centavos === undefined) return null;
+  return 'US$ ' + (centavos / 100).toFixed(2);
+}
+
 export default async function handler(req, res) {
   const base = String(process.env.SITE_URL || '').replace(/\/$/, '');
 
@@ -47,9 +64,25 @@ export default async function handler(req, res) {
         }
 
         const price = await stripe.prices.retrieve(priceId);
+        const effectiveUnitAmount = valorEfetivoCentavos(price);
+        let diagnostico = 'OK: per_unit + licensed; cobra quantity no checkout';
+        if (price.unit_amount === null && price.unit_amount_decimal) {
+          diagnostico = 'OK: usa unit_amount_decimal (fração de centavo); ler o campo decimal';
+        }
+        if (price.billing_scheme === 'tiered') diagnostico = 'BLOQUEIO: billing_scheme tiered';
+        if (price.custom_unit_amount) diagnostico = 'BLOQUEIO: custom_unit_amount definido pelo cliente';
+        if (price.recurring?.usage_type === 'metered') diagnostico = 'BLOQUEIO: usage_type metered';
         prices[categoria] = {
           unit_amount: price.unit_amount ?? null,
+          unit_amount_decimal: price.unit_amount_decimal ?? null,
           currency: price.currency || 'usd',
+          type: price.type,
+          interval: price.recurring?.interval ?? null,
+          billing_scheme: price.billing_scheme,
+          usage_type: price.recurring?.usage_type ?? price.usage_type ?? null,
+          effective_unit_amount: effectiveUnitAmount,
+          active: price.active,
+          diagnostico,
           ...(categoria === 'unico'
             ? { type: price.type === 'one_time' ? 'one_time' : String(price.type || '') }
             : { interval: price.recurring?.interval || null }),
@@ -73,5 +106,24 @@ export default async function handler(req, res) {
     cancel_url: `${base}/carbonpocket-calculator/`,
   };
 
-  return res.status(200).json({ env, prices, config });
+  const effective = Object.fromEntries(
+    Object.entries(prices).map(([categoria, price]) => [categoria, price.effective_unit_amount]),
+  );
+  const unico = effective.unico;
+  const mensal = effective.mensal;
+  const anual = effective.anual;
+  const simulacao = {
+    '137kg': {
+      unico: formatarUSD(unico === null ? null : unico * 137),
+      mensal: formatarUSD(mensal === null ? null : mensal * 137),
+      anual: anual === null ? null : formatarUSD(Math.round(anual * 137)),
+    },
+    '25kg': {
+      unico: formatarUSD(unico === null ? null : unico * 25),
+      mensal: formatarUSD(mensal === null ? null : mensal * 25),
+      anual: anual === null ? null : formatarUSD(Math.round(anual * 25)),
+    },
+  };
+
+  return res.status(200).json({ env, prices, simulacao, config });
 }
