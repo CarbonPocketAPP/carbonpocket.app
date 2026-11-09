@@ -104,14 +104,17 @@ export default async function handler(req, res) {
       success_url: `${base}/carbonpocket-calculator/sucesso.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/carbonpocket-calculator/`,
     });
+    const sessionCompleta = await stripe.checkout.sessions.retrieve(session.id, {
+      expand: ['line_items'],
+    });
 
     return res.status(200).json({
       url: session.url,
-      amount_total: session.amount_total,
-      amount_total_display: formatarUSD(session.amount_total),
-      currency: session.currency,
-      quantity: session.line_items?.data?.[0]?.quantity ?? null,
-      mode: session.mode,
+      amount_total: sessionCompleta.amount_total,
+      amount_total_display: formatarUSD(sessionCompleta.amount_total),
+      currency: sessionCompleta.currency,
+      quantity: sessionCompleta.line_items?.data?.[0]?.quantity ?? null,
+      mode: sessionCompleta.mode,
     });
   } catch (error) {
     console.error('STRIPE_ERROR', error.type, error.code, error.param);
