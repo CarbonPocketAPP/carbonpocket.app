@@ -1,5 +1,7 @@
 import Stripe from 'stripe';
 
+export const config = { api: { bodyParser: false } };
+
 const priceIds = {
   unico: process.env.STRIPE_PRICE_UNICO,
   mensal: process.env.STRIPE_PRICE_MENSAL,
@@ -24,6 +26,7 @@ export default async function handler(req, res) {
   let body;
   try {
     body = req.body || {};
+    if (Buffer.isBuffer(body)) body = body.toString('utf8');
     if (typeof body === 'string') body = JSON.parse(body);
     if (!body || typeof body !== 'object') throw new Error('corpo invalido');
   } catch {
