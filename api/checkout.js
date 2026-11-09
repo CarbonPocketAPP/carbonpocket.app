@@ -103,7 +103,7 @@ export default async function handler(req, res) {
       ...(categoria !== 'unico' ? { subscription_data: { metadata } } : {}),
       success_url: `${base}/carbonpocket-calculator/sucesso.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/carbonpocket-calculator/`,
-    }, { expand: ['line_items'] });
+    });
 
     return res.status(200).json({
       url: session.url,
