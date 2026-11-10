@@ -18,10 +18,13 @@ function valorEfetivoCentavos(price) {
   return null;
 }
 
-// Formata o valor monetário retornado pelo Stripe em dólares.
-function formatarUSD(centavos) {
+// Formata os centavos cobrados em reais no padrão brasileiro.
+function formatarBRL(centavos) {
   if (centavos === null || centavos === undefined) return null;
-  return 'US$ ' + (centavos / 100).toFixed(2);
+  return 'R$ ' + (centavos / 100).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 export default async function handler(req, res) {
@@ -127,7 +130,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       url: session.url,
       amount_total: sessionCompleta.amount_total,
-      amount_total_display: formatarUSD(sessionCompleta.amount_total),
+      amount_total_display: formatarBRL(sessionCompleta.amount_total),
       currency: sessionCompleta.currency,
       quantity: sessionCompleta.line_items?.data?.[0]?.quantity ?? null,
       mode: sessionCompleta.mode,

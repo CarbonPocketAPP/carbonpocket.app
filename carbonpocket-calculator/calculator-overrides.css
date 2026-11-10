@@ -169,6 +169,20 @@
   line-height: 1.5;
 }
 
+.checkout-resumo-brl {
+  margin: 6px 0 0;
+  color: #eaf5e9;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.checkout-nota-cambio {
+  margin: 4px 0 0;
+  color: #9fb0a2;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .checkout-transparencia,
 .checkout-erro {
   margin-top: 10px;

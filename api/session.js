@@ -1,9 +1,12 @@
 import Stripe from 'stripe';
 import { sanitizeName } from './name.js';
 
-function formatarUSD(centavos) {
+function formatarBRL(centavos) {
   if (centavos === null || centavos === undefined) return null;
-  return 'US$ ' + (centavos / 100).toFixed(2);
+  return 'R$ ' + (centavos / 100).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 export default async function handler(req, res) {
@@ -39,7 +42,7 @@ export default async function handler(req, res) {
       payment_status: session.payment_status,
       mode: session.mode,
       amount_total: session.amount_total,
-      amount_total_display: formatarUSD(session.amount_total),
+      amount_total_display: formatarBRL(session.amount_total),
       currency: session.currency,
       quantity: session.line_items?.data?.[0]?.quantity ?? null,
       customer_email: session.customer_details?.email ?? session.customer_email ?? null,

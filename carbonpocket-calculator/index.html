@@ -27,8 +27,16 @@
       const CHECKOUT_API = 'https://carbonpocketapp.vercel.app/api/checkout';
       const ANNUAL_ENABLED = true;
       const KG_MINIMO = 25;
-      const PRECO_KG = 0.02;
-      const PRECO_KG_ANUAL = 0.204;
+      // Valores em dólar são referência comercial; em real são a cobrança efetiva. cambioReferencia define preços, sem conversão em tempo real.
+      const PRECOS = {
+        usdPorKgUnico: 0.02,
+        usdPorKgAnual: 0.204,
+        brlPorKgUnico: 0.11,
+        brlPorKgMensal: 0.11,
+        brlPorKgAnual: 1.12,
+        cambioReferencia: 5.60,
+        notaCambio: 'USD values are approximate references. You will be charged in BRL.',
+      };
 
       function quantidadeKg(emissoesKg) {
         return Math.max(KG_MINIMO, Math.round(Number(emissoesKg) || 0));
@@ -38,15 +46,27 @@
         const kg = quantidadeKg(emissoesKg);
         return {
           kg: kg.toFixed(0),
-          unico: (kg * PRECO_KG).toFixed(2),
-          mensal: (kg * PRECO_KG).toFixed(2),
-          anual: (kg * PRECO_KG_ANUAL).toFixed(2),
+          unicoUsd: (kg * PRECOS.usdPorKgUnico).toFixed(2),
+          mensalUsd: (kg * PRECOS.usdPorKgUnico).toFixed(2),
+          anualUsd: (kg * PRECOS.usdPorKgAnual).toFixed(2),
+          unicoBrl: formatarBRL(kg * PRECOS.brlPorKgUnico),
+          mensalBrl: formatarBRL(kg * PRECOS.brlPorKgMensal),
+          anualBrl: formatarBRL(kg * PRECOS.brlPorKgAnual),
         };
+      }
+
+      function formatarBRL(valor) {
+        return 'R$ ' + valor.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
       }
 
       function exibirValor(emissoesKg) {
         const valores = calcularValores(emissoesKg);
         let resumo = document.getElementById('resumo-valor');
+        let cobrancaBRL = document.getElementById('resumo-cobranca-brl');
+        let notaCambio = document.getElementById('resumo-nota-cambio');
 
         if (!resumo) {
           resumo = document.createElement('p');
@@ -59,11 +79,32 @@
         const textoResumo =
           `Compensation for X kg: US$ Y once, US$ Z/month or US$ W/year`
             .replace('X', valores.kg)
-            .replace('Y', valores.unico)
-            .replace('Z', valores.mensal)
-            .replace('W', valores.anual);
+            .replace('Y', valores.unicoUsd)
+            .replace('Z', valores.mensalUsd)
+            .replace('W', valores.anualUsd);
         if (resumo.textContent !== textoResumo) {
           resumo.textContent = textoResumo;
+        }
+
+        if (!cobrancaBRL) {
+          cobrancaBRL = document.createElement('p');
+          cobrancaBRL.id = 'resumo-cobranca-brl';
+          cobrancaBRL.className = 'checkout-resumo-brl';
+          resumo.insertAdjacentElement('afterend', cobrancaBRL);
+        }
+        cobrancaBRL.textContent =
+          `Charged in BRL: ${valores.unicoBrl} once, ${valores.mensalBrl}/month or ${valores.anualBrl}/year`;
+
+        if (!notaCambio) {
+          notaCambio = document.createElement('p');
+          notaCambio.id = 'resumo-nota-cambio';
+          notaCambio.className = 'checkout-nota-cambio';
+          cobrancaBRL.insertAdjacentElement('afterend', notaCambio);
+        }
+        notaCambio.textContent = PRECOS.notaCambio;
+
+        if (notaCambio.previousElementSibling !== cobrancaBRL) {
+          cobrancaBRL.insertAdjacentElement('afterend', notaCambio);
         }
       }
 

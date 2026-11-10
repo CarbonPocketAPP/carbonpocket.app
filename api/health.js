@@ -11,7 +11,15 @@ function valorEfetivoCentavos(price) {
   return null;
 }
 
-// Formata centavos para o exibicao publica no formato americano.
+// Formata centavos cobrados em reais no padrão brasileiro.
+function formatarBRL(centavos) {
+  if (centavos === null || centavos === undefined) return null;
+  return 'R$ ' + (centavos / 100).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 function formatarUSD(centavos) {
   if (centavos === null || centavos === undefined) return null;
   return 'US$ ' + (centavos / 100).toFixed(2);
@@ -73,6 +81,7 @@ export default async function handler(req, res) {
         if (price.custom_unit_amount) diagnostico = 'BLOQUEIO: custom_unit_amount definido pelo cliente';
         if (price.recurring?.usage_type === 'metered') diagnostico = 'BLOQUEIO: usage_type metered';
         prices[categoria] = {
+          id: price.id,
           unit_amount: price.unit_amount ?? null,
           unit_amount_decimal: price.unit_amount_decimal ?? null,
           currency: price.currency || 'usd',
@@ -110,20 +119,19 @@ export default async function handler(req, res) {
     Object.entries(prices).map(([categoria, price]) => [categoria, price.effective_unit_amount]),
   );
   const unico = effective.unico;
-  const mensal = effective.mensal;
   const anual = effective.anual;
-  const simulacao = {
-    '137kg': {
-      unico: formatarUSD(unico === null ? null : unico * 137),
-      mensal: formatarUSD(mensal === null ? null : mensal * 137),
-      anual: anual === null ? null : formatarUSD(Math.round(anual * 137)),
-    },
-    '25kg': {
-      unico: formatarUSD(unico === null ? null : unico * 25),
-      mensal: formatarUSD(mensal === null ? null : mensal * 25),
-      anual: anual === null ? null : formatarUSD(Math.round(anual * 25)),
-    },
-  };
+  // brl representa a cobrança real; usd_ref é somente uma referência comercial.
+  const simulacao = Object.fromEntries(
+    [25, 137, 1000].map((kg) => [
+      `${kg}kg`,
+      {
+        unico_brl: formatarBRL(unico === null ? null : unico * kg),
+        anual_brl: formatarBRL(anual === null ? null : anual * kg),
+        unico_usd_ref: formatarUSD(Math.round(0.02 * kg * 100)),
+        anual_usd_ref: formatarUSD(Math.round(0.204 * kg * 100)),
+      },
+    ]),
+  );
 
   return res.status(200).json({ env, prices, simulacao, config });
 }

@@ -36,6 +36,14 @@
       const details = document.getElementById('payment-details');
       const calculatorLink = document.getElementById('calculator-link');
 
+      function formatarBRL(centavos) {
+        if (centavos === null || centavos === undefined) return null;
+        return 'R$ ' + (centavos / 100).toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      }
+
       function showVerificationError() {
         heading.textContent = 'Payment could not be verified';
         message.textContent = 'We could not verify this payment. Please check the link you received.';
@@ -62,7 +70,7 @@
             document.getElementById('payment-quantity').textContent =
               `${payment.quantity ?? payment.emissao_kg ?? '—'} kg CO₂e`;
             document.getElementById('payment-amount').textContent =
-              payment.amount_total_display ?? 'Amount unavailable';
+              payment.amount_total_display ?? formatarBRL(payment.amount_total) ?? 'Amount unavailable';
             document.getElementById('payment-email').textContent =
               payment.customer_email ?? 'Email unavailable';
             details.hidden = false;
