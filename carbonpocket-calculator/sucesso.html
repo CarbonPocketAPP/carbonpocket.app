@@ -3,25 +3,85 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contribution registered | CarbonPocket</title>
+    <title>Payment status | CarbonPocket</title>
     <link rel="stylesheet" href="./assets/index-hQOtl3ms.css" />
     <link rel="stylesheet" href="./calculator-overrides.css" />
   </head>
   <body>
     <main class="checkout-sucesso">
-      <section class="panel checkout-sucesso-card">
-        <p class="result-kicker">Contribution completed</p>
-        <h1>Your contribution has been registered.</h1>
-        <p>
-          Your contribution has been registered. Thank you for supporting carbon projects.
-        </p>
+      <section class="panel checkout-sucesso-card" aria-live="polite">
+        <p class="result-kicker">Payment status</p>
+        <h1 id="payment-heading">Checking your payment</h1>
+        <p id="payment-message">Verifying your payment...</p>
+        <dl id="payment-details" hidden>
+          <div><dt>Offset</dt><dd id="payment-quantity"></dd></div>
+          <div><dt>Amount paid</dt><dd id="payment-amount"></dd></div>
+          <div><dt>Email</dt><dd id="payment-email"></dd></div>
+        </dl>
         <a
+          id="calculator-link"
           class="button button-primary"
           href="https://carbonpocket.app/carbonpocket-calculator/"
+          hidden
         >
           Back to calculator
         </a>
       </section>
     </main>
+    <script>
+      const CHECKOUT_API = 'https://carbonpocketapp.vercel.app/api/session';
+      const sessionId = new URLSearchParams(window.location.search).get('session_id');
+      const heading = document.getElementById('payment-heading');
+      const message = document.getElementById('payment-message');
+      const details = document.getElementById('payment-details');
+      const calculatorLink = document.getElementById('calculator-link');
+
+      function showVerificationError() {
+        heading.textContent = 'Payment could not be verified';
+        message.textContent = 'We could not verify this payment. Please check the link you received.';
+        calculatorLink.hidden = false;
+      }
+
+      async function verifyPayment() {
+        if (!sessionId || !sessionId.startsWith('cs_') || sessionId.length < 10 || sessionId.length > 255) {
+          showVerificationError();
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `${CHECKOUT_API}?session_id=${encodeURIComponent(sessionId)}`,
+          );
+          if (!response.ok) throw new Error('Payment lookup failed');
+          const payment = await response.json();
+
+          if (payment.payment_status === 'paid') {
+            heading.textContent = 'Contribution completed';
+            message.textContent =
+              'Your contribution has been registered. Thank you for supporting carbon projects.';
+            document.getElementById('payment-quantity').textContent =
+              `${payment.quantity ?? payment.emissao_kg ?? '—'} kg CO₂e`;
+            document.getElementById('payment-amount').textContent =
+              payment.amount_total_display ?? 'Amount unavailable';
+            document.getElementById('payment-email').textContent =
+              payment.customer_email ?? 'Email unavailable';
+            details.hidden = false;
+          } else if (
+            payment.payment_status === 'unpaid' ||
+            payment.payment_status === 'no_payment_required'
+          ) {
+            heading.textContent = 'Payment processing';
+            message.textContent =
+              'Your payment is being processed. You will receive confirmation shortly.';
+          } else {
+            showVerificationError();
+          }
+        } catch {
+          showVerificationError();
+        }
+      }
+
+      verifyPayment();
+    </script>
   </body>
 </html>

@@ -1,7 +1,5 @@
 import Stripe from 'stripe';
 
-export const config = { api: { bodyParser: false } };
-
 const priceIds = {
   unico: process.env.STRIPE_PRICE_UNICO,
   mensal: process.env.STRIPE_PRICE_MENSAL,
@@ -40,14 +38,22 @@ export default async function handler(req, res) {
     return res.status(405).json({ erro: 'Method not allowed' });
   }
 
-  let body;
-  try {
-    body = req.body || {};
-    if (Buffer.isBuffer(body)) body = body.toString('utf8');
-    if (typeof body === 'string') body = JSON.parse(body);
-    if (!body || typeof body !== 'object') throw new Error('corpo invalido');
-  } catch {
-    console.error('BODY_INVALIDO', typeof req.body);
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch {
+      console.error('BODY_INVALIDO_TEXTO', body.slice(0, 100));
+      return res.status(400).json({ erro: 'Invalid request' });
+    }
+  }
+  if (
+    !body ||
+    typeof body !== 'object' ||
+    Array.isArray(body) ||
+    Object.keys(body).length === 0
+  ) {
+    console.error('BODY_AUSENTE', typeof req.body);
     return res.status(400).json({ erro: 'Invalid request' });
   }
 
@@ -69,9 +75,7 @@ export default async function handler(req, res) {
         erro: 'Unable to start payment',
       });
     }
-
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    const body = req.body || {};
     const categoriasValidas = ['unico', 'mensal', 'anual'];
     const categoria = categoriasValidas.includes(body.categoria)
       ? body.categoria
