@@ -6,6 +6,7 @@
     <title>Our contributors | CarbonPocket</title>
     <link rel="stylesheet" href="./assets/index-hQOtl3ms.css" />
     <link rel="stylesheet" href="./calculator-overrides.css" />
+    <script src="./countries.js"></script>
   </head>
   <body>
     <main class="checkout-sucesso">
@@ -66,6 +67,24 @@
             </div>
           </section>
 
+          <section id="contributors-country-section" class="contributors-section" hidden>
+            <h2>By country</h2>
+            <!-- TODO em português: avaliar um mapa coroplético quando houver dados suficientes por país. -->
+            <div class="contributors-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Country</th>
+                    <th scope="col">kg</th>
+                    <th scope="col">Contributors</th>
+                    <th scope="col">Compensations</th>
+                  </tr>
+                </thead>
+                <tbody id="contributors-country-rows"></tbody>
+              </table>
+            </div>
+          </section>
+
           <section id="contributors-matrix-section" class="contributors-section" hidden>
             <h2>Year × Source</h2>
             <div class="contributors-table-wrap">
@@ -100,6 +119,9 @@
         app: 'App',
         nao_identificado: 'Not identified',
       };
+      const countryLabels = Object.fromEntries(
+        window.CARBONPOCKET_COUNTRIES.map(({ code, name }) => [code, name]),
+      );
       const state = document.getElementById('contributors-state');
       const content = document.getElementById('contributors-content');
       const list = document.getElementById('contributors-list');
@@ -211,6 +233,26 @@
               ],
             );
             document.getElementById('contributors-source-section').hidden = false;
+          }
+
+          const countries = Array.isArray(data.por_pais) ? data.por_pais : [];
+          if (countries.length > 0) {
+            renderTableRows(
+              document.getElementById('contributors-country-rows'),
+              countries,
+              [
+                {
+                  header: true,
+                  value: (entry) => entry.pais === 'nao_informado'
+                    ? `${window.flagDe(entry.pais)} Not informed`
+                    : `${window.flagDe(entry.pais)} ${countryLabels[entry.pais] || entry.pais}`,
+                },
+                { value: (entry) => kgFormatter.format(entry.kg) },
+                { value: (entry) => countFormatter.format(entry.contributors) },
+                { value: (entry) => countFormatter.format(entry.sessions) },
+              ],
+            );
+            document.getElementById('contributors-country-section').hidden = false;
           }
 
           renderMatrix(matrix, years);

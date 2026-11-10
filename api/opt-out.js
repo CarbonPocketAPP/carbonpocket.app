@@ -63,10 +63,16 @@ export default async function handler(req, res) {
         const sessionName = sanitizeName(session.metadata?.nome).toLowerCase();
         if (sessionEmail !== email || sessionName !== expectedName) continue;
 
-        // A solicitação desativa a exibição pública em todas as sessões pagas correspondentes.
+        // A solicitação desativa a exibição pública da sessão e da assinatura correspondente.
         await stripe.checkout.sessions.update(session.id, {
           metadata: { ...session.metadata, opt_out: 'true' },
         });
+        if (session.subscription) {
+          const subscription = await stripe.subscriptions.retrieve(session.subscription);
+          await stripe.subscriptions.update(session.subscription, {
+            metadata: { ...subscription.metadata, opt_out: 'true' },
+          });
+        }
       }
 
       hasMore = page.has_more;

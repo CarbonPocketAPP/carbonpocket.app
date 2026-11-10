@@ -103,6 +103,8 @@ export default async function handler(req, res) {
     const email = String(body.email || '');
     const origensValidas = ['site', 'app'];
     const origem = origensValidas.includes(body.origem) ? body.origem : 'site';
+    const paisInformado = String(body.pais ?? '').trim().toUpperCase();
+    const pais = /^[A-Z]{2}$/.test(paisInformado) ? paisInformado : 'nao_informado';
     const mode = categoria === 'unico' ? 'payment' : 'subscription';
 
     const metadata = {
@@ -111,6 +113,13 @@ export default async function handler(req, res) {
       categoria,
       // Registra a origem da compra; o app deve enviar origem = 'app'.
       origem,
+      pais,
+    };
+    const subscriptionMetadata = {
+      ...metadata,
+      kg_por_ano: '{}',
+      faturas_por_ano: '{}',
+      ultima_invoice_id: '',
     };
 
     const session = await stripe.checkout.sessions.create({
@@ -123,7 +132,9 @@ export default async function handler(req, res) {
       ],
       ...(email ? { customer_email: email } : {}),
       metadata,
-      ...(categoria !== 'unico' ? { subscription_data: { metadata } } : {}),
+      ...(categoria !== 'unico'
+        ? { subscription_data: { metadata: subscriptionMetadata } }
+        : {}),
       success_url: `${base}/carbonpocket-calculator/sucesso.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/carbonpocket-calculator/`,
     });

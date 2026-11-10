@@ -19,6 +19,7 @@
     <script type="module" crossorigin src="./assets/index-8xHqDnEA.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-hQOtl3ms.css">
     <link rel="stylesheet" href="./calculator-overrides.css" />
+    <script src="./countries.js"></script>
   </head>
   <body>
     <div id="root"></div>
@@ -108,7 +109,7 @@
         }
       }
 
-      async function irParaCheckout(categoria, emissoesKg, nome, email) {
+      async function irParaCheckout(categoria, emissoesKg, nome, email, pais) {
         if (!email) {
           throw new Error('Email is required');
         }
@@ -121,6 +122,7 @@
             emissaoKg: quantidadeKg(emissoesKg),
             nome,
             email,
+            pais: pais || 'nao_informado',
           }),
         });
 
@@ -169,6 +171,12 @@
             <input id="nome" type="text" placeholder="Contributor name">
             <input id="email" type="email" placeholder="you@email.com">
           </div>
+          <div class="checkout-country">
+            <label for="checkout-country">Country</label>
+            <select id="checkout-country">
+              <option value="" selected disabled>Select your country</option>
+            </select>
+          </div>
           <p id="resumo-valor" class="checkout-resumo"></p>
           <p class="checkout-transparencia">Your name will be listed publicly among our contributors.</p>
           <aside class="checkout-parceiro" aria-label="Partner information">
@@ -185,6 +193,14 @@
           </div>
         `;
 
+        const countrySelect = painel.querySelector('#checkout-country');
+        for (const country of window.CARBONPOCKET_COUNTRIES) {
+          const option = document.createElement('option');
+          option.value = country.code;
+          option.textContent = `${window.flagDe(country.code)} ${country.name}`;
+          countrySelect.appendChild(option);
+        }
+
         destino.appendChild(painel);
         criarLinkContribuidores(destino, painel);
         ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
@@ -193,6 +209,7 @@
             const emissaoKg = obterEmissaoAtual();
             const nome = painel.querySelector('#nome').value.trim();
             const email = painel.querySelector('#email').value.trim();
+            const pais = countrySelect.value;
             let mensagemErro = painel.querySelector('.checkout-erro');
 
             if (!mensagemErro) {
@@ -206,7 +223,7 @@
             botao.disabled = true;
 
             try {
-              await irParaCheckout(botao.dataset.categoria, emissaoKg, nome, email);
+              await irParaCheckout(botao.dataset.categoria, emissaoKg, nome, email, pais);
             } catch (erro) {
               botao.disabled = false;
               mensagemErro.textContent = 'We could not start your payment. Please try again.';
