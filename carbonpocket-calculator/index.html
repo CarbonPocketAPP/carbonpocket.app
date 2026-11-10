@@ -66,6 +66,37 @@
         };
       }
 
+      let camposCheckout;
+      let privacidadeCheckout;
+
+      function obterCamposCheckout() {
+        if (!camposCheckout) {
+          camposCheckout = document.createElement('div');
+          camposCheckout.className = 'checkout-campos';
+          camposCheckout.innerHTML = `
+            <input id="nome" type="text" placeholder="Contributor name">
+            <input id="email" type="email" placeholder="you@email.com">
+          `;
+        }
+        if (!privacidadeCheckout) {
+          privacidadeCheckout = document.createElement('label');
+          privacidadeCheckout.className = 'checkout-privacidade';
+          privacidadeCheckout.innerHTML = `
+            <input id="exibir-nome-publicamente" type="checkbox">
+            <span>Show my name publicly in the contributors list; otherwise, I will be anonymous.</span>
+          `;
+        }
+        return { campos: camposCheckout, privacidade: privacidadeCheckout };
+      }
+
+      function moverCamposCheckoutParaPainel(painel) {
+        const { campos, privacidade } = obterCamposCheckout();
+        const camposDestino = painel.querySelector('#checkout-campos-slot');
+        const privacidadeDestino = painel.querySelector('#checkout-privacidade-slot');
+        if (camposDestino) camposDestino.replaceWith(campos);
+        if (privacidadeDestino) privacidadeDestino.replaceWith(privacidade);
+      }
+
       function exibirValor(emissoesKg) {
         const valores = calcularValores(emissoesKg);
         let resumo = document.getElementById('resumo-valor');
@@ -145,6 +176,7 @@
         const destino = painelReduzir || ancoraResultado;
 
         if (existente) {
+          moverCamposCheckoutParaPainel(existente);
           if (existente.parentElement !== destino) {
             destino.appendChild(existente);
           }
@@ -165,15 +197,9 @@
               <p class="checkout-parceiro-site">brcarbon.com.br</p>
             </div>
           </a>
-          <div class="checkout-campos">
-            <input id="nome" type="text" placeholder="Contributor name">
-            <input id="email" type="email" placeholder="you@email.com">
-          </div>
+          <div id="checkout-campos-slot"></div>
           <p id="resumo-valor" class="checkout-resumo"></p>
-          <label class="checkout-privacidade">
-            <input id="exibir-nome-publicamente" type="checkbox">
-            <span>Show my name publicly in the contributors list; otherwise, I will be anonymous.</span>
-          </label>
+          <div id="checkout-privacidade-slot"></div>
           <aside class="checkout-parceiro" aria-label="Partner information">
             <p>Credits are sourced from REDD+ forest protection projects in the Brazilian
             Amazon with Verra Standard certification. Your offsets support local
@@ -188,6 +214,7 @@
           </div>
         `;
 
+        moverCamposCheckoutParaPainel(painel);
         destino.appendChild(painel);
         ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
         criarSeccaoCreditosAvulsos(destino, painel);
@@ -222,11 +249,22 @@
       function criarSeccaoCreditosAvulsos(destino, painelCheckout) {
         let secao = document.getElementById('creditos-avulsos');
         if (secao) {
-          if (secao.parentElement !== destino || secao.previousElementSibling !== painelCheckout) {
-            painelCheckout.insertAdjacentElement('afterend', secao);
+          if (painelCheckout) {
+            if (secao.parentElement !== destino || secao.previousElementSibling !== painelCheckout) {
+              painelCheckout.insertAdjacentElement('afterend', secao);
+            }
+          } else {
+            const rodape = document.querySelector('footer');
+            if (rodape && secao.nextElementSibling !== rodape) {
+              rodape.insertAdjacentElement('beforebegin', secao);
+            } else if (!rodape && secao.parentElement !== destino) {
+              destino.appendChild(secao);
+            }
           }
           return;
         }
+
+        if (!destino) return;
 
         secao = document.createElement('section');
         secao.id = 'creditos-avulsos';
@@ -258,7 +296,23 @@
           <p class="creditos-erro" role="alert"></p>
         `;
 
-        painelCheckout.insertAdjacentElement('afterend', secao);
+        if (!painelCheckout) {
+          const { campos, privacidade } = obterCamposCheckout();
+          const primeiroControle = secao.querySelector('.creditos-selecao');
+          secao.insertBefore(campos, primeiroControle);
+          secao.insertBefore(privacidade, primeiroControle);
+        }
+
+        if (painelCheckout) {
+          painelCheckout.insertAdjacentElement('afterend', secao);
+        } else {
+          const rodape = document.querySelector('footer');
+          if (rodape) {
+            rodape.insertAdjacentElement('beforebegin', secao);
+          } else {
+            destino.appendChild(secao);
+          }
+        }
 
         const slider = secao.querySelector('#slider-kg');
         const campo = secao.querySelector('#campo-kg');
@@ -323,10 +377,9 @@
         secao.querySelector('.creditos-comprar').addEventListener('click', async (evento) => {
           const botao = evento.currentTarget;
           const mensagemErro = secao.querySelector('.creditos-erro');
-          const painel = document.getElementById('checkout-compensacao');
-          const nome = painel.querySelector('#nome').value.trim();
-          const email = painel.querySelector('#email').value.trim();
-          const exibirNome = painel.querySelector('#exibir-nome-publicamente').checked;
+          const nome = document.getElementById('nome').value.trim();
+          const email = document.getElementById('email').value.trim();
+          const exibirNome = document.getElementById('exibir-nome-publicamente').checked;
 
           mensagemErro.textContent = '';
           botao.disabled = true;
@@ -407,6 +460,10 @@
         if (document.querySelector('[data-testid="text-total"]')) {
           criarPainelCheckout();
           exibirValor(emissaoKg);
+        } else {
+          const rodape = document.querySelector('footer');
+          const destino = rodape?.parentElement || document.getElementById('root');
+          criarSeccaoCreditosAvulsos(destino, null);
         }
         atualizarConteudoPagina();
       }
