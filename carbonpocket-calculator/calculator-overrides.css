@@ -144,8 +144,7 @@
 }
 
 .checkout-campos,
-.checkout-acoes,
-.checkout-country {
+.checkout-acoes {
   display: grid;
   gap: 10px;
 }
@@ -157,21 +156,6 @@
   border: 1px solid rgba(234, 245, 233, 0.18);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
-  color: #eaf5e9;
-}
-
-.checkout-country label {
-  color: #b9c8bc;
-  font-size: 13px;
-}
-
-.checkout-country select {
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 12px;
-  border: 1px solid rgba(234, 245, 233, 0.18);
-  border-radius: 8px;
-  background: #14251c;
   color: #eaf5e9;
 }
 

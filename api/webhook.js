@@ -23,7 +23,9 @@ function invoiceQuantity(invoice, subscriptionId, fallback) {
     line.subscription === subscriptionId ||
     line.parent?.subscription_item_details?.subscription === subscriptionId,
   );
-  const line = matchingLine || lines.find((item) => item.quantity !== null);
+  const line = (matchingLine?.quantity !== null && matchingLine?.quantity !== undefined
+    ? matchingLine
+    : null) || lines.find((item) => item.quantity !== null && item.quantity !== undefined);
   const quantity = line?.quantity;
   return quantity === null || quantity === undefined ? Number(fallback) : Number(quantity);
 }
