@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { sanitizeName } from './name.js';
 
 function formatarUSD(centavos) {
   if (centavos === null || centavos === undefined) return null;
@@ -44,10 +45,10 @@ export default async function handler(req, res) {
       customer_email: session.customer_details?.email ?? session.customer_email ?? null,
       categoria: session.metadata?.categoria ?? null,
       emissao_kg: session.metadata?.emissao_kg ?? null,
-      nome: session.metadata?.nome ?? null,
+      nome: sanitizeName(session.metadata?.nome),
     });
   } catch {
-    console.error('STRIPE_SESSION_ERROR');
+    console.error('ERRO_STRIPE_SESSAO');
     return res.status(500).json({ erro: 'Unable to retrieve payment' });
   }
 }

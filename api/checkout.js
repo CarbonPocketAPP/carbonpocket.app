@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { sanitizeName } from './name.js';
 
 const priceIds = {
   unico: process.env.STRIPE_PRICE_UNICO,
@@ -17,7 +18,7 @@ function valorEfetivoCentavos(price) {
   return null;
 }
 
-// Formata o valor monetario retornado pelo Stripe em dolares.
+// Formata o valor monetário retornado pelo Stripe em dólares.
 function formatarUSD(centavos) {
   if (centavos === null || centavos === undefined) return null;
   return 'US$ ' + (centavos / 100).toFixed(2);
@@ -36,6 +37,17 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') {
     return res.status(405).json({ erro: 'Method not allowed' });
+  }
+
+  // Contadores em memória não são compartilhados entre instâncias serverless e não limitam o volume de forma confiável.
+  const origin = req.headers.origin;
+  if (origin && origin !== 'https://carbonpocket.app') {
+    return res.status(403).json({ erro: 'Forbidden' });
+  }
+
+  const contentType = req.headers['content-type'] || '';
+  if (!/^application\/json(?:\s*;|$)/i.test(contentType)) {
+    return res.status(415).json({ erro: 'Content-Type must be application/json' });
   }
 
   let body = req.body;
@@ -84,7 +96,7 @@ export default async function handler(req, res) {
       100000,
       Math.max(25, Math.round(Number(body.emissaoKg) || 0)),
     );
-    const nome = String(body.nome || '');
+    const nome = sanitizeName(body.nome);
     const email = String(body.email || '');
     const mode = categoria === 'unico' ? 'payment' : 'subscription';
 
@@ -121,7 +133,7 @@ export default async function handler(req, res) {
       mode: sessionCompleta.mode,
     });
   } catch (error) {
-    console.error('STRIPE_ERROR', error.type, error.code, error.param);
+    console.error('ERRO_STRIPE_CHECKOUT', error.type, error.code, error.param);
     return res.status(500).json({
       erro: 'Unable to start payment',
     });

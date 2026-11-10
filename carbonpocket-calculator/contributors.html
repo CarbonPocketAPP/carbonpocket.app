@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Our contributors | CarbonPocket</title>
+    <link rel="stylesheet" href="./assets/index-hQOtl3ms.css" />
+    <link rel="stylesheet" href="./calculator-overrides.css" />
+  </head>
+  <body>
+    <main class="checkout-sucesso">
+      <section class="panel checkout-sucesso-card" aria-live="polite">
+        <p class="result-kicker">CarbonPocket</p>
+        <h1>Our contributors</h1>
+        <div id="contributors-summary" class="contributors-summary" hidden>
+          <div>
+            <strong id="contributors-total-kg">0</strong>
+            <span>kg compensated</span>
+          </div>
+          <div>
+            <strong id="contributors-total-count">0</strong>
+            <span>contributors</span>
+          </div>
+        </div>
+        <p id="contributors-state" class="contributors-state" role="status">
+          Loading contributors...
+        </p>
+        <ol id="contributors-list" class="contributors-list" hidden></ol>
+        <p class="neutralization-service-link">
+          <a href="https://carbonpocket.app/carbonpocket-calculator/">
+            Back to calculator
+          </a>
+        </p>
+      </section>
+    </main>
+    <script>
+      const contributorsApi = 'https://carbonpocketapp.vercel.app/api/contributors';
+      const formatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
+      const state = document.getElementById('contributors-state');
+      const summary = document.getElementById('contributors-summary');
+      const list = document.getElementById('contributors-list');
+
+      async function loadContributors() {
+        try {
+          const response = await fetch(contributorsApi);
+          if (!response.ok) throw new Error('Unable to load contributors');
+          const data = await response.json();
+
+          document.getElementById('contributors-total-kg').textContent =
+            formatter.format(data.total_kg);
+          document.getElementById('contributors-total-count').textContent =
+            formatter.format(data.total_contributors);
+          summary.hidden = false;
+          list.replaceChildren();
+
+          if (data.contributors.length === 0) {
+            state.textContent = 'The first compensation round has not been published yet.';
+            return;
+          }
+
+          for (const contributor of data.contributors) {
+            const item = document.createElement('li');
+            const name = document.createElement('span');
+            const quantity = document.createElement('span');
+            name.textContent = contributor.name;
+            quantity.textContent = `${formatter.format(contributor.kg)} kg`;
+            item.append(name, quantity);
+            list.appendChild(item);
+          }
+
+          state.hidden = true;
+          list.hidden = false;
+        } catch {
+          state.hidden = false;
+          state.textContent = 'Unable to load contributors right now.';
+        }
+      }
+
+      loadContributors();
+    </script>
+  </body>
+</html>

@@ -200,6 +200,18 @@
           bloco.appendChild(link);
           rodape.parentNode.insertBefore(bloco, rodape);
         }
+
+        if (!document.getElementById('calculator-contributors-link') && document.querySelector('footer')) {
+          const rodape = document.querySelector('footer');
+          const bloco = document.createElement('div');
+          bloco.id = 'calculator-contributors-link';
+          bloco.className = 'neutralization-service-link';
+          const link = document.createElement('a');
+          link.href = 'https://carbonpocket.app/carbonpocket-calculator/contributors.html';
+          link.textContent = 'View contributors';
+          bloco.appendChild(link);
+          rodape.parentNode.insertBefore(bloco, rodape);
+        }
       }
 
       function obterEmissaoAtual() {
