@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { sanitizeName } from './name.js';
 
 export const config = { api: { bodyParser: false } };
 
@@ -15,19 +16,41 @@ export default async function handler(req, res) {
     return res.status(405).json({ erro: 'Method not allowed' });
   }
 
+  const signature = req.headers['stripe-signature'];
+  if (typeof signature !== 'string') {
+    // Sem assinatura não há payload confiável; responder 400 evita tratar isso como erro interno.
+    return res.status(400).json({ erro: 'Invalid signature' });
+  }
+
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
-    console.error('WEBHOOK_CONFIGURATION_MISSING');
+    console.error('CONFIGURACAO_WEBHOOK_AUSENTE');
     return res.status(500).json({ erro: 'Unable to verify event' });
   }
 
-  const chunks = [];
-  for await (const chunk of req) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  let rawBody;
+  try {
+    const chunks = [];
+    for await (const chunk of req) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    rawBody = Buffer.concat(chunks);
+  } catch (error) {
+    // Falhas inesperadas ao ler o stream são erros internos e devem ser registradas sem o conteúdo.
+    console.error('ERRO_LEITURA_CORPO_WEBHOOK', error.name);
+    return res.status(500).json({ erro: 'Unable to process event' });
   }
-  const rawBody = Buffer.concat(chunks);
-  const signature = req.headers['stripe-signature'];
-  if (typeof signature !== 'string') {
-    return res.status(400).json({ erro: 'Invalid signature' });
+
+  try {
+    // A análise aqui serve somente para rejeitar JSON malformado; o conteúdo não é usado antes da assinatura.
+    JSON.parse(rawBody.toString('utf8'));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      // JSON inválido é uma requisição malformada, não uma falha de assinatura nem erro interno.
+      console.error('CORPO_WEBHOOK_MALFORMADO');
+      return res.status(400).json({ erro: 'Invalid payload' });
+    }
+    console.error('ERRO_VALIDACAO_CORPO_WEBHOOK', error.name);
+    return res.status(500).json({ erro: 'Unable to process event' });
   }
 
   let event;
@@ -38,15 +61,58 @@ export default async function handler(req, res) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET,
     );
-  } catch {
-    console.error('WEBHOOK_SIGNATURE_INVALID');
-    return res.status(400).json({ erro: 'Invalid signature' });
+  } catch (error) {
+    if (error.type === 'StripeSignatureVerificationError') {
+      // Assinatura inválida é rejeitada com 400 para não confundir o erro com falha do handler.
+      console.error('ASSINATURA_WEBHOOK_INVALIDA');
+      return res.status(400).json({ erro: 'Invalid signature' });
+    }
+    console.error('ERRO_VERIFICACAO_WEBHOOK', error.type || error.name);
+    return res.status(500).json({ erro: 'Unable to process event' });
   }
 
-  if (eventTypes.has(event.type)) {
-    console.log('STRIPE_EVENT', event.type, event.data.object.id);
-  }
+  try {
+    const object = event.data?.object;
+    const session = object?.object === 'checkout.session' ? object : null;
+    const record = {
+      tipo: event.type,
+      event_id: event.id,
+      livemode: event.livemode,
+      created: event.created,
+      ...(object?.id ? { object_id: object.id } : {}),
+      ...(session
+        ? {
+            session: {
+              id: session.id,
+              payment_status: session.payment_status,
+              mode: session.mode,
+              amount_total: session.amount_total,
+              currency: session.currency,
+              nome: session.metadata?.nome
+                ? sanitizeName(session.metadata.nome)
+                : undefined,
+              emissao_kg: session.metadata?.emissao_kg,
+              categoria: session.metadata?.categoria,
+              customer_email: session.customer_email || session.customer_details?.email
+                ? 'presente'
+                : 'ausente',
+            },
+          }
+        : {}),
+    };
 
-  // O fulfillment é manual e agregado; a Brcarbon não tem API. Este webhook serve apenas como registro de eventos.
-  return res.status(200).json({ received: true });
+    console.log('WEBHOOK_EVENT', JSON.stringify(record));
+
+    // Eventos válidos não previstos são registrados e confirmados para evitar reenvios por até três dias.
+    if (!eventTypes.has(event.type)) {
+      return res.status(200).json({ received: true, ignored: true });
+    }
+
+    // O fulfillment é manual e agregado; este handler apenas registra eventos verificados.
+    return res.status(200).json({ received: true });
+  } catch (error) {
+    // Erros inesperados são registrados sem incluir corpo, segredo ou endereço de e-mail.
+    console.error('ERRO_PROCESSAMENTO_WEBHOOK', error.name);
+    return res.status(500).json({ erro: 'Unable to process event' });
+  }
 }

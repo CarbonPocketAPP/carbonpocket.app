@@ -60,6 +60,7 @@ export default async function handler(req, res) {
 
     // Sessões de checkout registram o primeiro pagamento; renovações exigiriam agregar invoice.paid.
     // TODO: integrar as renovações de assinatura quando a contabilidade de rodadas passar a incluí-las.
+    // TODO: separar sessões já compensadas por metadata ou data de corte quando houver mais de uma rodada.
     return res.status(200).json({
       total_kg: contributors.reduce((total, contributor) => total + contributor.kg, 0),
       total_contributors: contributors.length,
