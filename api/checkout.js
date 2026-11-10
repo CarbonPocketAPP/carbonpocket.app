@@ -3,6 +3,8 @@ import { sanitizeName } from './name.js';
 
 const priceIds = {
   unico: process.env.STRIPE_PRICE_UNICO,
+  // 'avulso' e 'unico' usam o mesmo Price, mas representam intenções diferentes: créditos independentes ou compensação das próprias emissões. Separar permite agregações distintas.
+  avulso: process.env.STRIPE_PRICE_UNICO,
   mensal: process.env.STRIPE_PRICE_MENSAL,
   anual: process.env.STRIPE_PRICE_ANUAL,
 };
@@ -72,6 +74,22 @@ export default async function handler(req, res) {
     return res.status(400).json({ erro: 'Invalid request' });
   }
 
+  const categoriasValidas = ['unico', 'avulso', 'mensal', 'anual'];
+  const categoria = categoriasValidas.includes(body.categoria)
+    ? body.categoria
+    : 'mensal';
+  if (
+    categoria === 'avulso' &&
+    (
+      typeof body.emissaoKg !== 'number' ||
+      !Number.isInteger(body.emissaoKg) ||
+      body.emissaoKg < 100 ||
+      body.emissaoKg > 10000
+    )
+  ) {
+    return res.status(400).json({ erro: 'Invalid credit amount.' });
+  }
+
   try {
     const requiredVariables = {
       STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
@@ -91,14 +109,12 @@ export default async function handler(req, res) {
       });
     }
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    const categoriasValidas = ['unico', 'mensal', 'anual'];
-    const categoria = categoriasValidas.includes(body.categoria)
-      ? body.categoria
-      : 'mensal';
-    const quantidade = Math.min(
-      100000,
-      Math.max(25, Math.round(Number(body.emissaoKg) || 0)),
-    );
+    const quantidade = categoria === 'avulso'
+      ? body.emissaoKg
+      : Math.min(
+        100000,
+        Math.max(25, Math.round(Number(body.emissaoKg) || 0)),
+      );
     const nome = sanitizeName(body.nome);
     const optOut = body.exibirNome !== true;
     const email = String(body.email || '');
@@ -106,7 +122,7 @@ export default async function handler(req, res) {
     const origem = origensValidas.includes(body.origem) ? body.origem : 'site';
     const paisInformado = String(body.pais ?? '').trim().toUpperCase();
     const pais = /^[A-Z]{2}$/.test(paisInformado) ? paisInformado : 'nao_informado';
-    const mode = categoria === 'unico' ? 'payment' : 'subscription';
+    const mode = ['unico', 'avulso'].includes(categoria) ? 'payment' : 'subscription';
 
     const metadata = {
       nome,
@@ -134,7 +150,7 @@ export default async function handler(req, res) {
       ],
       ...(email ? { customer_email: email } : {}),
       metadata,
-      ...(categoria !== 'unico'
+      ...(!['unico', 'avulso'].includes(categoria)
         ? { subscription_data: { metadata: subscriptionMetadata } }
         : {}),
       success_url: `${base}/carbonpocket-calculator/sucesso.html?session_id={CHECKOUT_SESSION_ID}`,

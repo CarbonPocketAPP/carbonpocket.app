@@ -107,6 +107,8 @@ export default async function handler(req, res) {
           return;
         }
 
+        // Compras com metadata.categoria = 'avulso' são créditos independentes das emissões calculadas e hoje somam normalmente nos totais.
+        // TODO: avaliar separar "emissions compensated" de "standalone credits purchased" na página pública.
         // Sessões sem origem são históricas do site; quando o app criar sessões, elas terão origem = 'app'.
         if (session.metadata?.origem && session.metadata.origem !== 'site') return;
         const kg = Number(session.metadata?.emissao_kg);

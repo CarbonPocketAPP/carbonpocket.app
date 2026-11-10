@@ -27,6 +27,10 @@
       const CHECKOUT_API = 'https://carbonpocketapp.vercel.app/api/checkout';
       const ANNUAL_ENABLED = true;
       const KG_MINIMO = 25;
+      const CREDITOS_KG_MINIMO = 100;
+      const CREDITOS_KG_MAXIMO = 10000;
+      const CREDITOS_KG_PASSO = 100;
+      const PRECO_BR_AVULSO_POR_KG = 0.11;
       let paisSelecionado = 'nao_informado';
       const seletoresPaisRegistrados = new WeakSet();
       // Valores em dólar são referência comercial; em real são a cobrança efetiva. cambioReferencia define preços, sem conversão em tempo real.
@@ -39,6 +43,17 @@
 
       function quantidadeKg(emissoesKg) {
         return Math.max(KG_MINIMO, Math.round(Number(emissoesKg) || 0));
+      }
+
+      function formatarBRL(valorReais) {
+        return 'R$ ' + valorReais.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      }
+
+      function formatarKg(valorKg) {
+        return Number(valorKg).toLocaleString('pt-BR');
       }
 
       function calcularValores(emissoesKg) {
@@ -108,7 +123,9 @@
         });
 
         if (!resposta.ok) {
-          throw new Error('Unexpected checkout response');
+          const erro = new Error('Unexpected checkout response');
+          erro.status = resposta.status;
+          throw erro;
         }
 
         const dados = await resposta.json();
@@ -132,6 +149,7 @@
             destino.appendChild(existente);
           }
           ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
+          criarSeccaoCreditosAvulsos(destino, existente);
           return;
         }
 
@@ -172,6 +190,7 @@
 
         destino.appendChild(painel);
         ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
+        criarSeccaoCreditosAvulsos(destino, painel);
         painel.querySelectorAll('[data-categoria]').forEach((botao) => {
           botao.addEventListener('click', async () => {
             const emissaoKg = obterEmissaoAtual();
@@ -198,6 +217,138 @@
             }
           });
         });
+      }
+
+      function criarSeccaoCreditosAvulsos(destino, painelCheckout) {
+        let secao = document.getElementById('creditos-avulsos');
+        if (secao) {
+          if (secao.parentElement !== destino || secao.previousElementSibling !== painelCheckout) {
+            painelCheckout.insertAdjacentElement('afterend', secao);
+          }
+          return;
+        }
+
+        secao = document.createElement('section');
+        secao.id = 'creditos-avulsos';
+        secao.className = 'creditos-avulsos';
+        secao.innerHTML = `
+          <h3>Buy credits</h3>
+          <p>Purchase carbon credits without calculating your emissions.</p>
+          <div class="creditos-selecao">
+            <div class="creditos-kg">
+              <span>Credits selected</span>
+              <output id="creditos-kg-selecionados" aria-live="polite">500 kg</output>
+            </div>
+            <label class="creditos-campo">
+              Exact amount (kg)
+              <input id="campo-kg" type="number" min="100" max="10000" step="100" value="500" inputmode="numeric">
+            </label>
+          </div>
+          <input id="slider-kg" type="range" min="100" max="10000" step="100" value="500" aria-label="Credit amount in kilograms">
+          <div class="creditos-preco">
+            <strong id="creditos-preco-brl">R$ 55,00</strong>
+            <span id="creditos-preco-usd">(approx. US$ 9.82)</span>
+          </div>
+          <div class="creditos-presets" role="group" aria-label="Quick credit amounts">
+            <button type="button" data-credit-kg="500">500 kg</button>
+            <button type="button" data-credit-kg="1000">1,000 kg</button>
+            <button type="button" data-credit-kg="5000">5,000 kg</button>
+          </div>
+          <button type="button" class="creditos-comprar">Buy credits</button>
+          <p class="creditos-erro" role="alert"></p>
+        `;
+
+        painelCheckout.insertAdjacentElement('afterend', secao);
+
+        const slider = secao.querySelector('#slider-kg');
+        const campo = secao.querySelector('#campo-kg');
+        const displayKg = secao.querySelector('#creditos-kg-selecionados');
+        const displayBRL = secao.querySelector('#creditos-preco-brl');
+        const displayUSD = secao.querySelector('#creditos-preco-usd');
+        let ultimoValorValido = 500;
+
+        function exibirCreditos(valorKg) {
+          const centavos = valorKg * PRECO_BR_AVULSO_POR_KG * 100;
+          const valorReais = centavos / 100;
+          displayKg.textContent = `${formatarKg(valorKg)} kg`;
+          displayBRL.textContent = formatarBRL(valorReais);
+          displayUSD.textContent =
+            `(approx. US$ ${(valorReais / PRECOS.cambioReferencia).toFixed(2)})`;
+        }
+
+        slider.addEventListener('input', () => {
+          ultimoValorValido = Number(slider.value);
+          campo.value = String(ultimoValorValido);
+          exibirCreditos(ultimoValorValido);
+        });
+
+        campo.addEventListener('input', () => {
+          if (campo.value === '') return;
+          const valorDigitado = Number(campo.value);
+          if (!Number.isFinite(valorDigitado)) return;
+          const arredondado = Math.round(valorDigitado / CREDITOS_KG_PASSO) * CREDITOS_KG_PASSO;
+          ultimoValorValido = Math.min(
+            CREDITOS_KG_MAXIMO,
+            Math.max(CREDITOS_KG_MINIMO, arredondado),
+          );
+          slider.value = String(ultimoValorValido);
+          exibirCreditos(ultimoValorValido);
+        });
+
+        campo.addEventListener('blur', () => {
+          const valorDigitado = Number(campo.value);
+          if (campo.value === '' || !Number.isFinite(valorDigitado)) {
+            campo.value = String(ultimoValorValido);
+          } else {
+            const arredondado = Math.round(valorDigitado / CREDITOS_KG_PASSO) * CREDITOS_KG_PASSO;
+            ultimoValorValido = Math.min(
+              CREDITOS_KG_MAXIMO,
+              Math.max(CREDITOS_KG_MINIMO, arredondado),
+            );
+            campo.value = String(ultimoValorValido);
+          }
+          slider.value = String(ultimoValorValido);
+          exibirCreditos(ultimoValorValido);
+        });
+
+        secao.querySelectorAll('[data-credit-kg]').forEach((botao) => {
+          botao.addEventListener('click', () => {
+            ultimoValorValido = Number(botao.dataset.creditKg);
+            slider.value = String(ultimoValorValido);
+            campo.value = String(ultimoValorValido);
+            exibirCreditos(ultimoValorValido);
+          });
+        });
+
+        secao.querySelector('.creditos-comprar').addEventListener('click', async (evento) => {
+          const botao = evento.currentTarget;
+          const mensagemErro = secao.querySelector('.creditos-erro');
+          const painel = document.getElementById('checkout-compensacao');
+          const nome = painel.querySelector('#nome').value.trim();
+          const email = painel.querySelector('#email').value.trim();
+          const exibirNome = painel.querySelector('#exibir-nome-publicamente').checked;
+
+          mensagemErro.textContent = '';
+          botao.disabled = true;
+          botao.textContent = 'Redirecting...';
+
+          try {
+            await irParaCheckout('avulso', ultimoValorValido, nome, email, exibirNome);
+          } catch (erro) {
+            botao.disabled = false;
+            botao.textContent = 'Buy credits';
+            if (erro.status === 400) {
+              mensagemErro.textContent =
+                'Unable to start checkout. Please check the amount and try again.';
+            } else if (erro.message === 'Email is required') {
+              mensagemErro.textContent = 'Please enter your email address.';
+            } else {
+              mensagemErro.textContent = 'Unable to start checkout right now.';
+            }
+          }
+        });
+
+        exibirCreditos(ultimoValorValido);
       }
 
       function atualizarConteudoPagina() {
