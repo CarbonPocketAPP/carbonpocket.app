@@ -7,7 +7,9 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', base);
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+  const cachePolicy = 'public, s-maxage=300, stale-while-revalidate=600';
+  res.setHeader('Cache-Control', cachePolicy);
+  res.setHeader('Vercel-CDN-Cache-Control', cachePolicy);
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
