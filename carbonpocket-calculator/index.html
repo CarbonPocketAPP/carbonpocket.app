@@ -33,9 +33,6 @@
       const PRECOS = {
         usdPorKgUnico: 0.02,
         usdPorKgAnual: 0.204,
-        brlPorKgUnico: 0.11,
-        brlPorKgMensal: 0.11,
-        brlPorKgAnual: 1.12,
         cambioReferencia: 5.60,
         notaCambio: 'USD values are approximate references. You will be charged in BRL.',
       };
@@ -51,23 +48,12 @@
           unicoUsd: (kg * PRECOS.usdPorKgUnico).toFixed(2),
           mensalUsd: (kg * PRECOS.usdPorKgUnico).toFixed(2),
           anualUsd: (kg * PRECOS.usdPorKgAnual).toFixed(2),
-          unicoBrl: formatarBRL(kg * PRECOS.brlPorKgUnico),
-          mensalBrl: formatarBRL(kg * PRECOS.brlPorKgMensal),
-          anualBrl: formatarBRL(kg * PRECOS.brlPorKgAnual),
         };
-      }
-
-      function formatarBRL(valor) {
-        return 'R$ ' + valor.toLocaleString('pt-BR', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
       }
 
       function exibirValor(emissoesKg) {
         const valores = calcularValores(emissoesKg);
         let resumo = document.getElementById('resumo-valor');
-        let cobrancaBRL = document.getElementById('resumo-cobranca-brl');
         let notaCambio = document.getElementById('resumo-nota-cambio');
 
         if (!resumo) {
@@ -88,34 +74,22 @@
           resumo.textContent = textoResumo;
         }
 
-        if (!cobrancaBRL) {
-          cobrancaBRL = document.createElement('p');
-          cobrancaBRL.id = 'resumo-cobranca-brl';
-          cobrancaBRL.className = 'checkout-resumo-brl';
-          resumo.insertAdjacentElement('afterend', cobrancaBRL);
-        }
-        const textoCobrancaBRL =
-          `Charged in BRL: ${valores.unicoBrl} once, ${valores.mensalBrl}/month or ${valores.anualBrl}/year`;
-        if (cobrancaBRL.textContent !== textoCobrancaBRL) {
-          cobrancaBRL.textContent = textoCobrancaBRL;
-        }
-
         if (!notaCambio) {
           notaCambio = document.createElement('p');
           notaCambio.id = 'resumo-nota-cambio';
           notaCambio.className = 'checkout-nota-cambio';
-          cobrancaBRL.insertAdjacentElement('afterend', notaCambio);
+          resumo.insertAdjacentElement('afterend', notaCambio);
         }
         if (notaCambio.textContent !== PRECOS.notaCambio) {
           notaCambio.textContent = PRECOS.notaCambio;
         }
 
-        if (notaCambio.previousElementSibling !== cobrancaBRL) {
-          cobrancaBRL.insertAdjacentElement('afterend', notaCambio);
+        if (notaCambio.previousElementSibling !== resumo) {
+          resumo.insertAdjacentElement('afterend', notaCambio);
         }
       }
 
-      async function irParaCheckout(categoria, emissoesKg, nome, email) {
+      async function irParaCheckout(categoria, emissoesKg, nome, email, exibirNome) {
         if (!email) {
           throw new Error('Email is required');
         }
@@ -128,6 +102,7 @@
             emissaoKg: quantidadeKg(emissoesKg),
             nome,
             email,
+            exibirNome,
             pais: paisSelecionado,
           }),
         });
@@ -156,7 +131,6 @@
           if (existente.parentElement !== destino) {
             destino.appendChild(existente);
           }
-          criarLinkContribuidores(destino, existente);
           ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
           return;
         }
@@ -178,7 +152,10 @@
             <input id="email" type="email" placeholder="you@email.com">
           </div>
           <p id="resumo-valor" class="checkout-resumo"></p>
-          <p class="checkout-transparencia">Your name will be listed publicly among our contributors.</p>
+          <label class="checkout-privacidade">
+            <input id="exibir-nome-publicamente" type="checkbox">
+            <span>Show my name publicly in the contributors list; otherwise, I will be anonymous.</span>
+          </label>
           <aside class="checkout-parceiro" aria-label="Partner information">
             <p>Credits are sourced from REDD+ forest protection projects in the Brazilian
             Amazon with Verra Standard certification. Your offsets support local
@@ -194,13 +171,13 @@
         `;
 
         destino.appendChild(painel);
-        criarLinkContribuidores(destino, painel);
         ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
         painel.querySelectorAll('[data-categoria]').forEach((botao) => {
           botao.addEventListener('click', async () => {
             const emissaoKg = obterEmissaoAtual();
             const nome = painel.querySelector('#nome').value.trim();
             const email = painel.querySelector('#email').value.trim();
+            const exibirNome = painel.querySelector('#exibir-nome-publicamente').checked;
             let mensagemErro = painel.querySelector('.checkout-erro');
 
             if (!mensagemErro) {
@@ -214,33 +191,13 @@
             botao.disabled = true;
 
             try {
-              await irParaCheckout(botao.dataset.categoria, emissaoKg, nome, email);
+              await irParaCheckout(botao.dataset.categoria, emissaoKg, nome, email, exibirNome);
             } catch (erro) {
               botao.disabled = false;
               mensagemErro.textContent = 'We could not start your payment. Please try again.';
             }
           });
         });
-      }
-
-      function criarLinkContribuidores(destino, painel) {
-        let bloco = document.getElementById('calculator-contributors-featured');
-        if (!bloco) {
-          bloco = document.createElement('p');
-          bloco.id = 'calculator-contributors-featured';
-          bloco.className = 'contributors-featured-link';
-          const link = document.createElement('a');
-          link.href = 'https://carbonpocket.app/carbonpocket-calculator/contributors.html';
-          link.textContent = 'See the credits compensated by all users';
-          bloco.appendChild(link);
-        }
-
-        if (painel.parentElement !== destino) {
-          destino.appendChild(painel);
-        }
-        if (bloco.previousElementSibling !== painel) {
-          painel.insertAdjacentElement('afterend', bloco);
-        }
       }
 
       function atualizarConteudoPagina() {
@@ -257,31 +214,21 @@
           }
         });
 
-        if (!document.getElementById('neutralization-service-link') && document.querySelector('footer')) {
-          const rodape = document.querySelector('footer');
-          const bloco = document.createElement('div');
-          bloco.id = 'neutralization-service-link';
-          bloco.className = 'neutralization-service-link';
-          const link = document.createElement('a');
-          link.href = 'https://carbonpocket.app/neutralization-service/neutralization-service';
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          link.textContent = 'Learn about our neutralization service';
-          // TODO em portugues: confirmar se esta URL esta correta (o segmento aparece duplicado no caminho).
-          bloco.appendChild(link);
-          rodape.parentNode.insertBefore(bloco, rodape);
-        }
-
-        if (!document.getElementById('calculator-contributors-link') && document.querySelector('footer')) {
-          const rodape = document.querySelector('footer');
-          const bloco = document.createElement('div');
-          bloco.id = 'calculator-contributors-link';
-          bloco.className = 'neutralization-service-link';
-          const link = document.createElement('a');
-          link.href = 'https://carbonpocket.app/carbonpocket-calculator/contributors.html';
-          link.textContent = 'View contributors';
-          bloco.appendChild(link);
-          rodape.parentNode.insertBefore(bloco, rodape);
+        const rodape = document.querySelector('footer');
+        if (rodape && !document.getElementById('calculator-footer-links')) {
+          const bloco = document.createElement('p');
+          bloco.id = 'calculator-footer-links';
+          bloco.className = 'calculator-footer-links';
+          const contribuidores = document.createElement('a');
+          contribuidores.href = 'https://carbonpocket.app/carbonpocket-calculator/contributors.html';
+          contribuidores.textContent = 'View contributors';
+          const servico = document.createElement('a');
+          servico.href = 'https://carbonpocket.app/neutralization-service/neutralization-service';
+          servico.target = '_blank';
+          servico.rel = 'noopener noreferrer';
+          servico.textContent = 'Learn about our neutralization service';
+          bloco.append(contribuidores, document.createTextNode(' · '), servico);
+          rodape.appendChild(bloco);
         }
       }
 

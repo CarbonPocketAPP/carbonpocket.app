@@ -169,13 +169,6 @@
   line-height: 1.5;
 }
 
-.checkout-resumo-brl {
-  margin: 6px 0 0;
-  color: #eaf5e9;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
 .checkout-nota-cambio {
   margin: 4px 0 0;
   color: #9fb0a2;
@@ -183,15 +176,25 @@
   line-height: 1.45;
 }
 
-.checkout-transparencia,
+.checkout-privacidade,
 .checkout-erro {
   margin-top: 10px;
   font-size: 12px;
   line-height: 1.45;
 }
 
-.checkout-transparencia {
+.checkout-privacidade {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   color: #9fb0a2;
+  cursor: pointer;
+}
+
+.checkout-privacidade input {
+  flex: 0 0 auto;
+  margin: 2px 0 0;
+  accent-color: #72e19a;
 }
 
 .checkout-erro {
@@ -221,38 +224,19 @@
   color: #72e19a;
 }
 
-.neutralization-service-link {
-  width: 100%;
-  margin-bottom: 8px;
-  text-align: center;
-  font-size: 12px;
+.calculator-footer-links {
+  margin: 0;
+  text-align: right;
 }
 
-.neutralization-service-link a {
+.calculator-footer-links a {
   color: #9fb0a2;
   text-decoration: none;
 }
 
-.neutralization-service-link a:hover {
+.calculator-footer-links a:hover {
   color: #72e19a;
   text-decoration: underline;
-}
-
-.contributors-featured-link {
-  margin: 0;
-  text-align: center;
-  font-size: 13px;
-}
-
-.contributors-featured-link a {
-  color: #b9c8bc;
-  text-decoration: underline;
-  text-decoration-color: rgba(185, 200, 188, 0.45);
-  text-underline-offset: 3px;
-}
-
-.contributors-featured-link a:hover {
-  color: #72e19a;
 }
 
 .checkout-sucesso {

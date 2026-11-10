@@ -100,6 +100,7 @@ export default async function handler(req, res) {
       Math.max(25, Math.round(Number(body.emissaoKg) || 0)),
     );
     const nome = sanitizeName(body.nome);
+    const optOut = body.exibirNome !== true;
     const email = String(body.email || '');
     const origensValidas = ['site', 'app'];
     const origem = origensValidas.includes(body.origem) ? body.origem : 'site';
@@ -111,6 +112,7 @@ export default async function handler(req, res) {
       nome,
       emissao_kg: String(quantidade),
       categoria,
+      opt_out: String(optOut),
       // Registra a origem da compra; o app deve enviar origem = 'app'.
       origem,
       pais,
