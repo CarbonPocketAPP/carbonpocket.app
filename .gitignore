@@ -18,6 +18,7 @@ _*.py
 .DS_Store
 Thumbs.db
 desktop.ini
+**/desktop.ini
 
 # Node and Wrangler
 node_modules/

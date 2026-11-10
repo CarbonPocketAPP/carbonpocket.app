@@ -9,23 +9,81 @@
   </head>
   <body>
     <main class="checkout-sucesso">
-      <section class="panel checkout-sucesso-card" aria-live="polite">
+      <section class="panel checkout-sucesso-card contributors-card" aria-live="polite">
         <p class="result-kicker">CarbonPocket</p>
         <h1>Our contributors</h1>
-        <div id="contributors-summary" class="contributors-summary" hidden>
-          <div>
-            <strong id="contributors-total-kg">0</strong>
-            <span>kg compensated</span>
-          </div>
-          <div>
-            <strong id="contributors-total-count">0</strong>
-            <span>contributors</span>
-          </div>
-        </div>
+        <p class="contributors-intro">Every contribution helps support carbon projects.</p>
         <p id="contributors-state" class="contributors-state" role="status">
           Loading contributors...
         </p>
-        <ol id="contributors-list" class="contributors-list" hidden></ol>
+        <div id="contributors-content" hidden>
+          <div class="contributors-summary">
+            <div>
+              <strong id="contributors-total-kg">0</strong>
+              <span>kg compensated</span>
+            </div>
+            <div>
+              <strong id="contributors-total-count">0</strong>
+              <span>contributors</span>
+            </div>
+            <div>
+              <strong id="contributors-total-sessions">0</strong>
+              <span>compensations</span>
+            </div>
+          </div>
+
+          <section id="contributors-year-section" class="contributors-section" hidden>
+            <h2>By year</h2>
+            <div class="contributors-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Year</th>
+                    <th scope="col">kg</th>
+                    <th scope="col">Contributors</th>
+                    <th scope="col">Compensations</th>
+                  </tr>
+                </thead>
+                <tbody id="contributors-year-rows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="contributors-source-section" class="contributors-section" hidden>
+            <h2>By source</h2>
+            <div class="contributors-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Source</th>
+                    <th scope="col">kg</th>
+                    <th scope="col">Contributors</th>
+                    <th scope="col">Compensations</th>
+                  </tr>
+                </thead>
+                <tbody id="contributors-source-rows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="contributors-matrix-section" class="contributors-section" hidden>
+            <h2>Year × Source</h2>
+            <div class="contributors-table-wrap">
+              <table>
+                <thead id="contributors-matrix-head"></thead>
+                <tbody id="contributors-matrix-rows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="contributors-section">
+            <h2>Contributors</h2>
+            <ol id="contributors-list" class="contributors-list" hidden></ol>
+            <p id="contributors-private-state" class="contributors-state" hidden>
+              No contributors have chosen to publish their names.
+            </p>
+          </section>
+        </div>
         <p class="neutralization-service-link">
           <a href="https://carbonpocket.app/carbonpocket-calculator/">
             Back to calculator
@@ -35,41 +93,141 @@
     </main>
     <script>
       const contributorsApi = 'https://carbonpocketapp.vercel.app/api/contributors';
-      const formatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
+      const kgFormatter = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
+      const countFormatter = new Intl.NumberFormat('en-US');
+      const sourceLabels = {
+        site: 'Website',
+        app: 'App',
+        nao_identificado: 'Not identified',
+      };
       const state = document.getElementById('contributors-state');
-      const summary = document.getElementById('contributors-summary');
+      const content = document.getElementById('contributors-content');
       const list = document.getElementById('contributors-list');
+
+      function addCell(row, value, isHeader, scope = 'row') {
+        const cell = document.createElement(isHeader ? 'th' : 'td');
+        if (isHeader) cell.scope = scope;
+        cell.textContent = value;
+        row.appendChild(cell);
+      }
+
+      function renderTableRows(target, rows, columns) {
+        target.replaceChildren();
+        for (const entry of rows) {
+          const row = document.createElement('tr');
+          for (const column of columns) {
+            addCell(row, String(column.value(entry)), column.header);
+          }
+          target.appendChild(row);
+        }
+      }
+
+      function renderMatrix(matrix, years) {
+        if (matrix.length === 0 || years.length === 0) return;
+        const sources = [...new Set(matrix.map((entry) => entry.origem))]
+          .sort((a, b) => a.localeCompare(b));
+        const amountByYearAndSource = new Map(
+          matrix.map((entry) => [`${entry.ano}:${entry.origem}`, entry.kg]),
+        );
+        const head = document.getElementById('contributors-matrix-head');
+        const headerRow = document.createElement('tr');
+        addCell(headerRow, 'Year', true, 'col');
+        for (const source of sources) {
+          addCell(headerRow, sourceLabels[source] || 'Not identified', true, 'col');
+        }
+        addCell(headerRow, 'Total', true, 'col');
+        head.replaceChildren(headerRow);
+
+        const rows = years.map((year) => ({
+          year: year.ano,
+          total: year.kg,
+        }));
+        const target = document.getElementById('contributors-matrix-rows');
+        target.replaceChildren();
+        for (const entry of rows) {
+          const row = document.createElement('tr');
+          addCell(row, String(entry.year), true);
+          let yearTotal = 0;
+          for (const source of sources) {
+            const amount = amountByYearAndSource.get(`${entry.year}:${source}`);
+            if (Number.isFinite(amount)) yearTotal += amount;
+            addCell(row, Number.isFinite(amount) ? kgFormatter.format(amount) : '—');
+          }
+          addCell(row, kgFormatter.format(yearTotal));
+          target.appendChild(row);
+        }
+        document.getElementById('contributors-matrix-section').hidden = false;
+      }
 
       async function loadContributors() {
         try {
           const response = await fetch(contributorsApi);
           if (!response.ok) throw new Error('Unable to load contributors');
           const data = await response.json();
+          const total = data.total || { kg: 0, contributors: 0, sessions: 0 };
+          const years = Array.isArray(data.por_ano) ? data.por_ano : [];
+          const sources = Array.isArray(data.por_origem) ? data.por_origem : [];
+          const matrix = Array.isArray(data.matriz) ? data.matriz : [];
+          const contributors = Array.isArray(data.contributors) ? data.contributors : [];
 
-          document.getElementById('contributors-total-kg').textContent =
-            formatter.format(data.total_kg);
-          document.getElementById('contributors-total-count').textContent =
-            formatter.format(data.total_contributors);
-          summary.hidden = false;
-          list.replaceChildren();
-
-          if (data.contributors.length === 0) {
+          if (!Number(total.sessions)) {
             state.textContent = 'The first compensation round has not been published yet.';
             return;
           }
 
-          for (const contributor of data.contributors) {
+          document.getElementById('contributors-total-kg').textContent =
+            kgFormatter.format(Number(total.kg) || 0);
+          document.getElementById('contributors-total-count').textContent =
+            countFormatter.format(Number(total.contributors) || 0);
+          document.getElementById('contributors-total-sessions').textContent =
+            countFormatter.format(Number(total.sessions) || 0);
+
+          if (years.length > 0) {
+            renderTableRows(
+              document.getElementById('contributors-year-rows'),
+              years,
+              [
+                { header: true, value: (entry) => entry.ano },
+                { value: (entry) => kgFormatter.format(entry.kg) },
+                { value: (entry) => countFormatter.format(entry.contributors) },
+                { value: (entry) => countFormatter.format(entry.sessions) },
+              ],
+            );
+            document.getElementById('contributors-year-section').hidden = false;
+          }
+
+          if (sources.length > 0) {
+            renderTableRows(
+              document.getElementById('contributors-source-rows'),
+              sources,
+              [
+                {
+                  header: true,
+                  value: (entry) => sourceLabels[entry.origem] || 'Not identified',
+                },
+                { value: (entry) => kgFormatter.format(entry.kg) },
+                { value: (entry) => countFormatter.format(entry.contributors) },
+                { value: (entry) => countFormatter.format(entry.sessions) },
+              ],
+            );
+            document.getElementById('contributors-source-section').hidden = false;
+          }
+
+          renderMatrix(matrix, years);
+          for (const contributor of contributors) {
             const item = document.createElement('li');
             const name = document.createElement('span');
             const quantity = document.createElement('span');
             name.textContent = contributor.name;
-            quantity.textContent = `${formatter.format(contributor.kg)} kg`;
+            quantity.textContent = `${kgFormatter.format(contributor.kg)} kg`;
             item.append(name, quantity);
             list.appendChild(item);
           }
-
+          list.hidden = contributors.length === 0;
+          document.getElementById('contributors-private-state').hidden =
+            contributors.length > 0;
+          content.hidden = false;
           state.hidden = true;
-          list.hidden = false;
         } catch {
           state.hidden = false;
           state.textContent = 'Unable to load contributors right now.';

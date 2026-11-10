@@ -101,12 +101,16 @@ export default async function handler(req, res) {
     );
     const nome = sanitizeName(body.nome);
     const email = String(body.email || '');
+    const origensValidas = ['site', 'app'];
+    const origem = origensValidas.includes(body.origem) ? body.origem : 'site';
     const mode = categoria === 'unico' ? 'payment' : 'subscription';
 
     const metadata = {
       nome,
       emissao_kg: String(quantidade),
       categoria,
+      // Registra a origem da compra; o app deve enviar origem = 'app'.
+      origem,
     };
 
     const session = await stripe.checkout.sessions.create({

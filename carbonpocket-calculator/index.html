@@ -148,6 +148,7 @@
           if (existente.parentElement !== destino) {
             destino.appendChild(existente);
           }
+          criarLinkContribuidores(destino, existente);
           ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
           return;
         }
@@ -185,6 +186,7 @@
         `;
 
         destino.appendChild(painel);
+        criarLinkContribuidores(destino, painel);
         ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
         painel.querySelectorAll('[data-categoria]').forEach((botao) => {
           botao.addEventListener('click', async () => {
@@ -211,6 +213,26 @@
             }
           });
         });
+      }
+
+      function criarLinkContribuidores(destino, painel) {
+        let bloco = document.getElementById('calculator-contributors-featured');
+        if (!bloco) {
+          bloco = document.createElement('p');
+          bloco.id = 'calculator-contributors-featured';
+          bloco.className = 'contributors-featured-link';
+          const link = document.createElement('a');
+          link.href = 'https://carbonpocket.app/carbonpocket-calculator/contributors.html';
+          link.textContent = 'See the credits compensated by all users';
+          bloco.appendChild(link);
+        }
+
+        if (painel.parentElement !== destino) {
+          destino.appendChild(painel);
+        }
+        if (bloco.previousElementSibling !== painel) {
+          painel.insertAdjacentElement('afterend', bloco);
+        }
       }
 
       function atualizarConteudoPagina() {
