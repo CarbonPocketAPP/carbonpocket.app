@@ -27,8 +27,17 @@ export default async function handler(req, res) {
     const matrizStats = new Map();
     const paisStats = new Map();
     const kgByName = new Map();
+    const latestContributionByName = new Map();
 
-    function addContribution({ kg, year, country, name, optedOut, sessions }) {
+    function addContribution({
+      kg,
+      year,
+      country,
+      name,
+      optedOut,
+      sessions,
+      contributedAt,
+    }) {
       const contributorName = optedOut || name.includes('@') ? 'Anonymous' : name;
       total.kg += kg;
       total.contributors.add(contributorName);
@@ -76,6 +85,10 @@ export default async function handler(req, res) {
       paisStats.set(country, countryStat);
 
       kgByName.set(contributorName, (kgByName.get(contributorName) || 0) + kg);
+      latestContributionByName.set(
+        contributorName,
+        Math.max(latestContributionByName.get(contributorName) || 0, contributedAt),
+      );
     }
 
     async function forEachPage(listPage, visit) {
@@ -124,6 +137,7 @@ export default async function handler(req, res) {
           name: sanitizeName(session.metadata?.nome),
           optedOut: session.metadata?.opt_out === 'true',
           sessions: 1,
+          contributedAt: session.created,
         });
       },
     );
@@ -175,13 +189,19 @@ export default async function handler(req, res) {
             sessions: Number.isFinite(storedInvoices) && storedInvoices > 0
               ? Math.floor(storedInvoices)
               : 1,
+            contributedAt: subscription.created,
           });
         }
       },
     );
 
-    const contributors = Array.from(kgByName, ([name, kg]) => ({ name, kg }))
-      .sort((a, b) => b.kg - a.kg);
+    const contributors = Array.from(kgByName, ([name, kg]) => ({
+      name,
+      kg,
+      contributedAt: latestContributionByName.get(name) || 0,
+    }))
+      .sort((a, b) => b.contributedAt - a.contributedAt || b.kg - a.kg)
+      .map(({ name, kg }) => ({ name, kg }));
     const porOrigem = Array.from(origemStats, ([origem, stats]) => ({
       origem,
       kg: stats.kg,

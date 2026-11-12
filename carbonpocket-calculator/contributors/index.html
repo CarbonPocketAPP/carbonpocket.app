@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Our contributors | CarbonPocket</title>
-    <link rel="stylesheet" href="./assets/index-hQOtl3ms.css" />
-    <link rel="stylesheet" href="./calculator-overrides.css" />
-    <script src="./countries.js"></script>
+    <link rel="stylesheet" href="../assets/index-hQOtl3ms.css" />
+    <link rel="stylesheet" href="../calculator-overrides.css" />
+    <script src="../countries.js"></script>
   </head>
   <body>
     <main class="checkout-sucesso">
@@ -50,23 +50,6 @@
             </div>
           </section>
 
-          <section id="contributors-source-section" class="contributors-section" hidden>
-            <h2>By source</h2>
-            <div class="contributors-table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Source</th>
-                    <th scope="col">kg</th>
-                    <th scope="col">Contributors</th>
-                    <th scope="col">Compensations</th>
-                  </tr>
-                </thead>
-                <tbody id="contributors-source-rows"></tbody>
-              </table>
-            </div>
-          </section>
-
           <section id="contributors-country-section" class="contributors-section" hidden>
             <h2>By country</h2>
             <!-- TODO em português: avaliar um mapa coroplético quando houver dados suficientes por país. -->
@@ -81,16 +64,6 @@
                   </tr>
                 </thead>
                 <tbody id="contributors-country-rows"></tbody>
-              </table>
-            </div>
-          </section>
-
-          <section id="contributors-matrix-section" class="contributors-section" hidden>
-            <h2>Year × Source</h2>
-            <div class="contributors-table-wrap">
-              <table>
-                <thead id="contributors-matrix-head"></thead>
-                <tbody id="contributors-matrix-rows"></tbody>
               </table>
             </div>
           </section>
@@ -114,11 +87,6 @@
       const contributorsApi = 'https://carbonpocketapp.vercel.app/api/contributors';
       const kgFormatter = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
       const countFormatter = new Intl.NumberFormat('en-US');
-      const sourceLabels = {
-        site: 'Website',
-        app: 'App',
-        nao_identificado: 'Not identified',
-      };
       const countryLabels = Object.fromEntries(
         window.CARBONPOCKET_COUNTRIES.map(({ code, name }) => [code, name]),
       );
@@ -144,43 +112,6 @@
         }
       }
 
-      function renderMatrix(matrix, years) {
-        if (matrix.length === 0 || years.length === 0) return;
-        const sources = [...new Set(matrix.map((entry) => entry.origem))]
-          .sort((a, b) => a.localeCompare(b));
-        const amountByYearAndSource = new Map(
-          matrix.map((entry) => [`${entry.ano}:${entry.origem}`, entry.kg]),
-        );
-        const head = document.getElementById('contributors-matrix-head');
-        const headerRow = document.createElement('tr');
-        addCell(headerRow, 'Year', true, 'col');
-        for (const source of sources) {
-          addCell(headerRow, sourceLabels[source] || 'Not identified', true, 'col');
-        }
-        addCell(headerRow, 'Total', true, 'col');
-        head.replaceChildren(headerRow);
-
-        const rows = years.map((year) => ({
-          year: year.ano,
-          total: year.kg,
-        }));
-        const target = document.getElementById('contributors-matrix-rows');
-        target.replaceChildren();
-        for (const entry of rows) {
-          const row = document.createElement('tr');
-          addCell(row, String(entry.year), true);
-          let yearTotal = 0;
-          for (const source of sources) {
-            const amount = amountByYearAndSource.get(`${entry.year}:${source}`);
-            if (Number.isFinite(amount)) yearTotal += amount;
-            addCell(row, Number.isFinite(amount) ? kgFormatter.format(amount) : '—');
-          }
-          addCell(row, kgFormatter.format(yearTotal));
-          target.appendChild(row);
-        }
-        document.getElementById('contributors-matrix-section').hidden = false;
-      }
-
       async function loadContributors() {
         try {
           const response = await fetch(contributorsApi);
@@ -188,8 +119,6 @@
           const data = await response.json();
           const total = data.total || { kg: 0, contributors: 0, sessions: 0 };
           const years = Array.isArray(data.por_ano) ? data.por_ano : [];
-          const sources = Array.isArray(data.por_origem) ? data.por_origem : [];
-          const matrix = Array.isArray(data.matriz) ? data.matriz : [];
           const contributors = Array.isArray(data.contributors) ? data.contributors : [];
 
           if (!Number(total.sessions)) {
@@ -218,23 +147,6 @@
             document.getElementById('contributors-year-section').hidden = false;
           }
 
-          if (sources.length > 0) {
-            renderTableRows(
-              document.getElementById('contributors-source-rows'),
-              sources,
-              [
-                {
-                  header: true,
-                  value: (entry) => sourceLabels[entry.origem] || 'Not identified',
-                },
-                { value: (entry) => kgFormatter.format(entry.kg) },
-                { value: (entry) => countFormatter.format(entry.contributors) },
-                { value: (entry) => countFormatter.format(entry.sessions) },
-              ],
-            );
-            document.getElementById('contributors-source-section').hidden = false;
-          }
-
           const countries = Array.isArray(data.por_pais) ? data.por_pais : [];
           if (countries.length > 0) {
             renderTableRows(
@@ -255,8 +167,7 @@
             document.getElementById('contributors-country-section').hidden = false;
           }
 
-          renderMatrix(matrix, years);
-          for (const contributor of contributors) {
+          for (const contributor of contributors.slice(0, 5)) {
             const item = document.createElement('li');
             const name = document.createElement('span');
             const quantity = document.createElement('span');
