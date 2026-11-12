@@ -116,7 +116,7 @@ export default async function handler(req, res) {
         Math.max(25, Math.round(Number(body.emissaoKg) || 0)),
       );
     const nome = sanitizeName(body.nome);
-    const optOut = body.exibirNome !== true;
+      const optOut = body.exibirNome === false;
     const email = String(body.email || '');
     const origensValidas = ['site', 'app'];
     const origem = origensValidas.includes(body.origem) ? body.origem : 'site';

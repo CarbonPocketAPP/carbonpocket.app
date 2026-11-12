@@ -299,25 +299,10 @@
   line-height: 1.45;
 }
 
-.checkout-privacidade,
 .checkout-erro {
   margin-top: 10px;
   font-size: 12px;
   line-height: 1.45;
-}
-
-.checkout-privacidade {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  color: #9fb0a2;
-  cursor: pointer;
-}
-
-.checkout-privacidade input {
-  flex: 0 0 auto;
-  margin: 2px 0 0;
-  accent-color: #72e19a;
 }
 
 .checkout-erro {

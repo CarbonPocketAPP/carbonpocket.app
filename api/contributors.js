@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     const kgByName = new Map();
 
     function addContribution({ kg, year, country, name, optedOut, sessions }) {
-      const contributorName = optedOut ? 'Anonymous' : name;
+      const contributorName = optedOut || name.includes('@') ? 'Anonymous' : name;
       total.kg += kg;
       total.contributors.add(contributorName);
       total.sessions += sessions;

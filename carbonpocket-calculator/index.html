@@ -67,34 +67,23 @@
       }
 
       let camposCheckout;
-      let privacidadeCheckout;
 
       function obterCamposCheckout() {
         if (!camposCheckout) {
           camposCheckout = document.createElement('div');
           camposCheckout.className = 'checkout-campos';
           camposCheckout.innerHTML = `
-            <input id="nome" type="text" placeholder="Contributor name">
+            <input id="nome" type="text" placeholder="Contributor name (optional)" aria-label="Contributor name (optional)">
             <input id="email" type="email" placeholder="you@email.com">
           `;
         }
-        if (!privacidadeCheckout) {
-          privacidadeCheckout = document.createElement('label');
-          privacidadeCheckout.className = 'checkout-privacidade';
-          privacidadeCheckout.innerHTML = `
-            <input id="exibir-nome-publicamente" type="checkbox">
-            <span>Show my name publicly in the contributors list; otherwise, I will be anonymous.</span>
-          `;
-        }
-        return { campos: camposCheckout, privacidade: privacidadeCheckout };
+        return camposCheckout;
       }
 
       function moverCamposCheckoutParaPainel(painel) {
-        const { campos, privacidade } = obterCamposCheckout();
+        const campos = obterCamposCheckout();
         const camposDestino = painel.querySelector('#checkout-campos-slot');
-        const privacidadeDestino = painel.querySelector('#checkout-privacidade-slot');
         if (camposDestino) camposDestino.replaceWith(campos);
-        if (privacidadeDestino) privacidadeDestino.replaceWith(privacidade);
       }
 
       function exibirValor(emissoesKg) {
@@ -135,7 +124,7 @@
         }
       }
 
-      async function irParaCheckout(categoria, emissoesKg, nome, email, exibirNome) {
+      async function irParaCheckout(categoria, emissoesKg, nome, email) {
         if (!email) {
           throw new Error('Email is required');
         }
@@ -148,7 +137,6 @@
             emissaoKg: quantidadeKg(emissoesKg),
             nome,
             email,
-            exibirNome,
             pais: paisSelecionado,
           }),
         });
@@ -189,7 +177,7 @@
         painel.id = 'checkout-compensacao';
         painel.className = 'checkout-compensacao';
         painel.innerHTML = `
-          <p class="checkout-titulo">Compensate your footprint</p>
+          <p class="checkout-titulo">Buy Neutralization service</p>
           <a class="checkout-parceiro-cabecalho" href="https://brcarbon.com.br/" target="_blank" rel="noopener noreferrer">
             <div class="checkout-parceiro-logo" aria-hidden="true">BR</div>
             <div>
@@ -199,7 +187,6 @@
           </a>
           <div id="checkout-campos-slot"></div>
           <p id="resumo-valor" class="checkout-resumo"></p>
-          <div id="checkout-privacidade-slot"></div>
           <aside class="checkout-parceiro" aria-label="Partner information">
             <p>Credits are sourced from REDD+ forest protection projects in the Brazilian
             Amazon with Verra Standard certification. Your offsets support local
@@ -223,7 +210,6 @@
             const emissaoKg = obterEmissaoAtual();
             const nome = painel.querySelector('#nome').value.trim();
             const email = painel.querySelector('#email').value.trim();
-            const exibirNome = painel.querySelector('#exibir-nome-publicamente').checked;
             let mensagemErro = painel.querySelector('.checkout-erro');
 
             if (!mensagemErro) {
@@ -237,7 +223,7 @@
             botao.disabled = true;
 
             try {
-              await irParaCheckout(botao.dataset.categoria, emissaoKg, nome, email, exibirNome);
+              await irParaCheckout(botao.dataset.categoria, emissaoKg, nome, email);
             } catch (erro) {
               botao.disabled = false;
               mensagemErro.textContent = 'We could not start your payment. Please try again.';
@@ -270,8 +256,8 @@
         secao.id = 'creditos-avulsos';
         secao.className = 'creditos-avulsos';
         secao.innerHTML = `
-          <h3>Buy credits</h3>
-          <p>Purchase carbon credits without calculating your emissions.</p>
+          <h3>Buy Neutralization service</h3>
+          <p>Purchase a neutralization service without calculating your emissions.</p>
           <div class="creditos-selecao">
             <div class="creditos-kg">
               <span>Credits selected</span>
@@ -292,15 +278,14 @@
             <button type="button" data-credit-kg="1000">1,000 kg</button>
             <button type="button" data-credit-kg="5000">5,000 kg</button>
           </div>
-          <button type="button" class="creditos-comprar">Buy credits</button>
+          <button type="button" class="creditos-comprar">Buy Neutralization service</button>
           <p class="creditos-erro" role="alert"></p>
         `;
 
         if (!painelCheckout) {
-          const { campos, privacidade } = obterCamposCheckout();
+          const campos = obterCamposCheckout();
           const primeiroControle = secao.querySelector('.creditos-selecao');
           secao.insertBefore(campos, primeiroControle);
-          secao.insertBefore(privacidade, primeiroControle);
         }
 
         if (painelCheckout) {
@@ -379,17 +364,16 @@
           const mensagemErro = secao.querySelector('.creditos-erro');
           const nome = document.getElementById('nome').value.trim();
           const email = document.getElementById('email').value.trim();
-          const exibirNome = document.getElementById('exibir-nome-publicamente').checked;
 
           mensagemErro.textContent = '';
           botao.disabled = true;
           botao.textContent = 'Redirecting...';
 
           try {
-            await irParaCheckout('avulso', ultimoValorValido, nome, email, exibirNome);
+            await irParaCheckout('avulso', ultimoValorValido, nome, email);
           } catch (erro) {
             botao.disabled = false;
-            botao.textContent = 'Buy credits';
+            botao.textContent = 'Buy Neutralization service';
             if (erro.status === 400) {
               mensagemErro.textContent =
                 'Unable to start checkout. Please check the amount and try again.';
