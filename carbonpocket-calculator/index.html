@@ -19,6 +19,7 @@
     <script type="module" crossorigin src="./assets/index-8xHqDnEA.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-hQOtl3ms.css">
     <link rel="stylesheet" href="./calculator-overrides.css" />
+    <script src="translations.js?v=1"></script>
   </head>
   <body>
     <div id="root"></div>
@@ -121,12 +122,6 @@
         if (resumo.textContent !== textoResumo) {
           resumo.textContent = textoResumo;
         }
-        atualizarAvisoQualificacao(
-          document.getElementById('checkout-compensacao'),
-          emissoesKg,
-          false,
-        );
-
         if (!notaCambio) {
           notaCambio = document.createElement('p');
           notaCambio.id = 'resumo-nota-cambio';
@@ -183,7 +178,6 @@
 
         if (existente) {
           moverCamposCheckoutParaPainel(existente);
-          atualizarAvisoQualificacao(existente, obterEmissaoAtual(), false);
           if (existente.parentElement !== destino) {
             destino.appendChild(existente);
           }
@@ -200,25 +194,25 @@
           <a class="checkout-parceiro-cabecalho" href="https://brcarbon.com.br/" target="_blank" rel="noopener noreferrer">
             <div class="checkout-parceiro-logo" aria-hidden="true">BR</div>
             <div>
-              <p class="checkout-parceiro-nome" data-supplier-name>Credit supplier: BR Carbon</p>
-              <p class="checkout-parceiro-site" data-supplier-standard>Verra VCS identifies the credit certification standard, not app approval.</p>
+              <p class="checkout-parceiro-nome" data-supplier-name></p>
+              <p class="checkout-parceiro-site" data-supplier-standard></p>
             </div>
           </a>
           <div id="checkout-campos-slot"></div>
           <p id="resumo-valor" class="checkout-resumo"></p>
           <aside class="qualification-notice" aria-live="polite">
-            <h3 data-qualification-title>What you are buying</h3>
+            <h3 data-qualification-title></h3>
             <p data-qualification-body></p>
             <details>
-              <summary data-verification-summary>How your compensation is verified</summary>
+              <summary data-verification-summary></summary>
               <ul data-verification-list></ul>
             </details>
           </aside>
-          <aside class="checkout-parceiro" aria-label="Partner information">
-            <h3 data-partner-title>Verified credits, fully disclosed</h3>
-            <p data-partner-cycle>Verra VCS-certified REDD+ credits. Cycle details will be published after verification: project ${COMPENSATION_CONFIG.projectName}, serial range ${COMPENSATION_CONFIG.serialStart}–${COMPENSATION_CONFIG.serialEnd}, retirement ID ${COMPENSATION_CONFIG.retirementTransactionId}, ledger ${COMPENSATION_CONFIG.ledgerUrl}. Carbon Pocket is not certified or endorsed by Verra.</p>
-            <p data-partner-cobenefits>Co-benefit information is that published by the project developer.</p>
-            <p data-partner-roles>Verra is the certification standard for the credits. BR Carbon is the credit supplier.</p>
+          <aside class="checkout-parceiro" aria-label="">
+            <h3 data-partner-title></h3>
+            <p data-partner-cycle></p>
+            <p data-partner-cobenefits></p>
+            <p data-partner-roles></p>
             <p><span data-partner-link-label>Link:</span> <a href="https://brcarbon.com.br/" target="_blank" rel="noopener noreferrer">https://brcarbon.com.br/</a></p>
           </aside>
           <div class="checkout-acoes">
@@ -234,7 +228,6 @@
           reforco.textContent = 'Compensation only, your emissions still occur. Credits are retired in a public registry.';
           botao.insertAdjacentElement('afterend', reforco);
         });
-        atualizarAvisoQualificacao(painel, obterEmissaoAtual(), false);
         moverCamposCheckoutParaPainel(painel);
         destino.appendChild(painel);
         ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
@@ -281,11 +274,6 @@
               destino.appendChild(secao);
             }
           }
-          atualizarAvisoQualificacao(
-            secao,
-            Number(secao.querySelector('#campo-kg').value) || 500,
-            true,
-          );
           return;
         }
 
@@ -318,15 +306,15 @@
             <button type="button" data-credit-kg="5000">5,000 kg</button>
           </div>
           <aside class="qualification-notice" aria-live="polite">
-            <h3 data-qualification-title>What you are buying</h3>
+            <h3 data-qualification-title></h3>
             <p data-qualification-body></p>
             <details>
-              <summary data-verification-summary>How your compensation is verified</summary>
+              <summary data-verification-summary></summary>
               <ul data-verification-list></ul>
             </details>
           </aside>
           <button type="button" class="creditos-comprar">Buy carbon compensation</button>
-          <p class="qualification-reinforcement">Compensation only, your emissions still occur. Credits are retired in a public registry.</p>
+          <p class="qualification-reinforcement"></p>
           <p class="creditos-erro" role="alert"></p>
         `;
 
@@ -354,8 +342,6 @@
         const displayUSD = secao.querySelector('#creditos-preco-usd');
         let ultimoValorValido = 500;
 
-        atualizarAvisoQualificacao(secao, ultimoValorValido, true);
-
         function exibirCreditos(valorKg) {
           const centavos = valorKg * PRECO_BR_AVULSO_POR_KG * 100;
           const valorReais = centavos / 100;
@@ -363,7 +349,7 @@
           displayBRL.textContent = formatarBRL(valorReais);
           displayUSD.textContent =
             `(approx. US$ ${(valorReais / PRECOS.cambioReferencia).toFixed(2)})`;
-          atualizarAvisoQualificacao(secao, valorKg, true);
+          renderizarPainelCheckout();
         }
 
         slider.addEventListener('input', () => {
@@ -470,78 +456,99 @@
         }
       }
 
-      function atualizarAvisoQualificacao(container, quantidadeKg, volumeDefinido) {
-        if (!container) return;
-        const aviso = container.querySelector('.qualification-notice');
-        if (!aviso) return;
-        const emPortugues = paisSelecionado === 'BR';
-        const quantidade = formatarKg(quantidadeKg);
-        container.querySelectorAll('.qualification-reinforcement').forEach((linha) => {
-          linha.textContent = emPortugues
-            ? 'Apenas compensação: suas emissões continuam ocorrendo. Os créditos são aposentados em registro público.'
-            : 'Compensation only, your emissions still occur. Credits are retired in a public registry.';
-        });
-        aviso.querySelector('[data-qualification-title]').textContent = emPortugues
-          ? 'O que você está comprando'
-          : 'What you are buying';
-        aviso.querySelector('[data-qualification-body]').textContent = emPortugues
-          ? volumeDefinido
-            ? `Isto compensa ${quantidade} kg CO2e com créditos REDD+ certificados pelo padrão Verra VCS. É compensação, não redução: suas emissões continuam ocorrendo. Os créditos são aposentados em lotes, publicados a cada ciclo em ${COMPENSATION_CONFIG.ledgerUrl}. Não é inventário oficial, não é CRVE e não serve para cumprir obrigações do SBCE nem metas de NDC.`
-            : `Isto compensa ${quantidade} kg CO2e da sua pegada mensal estimada com créditos REDD+ certificados pelo padrão Verra VCS. É compensação, não redução: suas emissões continuam ocorrendo. Os créditos são aposentados em lotes, publicados a cada ciclo em ${COMPENSATION_CONFIG.ledgerUrl}. Não é inventário oficial, não é CRVE e não serve para cumprir obrigações do SBCE nem metas de NDC.`
-          : volumeDefinido
-            ? `This compensates ${quantidade} kg CO2e with Verra VCS-certified REDD+ credits. Compensation, not reduction: your emissions still occur. Credits are retired in pooled retirements, published each cycle at ${COMPENSATION_CONFIG.ledgerUrl}. Not an official inventory, not a CRVE, and not valid for SBCE compliance or NDC claims.`
-            : `This compensates ${quantidade} kg CO2e of your estimated monthly footprint with Verra VCS-certified REDD+ credits. Compensation, not reduction: your emissions still occur. Credits are retired in pooled retirements, published each cycle at ${COMPENSATION_CONFIG.ledgerUrl}. Not an official inventory, not a CRVE, and not valid for SBCE compliance or NDC claims.`;
+      const IDIOMAS_POR_PAIS = {
+        BR: 'pt',
+        AR: 'es', CL: 'es', CO: 'es', MX: 'es', PE: 'es', UY: 'es', VE: 'es',
+        EC: 'es', BO: 'es', PY: 'es', CR: 'es', GT: 'es', HN: 'es', NI: 'es',
+        PA: 'es', SV: 'es', DO: 'es', CU: 'es', PR: 'es',
+        FR: 'fr',
+        DE: 'de', AT: 'de', CH: 'de',
+        IT: 'it',
+        CN: 'zh', TW: 'zh', HK: 'zh', SG: 'zh',
+        JP: 'ja',
+        KR: 'ko',
+        RU: 'ru', UA: 'ru', KZ: 'ru',
+        SA: 'ar', AE: 'ar', EG: 'ar', JO: 'ar', KW: 'ar', QA: 'ar',
+        OM: 'ar', BH: 'ar', IQ: 'ar', LB: 'ar', IR: 'ar',
+        SE: 'sv',
+      };
 
-        aviso.querySelector('[data-verification-summary]').textContent = emPortugues
-          ? 'Como sua compensação é verificada'
-          : 'How your compensation is verified';
-        const painelParceiro = container.querySelector('.checkout-parceiro');
-        if (painelParceiro) {
-          painelParceiro.setAttribute(
-            'aria-label',
-            emPortugues ? 'Informações sobre parceiros' : 'Partner information',
+      function resolverIdiomaCheckout() {
+        return IDIOMAS_POR_PAIS[paisSelecionado] || 'en';
+      }
+
+      function obterValoresTokens(quantidadeKg) {
+        return {
+          KG: formatarKg(quantidadeKg),
+          PROJECT_NAME: COMPENSATION_CONFIG.projectName,
+          PROJECT_ID: COMPENSATION_CONFIG.projectId,
+          METHODOLOGY_ID: COMPENSATION_CONFIG.methodologyId,
+          VINTAGE_RANGE: COMPENSATION_CONFIG.vintageRange,
+          RETIREMENT_TX_ID: COMPENSATION_CONFIG.retirementTransactionId,
+          SERIAL_START: COMPENSATION_CONFIG.serialStart,
+          SERIAL_END: COMPENSATION_CONFIG.serialEnd,
+          DATE: COMPENSATION_CONFIG.retirementDate,
+          'YYYY-MM': COMPENSATION_CONFIG.beneficiaryCycle,
+          LEDGER_URL: COMPENSATION_CONFIG.ledgerUrl,
+        };
+      }
+
+      function renderizarPainelCheckout() {
+        const idioma = resolverIdiomaCheckout();
+        const itensVerificacao = [
+          'checkout_check_emissions',
+          'checkout_check_credits',
+          'checkout_check_retirement',
+          'checkout_check_integrity',
+          'checkout_check_standard',
+        ];
+
+        document.querySelectorAll('.qualification-reinforcement').forEach((linha) => {
+          linha.textContent = t('checkout_notice_short', idioma);
+        });
+
+        document.querySelectorAll('.qualification-notice').forEach((aviso) => {
+          const secaoCreditos = aviso.closest('#creditos-avulsos');
+          const volumeDefinido = Boolean(secaoCreditos);
+          const quantidadeKg = volumeDefinido
+            ? Number(secaoCreditos.querySelector('#campo-kg')?.value) || 500
+            : obterEmissaoAtual();
+          const valores = obterValoresTokens(quantidadeKg);
+          aviso.querySelector('[data-qualification-title]').textContent =
+            t('checkout_what_buying', idioma);
+          aviso.querySelector('[data-qualification-body]').textContent = tTokens(
+            volumeDefinido ? 'checkout_buying_fixed' : 'checkout_buying_monthly',
+            idioma,
+            valores,
           );
-          container.querySelector('[data-supplier-name]').textContent = emPortugues
-            ? 'Fornecedor de créditos: BR Carbon'
-            : 'Credit supplier: BR Carbon';
-          container.querySelector('[data-supplier-standard]').textContent = emPortugues
-            ? 'Verra VCS identifica o padrão de certificação dos créditos, não uma aprovação do aplicativo.'
-            : 'Verra VCS identifies the credit certification standard, not app approval.';
-          painelParceiro.querySelector('[data-partner-title]').textContent = emPortugues
-            ? 'Créditos verificados, com divulgação completa'
-            : 'Verified credits, fully disclosed';
-          painelParceiro.querySelector('[data-partner-cycle]').textContent = emPortugues
-            ? `Créditos REDD+ certificados pela Verra VCS. Detalhes do ciclo serão publicados após verificação: projeto ${COMPENSATION_CONFIG.projectName}, faixa de séries ${COMPENSATION_CONFIG.serialStart}–${COMPENSATION_CONFIG.serialEnd}, ID de aposentadoria ${COMPENSATION_CONFIG.retirementTransactionId}, registro ${COMPENSATION_CONFIG.ledgerUrl}. Carbon Pocket não é certificado nem endossado pela Verra.`
-            : `Verra VCS-certified REDD+ credits. Cycle details will be published after verification: project ${COMPENSATION_CONFIG.projectName}, serial range ${COMPENSATION_CONFIG.serialStart}–${COMPENSATION_CONFIG.serialEnd}, retirement ID ${COMPENSATION_CONFIG.retirementTransactionId}, ledger ${COMPENSATION_CONFIG.ledgerUrl}. Carbon Pocket is not certified or endorsed by Verra.`;
-          painelParceiro.querySelector('[data-partner-cobenefits]').textContent = emPortugues
-            ? 'As informações sobre cobenefícios são as publicadas pelo desenvolvedor do projeto.'
-            : 'Co-benefit information is that published by the project developer.';
-          painelParceiro.querySelector('[data-partner-roles]').textContent = emPortugues
-            ? 'Verra é o padrão de certificação dos créditos. BR Carbon é o fornecedor de créditos.'
-            : 'Verra is the certification standard for the credits. BR Carbon is the credit supplier.';
-          painelParceiro.querySelector('[data-partner-link-label]').textContent = 'Link:';
-        }
-        const itens = emPortugues
-          ? [
-            `Emissões estimadas: dados informados por você e fatores IEA 2025 para eletricidade, DEFRA e EPA para transporte, ICAO para aviação, Diretrizes do IPCC para energia doméstica e Poore & Nemecek (2018) para alimentos. Lógica de escopos do GHG Protocol adaptada a indivíduos. É uma estimativa, não um inventário oficial.`,
-            `Créditos: Verra VCS, REDD+ (evitação de desmatamento). Projeto: ${COMPENSATION_CONFIG.projectName}; ID VCS: ${COMPENSATION_CONFIG.projectId}; metodologia: ${COMPENSATION_CONFIG.methodologyId}; safras: ${COMPENSATION_CONFIG.vintageRange}.`,
-            `Aposentadoria: um lote coletivo por ciclo; transação ${COMPENSATION_CONFIG.retirementTransactionId}; faixa de séries ${COMPENSATION_CONFIG.serialStart} a ${COMPENSATION_CONFIG.serialEnd}; data ${COMPENSATION_CONFIG.retirementDate}; beneficiário: contribuintes Carbon Pocket, ciclo ${COMPENSATION_CONFIG.beneficiaryCycle}.`,
-            'Integridade: cada série é aposentada uma única vez e não pode ser revendida. O Carbon Pocket não reivindica os créditos para si. Os créditos não têm ajuste correspondente e não podem ser contabilizados por governos para suas NDCs.',
-            'Status do padrão: Verra é o padrão de certificação dos créditos. Carbon Pocket não é certificado, endossado ou auditado pela Verra ou pela BR Carbon.',
-          ]
-          : [
-            `Estimated emissions: based on your input, using IEA 2025 electricity factors, DEFRA and EPA transport factors, ICAO aviation data, IPCC Guidelines for household energy, and Poore & Nemecek (2018) for food. GHG Protocol scope logic adapted to individuals. This is an estimate, not an official inventory.`,
-            `Credits: Verra VCS certified, REDD+ (avoided deforestation). Project: ${COMPENSATION_CONFIG.projectName}; VCS project ID: ${COMPENSATION_CONFIG.projectId}; methodology: ${COMPENSATION_CONFIG.methodologyId}; vintages: ${COMPENSATION_CONFIG.vintageRange}.`,
-            `Retirement: one pooled retirement per cycle; transaction ${COMPENSATION_CONFIG.retirementTransactionId}; serial range ${COMPENSATION_CONFIG.serialStart} to ${COMPENSATION_CONFIG.serialEnd}; date ${COMPENSATION_CONFIG.retirementDate}; beneficiary: Carbon Pocket contributors, cycle ${COMPENSATION_CONFIG.beneficiaryCycle}.`,
-            'Integrity: each serial is retired once and cannot be resold. Carbon Pocket makes no claim over the credits for its own account. The credits carry no corresponding adjustment, so governments cannot count them toward their NDCs.',
-            'Standard status: Verra is the certification standard for the credits. Carbon Pocket is not certified, endorsed or audited by Verra or BR Carbon.',
-          ];
-        const lista = aviso.querySelector('[data-verification-list]');
-        lista.replaceChildren(...itens.map((texto) => {
-          const item = document.createElement('li');
-          item.textContent = texto;
-          return item;
-        }));
+          aviso.querySelector('[data-verification-summary]').textContent =
+            t('checkout_how_verified', idioma);
+
+          const lista = aviso.querySelector('[data-verification-list]');
+          lista.replaceChildren(...itensVerificacao.map((chave) => {
+            const item = document.createElement('li');
+            item.textContent = tTokens(chave, idioma, valores);
+            return item;
+          }));
+        });
+
+        const painelCheckout = document.getElementById('checkout-compensacao');
+        const painelParceiro = painelCheckout?.querySelector('.checkout-parceiro');
+        if (!painelCheckout || !painelParceiro) return;
+        const valores = obterValoresTokens(obterEmissaoAtual());
+        painelParceiro.setAttribute('aria-label', t('checkout_partner_info', idioma));
+        painelCheckout.querySelector('[data-supplier-name]').textContent =
+          t('checkout_supplier', idioma);
+        painelCheckout.querySelector('[data-supplier-standard]').textContent =
+          t('checkout_verra_label', idioma);
+        painelParceiro.querySelector('[data-partner-title]').textContent =
+          t('checkout_verified_title', idioma);
+        painelParceiro.querySelector('[data-partner-cycle]').textContent =
+          tTokens('checkout_cycle_details', idioma, valores);
+        painelParceiro.querySelector('[data-partner-cobenefits]').textContent =
+          t('checkout_cobenefit', idioma);
+        painelParceiro.querySelector('[data-partner-roles]').textContent =
+          t('checkout_standard_supplier', idioma);
       }
 
       function obterEmissaoAtual() {
@@ -560,6 +567,7 @@
         seletor.addEventListener('change', () => {
           paisSelecionado = seletor.value;
           atualizarCheckout();
+          renderizarPainelCheckout();
         });
       }
 
@@ -583,6 +591,7 @@
         observadorCalculadora.disconnect();
         try {
           atualizarCheckout();
+          renderizarPainelCheckout();
         } finally {
           observadorCalculadora.observe(raizCalculadora, {
             childList: true,
@@ -597,6 +606,7 @@
         subtree: true,
       });
       atualizarCheckout();
+      renderizarPainelCheckout();
     </script>
   </body>
 </html>
