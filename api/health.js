@@ -1,4 +1,30 @@
 import Stripe from 'stripe';
+import { Pool } from 'pg';
+
+const healthPool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 1,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 3000,
+});
+
+async function verificarBanco() {
+  const inicio = Date.now();
+  let timeout;
+  try {
+    const conectado = await Promise.race([
+      healthPool.query({ text: 'SELECT 1', query_timeout: 3000 }).then(() => true),
+      new Promise((resolve) => {
+        timeout = setTimeout(() => resolve(false), 3000);
+      }),
+    ]);
+    return { conectado, latencia_ms: Date.now() - inicio };
+  } catch {
+    return { conectado: false, latencia_ms: Date.now() - inicio };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 // Converte o valor informado pelo Stripe sem mascarar valores decimais ou nulos.
 function valorEfetivoCentavos(price) {
@@ -114,6 +140,7 @@ export default async function handler(req, res) {
     success_url_template: `${base}/carbonpocket-calculator/sucesso.html?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${base}/carbonpocket-calculator/`,
   };
+  const banco = await verificarBanco();
 
   const effective = Object.fromEntries(
     Object.entries(prices).map(([categoria, price]) => [categoria, price.effective_unit_amount]),
@@ -133,5 +160,5 @@ export default async function handler(req, res) {
     ]),
   );
 
-  return res.status(200).json({ env, prices, simulacao, config });
+  return res.status(200).json({ env, prices, simulacao, config, banco });
 }

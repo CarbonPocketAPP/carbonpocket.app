@@ -1,6 +1,13 @@
 {
   "type": "module",
   "dependencies": {
+    "@vercel/functions": "^3.11.2",
+    "drizzle-orm": "^0.45.4",
+    "pg": "^8.23.1",
     "stripe": "^17.0.0"
+  },
+  "devDependencies": {
+    "dotenv": "^18.0.10",
+    "drizzle-kit": "^0.31.11"
   }
 }

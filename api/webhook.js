@@ -1,10 +1,12 @@
 import Stripe from 'stripe';
 import { sanitizeName } from './name.js';
+import { registrarContribuicao } from '../lib/contributions.js';
 
 export const config = { api: { bodyParser: false } };
 
 const eventTypes = new Set([
   'checkout.session.completed',
+  'checkout.session.async_payment_succeeded',
   'invoice.paid',
   'invoice.payment_failed',
   'customer.subscription.updated',
@@ -240,7 +242,43 @@ export default async function handler(req, res) {
       return res.status(200).json({ received: true, ignored: true });
     }
 
+    if (event.type === 'checkout.session.completed') {
+      if (session?.payment_status === 'paid') {
+        try {
+          await registrarContribuicao({ session });
+        } catch (error) {
+          console.error('WEBHOOK_DB_ERROR', {
+            event_id: event.id,
+            session_id: session.id,
+            error: error.name,
+          });
+        }
+      }
+      return res.status(200).json({ received: true });
+    }
+
+    if (event.type === 'checkout.session.async_payment_succeeded') {
+      if (session) {
+        try {
+          await registrarContribuicao({ session });
+        } catch (error) {
+          console.error('WEBHOOK_DB_ERROR', {
+            event_id: event.id,
+            session_id: session.id,
+            error: error.name,
+          });
+        }
+      }
+      return res.status(200).json({ received: true });
+    }
+
     if (event.type === 'invoice.paid') {
+      console.log('WEBHOOK_INVOICE_PAID', JSON.stringify({
+        invoice_id: object?.id,
+        subscription: subscriptionIdFromInvoice(object || {}),
+        amount_paid: object?.amount_paid ?? null,
+      }));
+      // TODO: agregar renovações à rodada de compensação é uma decisão futura.
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
       await accumulatePaidInvoice(stripe, object);
       return res.status(200).json({ received: true });

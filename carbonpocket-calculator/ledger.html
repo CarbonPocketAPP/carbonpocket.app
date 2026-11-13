@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Public record of carbon credits retired on behalf of Carbon Pocket contributors.">
+  <title>Verified compensation rounds | Carbon Pocket</title>
+  <link rel="stylesheet" href="./assets/index-hQOtl3ms.css">
+  <link rel="stylesheet" href="./calculator-overrides.css">
+  <style>
+    .ledger-page{min-height:100vh;background:#0a0f0c;color:#eaf5e9;font:16px/1.6 Inter,system-ui,sans-serif}
+    .ledger-header{max-width:1040px;margin:0 auto;padding:24px;min-height:72px;box-sizing:border-box}
+    .ledger-back{margin-left:auto;color:#9fb0a2;font-size:13px;text-decoration:none}
+    .ledger-back:hover{color:#72e19a}
+    .ledger-main{width:min(920px,calc(100% - 32px));margin:28px auto 64px}
+    .ledger-main h1{margin:0 0 24px;font-size:clamp(28px,5vw,40px);line-height:1.15}
+    .ledger-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:28px 0}
+    .ledger-summary article,.ledger-round{padding:20px;border:1px solid rgba(234,245,233,.12);border-radius:14px;background:rgba(22,44,33,.72)}
+    .ledger-summary p{margin:0;color:#9fb0a2;font-size:13px}
+    .ledger-summary strong{display:block;margin-top:8px;color:#eaf5e9;font-size:28px;font-variant-numeric:tabular-nums}
+    .ledger-state{color:#9fb0a2;font-size:14px}
+    .ledger-round{margin:16px 0}
+    .ledger-round h2{margin:0 0 14px;font-size:20px}
+    .ledger-details{display:grid;grid-template-columns:minmax(150px,1fr) 2fr;gap:8px 18px;margin:0}
+    .ledger-details dt{color:#9fb0a2;font-size:13px}
+    .ledger-details dd{margin:0;overflow-wrap:anywhere}
+    .ledger-details a{color:#72e19a}
+    .ledger-qualification{margin-top:24px}
+    .ledger-footer{max-width:920px;margin:0 auto;padding:24px 16px 40px;color:#7f9587;font-size:12px}
+    @media(max-width:560px){.ledger-summary{grid-template-columns:1fr}.ledger-details{grid-template-columns:1fr;gap:2px}.ledger-details dd{margin-bottom:10px}}
+  </style>
+</head>
+<body>
+  <div class="ledger-page">
+    <header class="topbar ledger-header">
+      <a class="brand" href="/">CarbonPocket</a>
+      <a class="ledger-back" href="./">Back to calculator</a>
+    </header>
+    <main class="ledger-main">
+      <h1>Verified compensation rounds</h1>
+      <section class="ledger-summary" aria-label="Published totals">
+        <article>
+          <p>Total volume compensated</p>
+          <strong id="total-kg">0 kg</strong>
+        </article>
+        <article>
+          <p>Published rounds</p>
+          <strong id="round-count">0</strong>
+        </article>
+      </section>
+      <p id="rounds-state" class="ledger-state" role="status" aria-live="polite">Loading compensation rounds…</p>
+      <div id="rounds-list"></div>
+      <aside class="qualification-notice ledger-qualification">
+        This page records carbon credits retired in a public registry on behalf of Carbon Pocket contributors. Compensation, not reduction: emissions still occur. Not carbon neutral, not net zero, not an official inventory, not a CRVE, and not valid for SBCE compliance or NDC claims.
+      </aside>
+    </main>
+    <footer class="ledger-footer">© 2026 Carbon Pocket</footer>
+  </div>
+  <script>
+    const LEDGER_API_URL = 'https://carbonpocketapp.vercel.app/api/ledger';
+    const roundsState = document.getElementById('rounds-state');
+    const roundsList = document.getElementById('rounds-list');
+
+    function formatNumber(value, maximumFractionDigits = 0) {
+      return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(value);
+    }
+
+    function safeRegistryUrl(value) {
+      if (typeof value !== 'string') return null;
+      try {
+        const url = new URL(value);
+        return url.protocol === 'https:' || url.protocol === 'http:'
+          ? url.href
+          : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function appendDetail(list, label, value, url) {
+      const term = document.createElement('dt');
+      term.textContent = label;
+      const description = document.createElement('dd');
+      const safeUrl = safeRegistryUrl(url);
+      if (safeUrl && value) {
+        const link = document.createElement('a');
+        link.href = safeUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = value;
+        description.appendChild(link);
+      } else {
+        description.textContent = value || '—';
+      }
+      list.append(term, description);
+    }
+
+    function renderRound(round) {
+      const article = document.createElement('article');
+      article.className = 'ledger-round';
+      const heading = document.createElement('h2');
+      heading.textContent = round.cycle;
+      const details = document.createElement('dl');
+      details.className = 'ledger-details';
+
+      appendDetail(details, 'Retirement date', round.retirementDate);
+      appendDetail(details, 'Project', round.projectName);
+      appendDetail(details, 'Project ID', round.projectId);
+      appendDetail(details, 'Methodology', round.methodologyId);
+      appendDetail(details, 'Vintage range', round.vintageRange);
+      appendDetail(
+        details,
+        'Serial range',
+        Array.isArray(round.serialRange) && round.serialRange.every((serial) =>
+          typeof serial === 'string' || Number.isSafeInteger(serial),
+        )
+          ? `${round.serialRange[0]}–${round.serialRange[1]}`
+          : null,
+      );
+      appendDetail(
+        details,
+        'Retirement transaction',
+        round.registryTransactionId,
+        round.registryUrl,
+      );
+      appendDetail(details, 'Credits retired', `${formatNumber(Number(round.totalTonnes), 3)} tCO2e`);
+      appendDetail(details, 'Contributors', formatNumber(Number(round.contributorCount)));
+
+      const roundingDelta = Number(round.aggregates?.roundingDelta);
+      if (Number.isFinite(roundingDelta) && roundingDelta > 0) {
+        appendDetail(details, 'Rounding difference', `${formatNumber(roundingDelta)} kg`);
+      }
+
+      article.append(heading, details);
+      return article;
+    }
+
+    async function loadRounds() {
+      try {
+        const response = await fetch(LEDGER_API_URL);
+        if (!response.ok) throw new Error('Ledger request failed');
+        const payload = await response.json();
+        if (!payload || !Array.isArray(payload.rounds)) {
+          throw new TypeError('Invalid ledger response');
+        }
+
+        const rounds = payload.rounds;
+        const totalKg = rounds.reduce(
+          (sum, round) => sum + Number(round.aggregates?.totalKgCompensado),
+          0,
+        );
+        if (!Number.isFinite(totalKg)) throw new TypeError('Invalid ledger totals');
+
+        document.getElementById('total-kg').textContent = `${formatNumber(totalKg)} kg`;
+        document.getElementById('round-count').textContent = formatNumber(rounds.length);
+        roundsList.replaceChildren(...rounds.map(renderRound));
+
+        if (rounds.length === 0) {
+          roundsState.textContent = 'No compensation round has been published yet.';
+        } else {
+          roundsState.hidden = true;
+        }
+      } catch {
+        roundsList.replaceChildren();
+        roundsState.hidden = false;
+        roundsState.textContent = 'Unable to load the compensation rounds right now.';
+      }
+    }
+
+    loadRounds();
+  </script>
+</body>
+</html>
