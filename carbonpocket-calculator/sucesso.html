@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Payment status | CarbonPocket</title>
+    <title>Contribution confirmation | Carbon Pocket</title>
     <link rel="stylesheet" href="./assets/index-hQOtl3ms.css" />
     <link rel="stylesheet" href="./calculator-overrides.css" />
   </head>
@@ -18,6 +18,9 @@
           <div><dt>Amount paid</dt><dd id="payment-amount"></dd></div>
           <div><dt>Email</dt><dd id="payment-email"></dd></div>
         </dl>
+        <button id="download-confirmation" class="button button-primary" type="button" hidden>
+          Download confirmation
+        </button>
         <a
           id="calculator-link"
           class="button button-primary"
@@ -34,14 +37,85 @@
       const heading = document.getElementById('payment-heading');
       const message = document.getElementById('payment-message');
       const details = document.getElementById('payment-details');
+      const downloadButton = document.getElementById('download-confirmation');
       const calculatorLink = document.getElementById('calculator-link');
 
-      function formatarBRL(centavos) {
-        if (centavos === null || centavos === undefined) return null;
-        return 'R$ ' + (centavos / 100).toLocaleString('pt-BR', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
+      function formatPaymentAmount(payment) {
+        if (
+          !Number.isSafeInteger(payment.amount_total) ||
+          typeof payment.currency !== 'string' ||
+          !/^[a-z]{3}$/i.test(payment.currency)
+        ) {
+          return 'Amount unavailable';
+        }
+
+        const currency = payment.currency.toUpperCase();
+        const fractionDigits = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency,
+        }).resolvedOptions().maximumFractionDigits;
+        const amount = new Intl.NumberFormat('en-US', {
+          minimumFractionDigits: fractionDigits,
+          maximumFractionDigits: fractionDigits,
+        }).format(payment.amount_total / (10 ** fractionDigits));
+        return `${currency} ${amount}`;
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (character) => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        })[character]);
+      }
+
+      function downloadConfirmation(payment) {
+        const issuedOn = new Date().toISOString().slice(0, 10);
+        const kg = Number(payment.emissao_kg);
+        const hasKg = payment.emissao_kg !== null &&
+          payment.emissao_kg !== undefined &&
+          String(payment.emissao_kg).trim() !== '';
+        const compensatedKg = hasKg && Number.isFinite(kg) && kg >= 0
+          ? `${new Intl.NumberFormat('en-US').format(kg)} kg CO₂e`
+          : 'Not available';
+        const contributorName = typeof payment.nome === 'string' && payment.nome.trim()
+          ? payment.nome.trim()
+          : 'Not provided';
+        const amount = formatPaymentAmount(payment);
+        const confirmation = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contribution confirmation | Carbon Pocket</title>
+</head>
+<body>
+  <main>
+    <h1>Contribution confirmation</h1>
+    <p><strong>Carbon Pocket</strong></p>
+    <dl>
+      <dt>Issue date</dt><dd>${escapeHtml(issuedOn)}</dd>
+      <dt>Contributor name</dt><dd>${escapeHtml(contributorName)}</dd>
+      <dt>Compensated volume</dt><dd>${escapeHtml(compensatedKg)}</dd>
+      <dt>Amount paid</dt><dd>${escapeHtml(amount)}</dd>
+      <dt>Transaction reference</dt><dd>${escapeHtml(sessionId)}</dd>
+    </dl>
+    <p>This document records a contribution made through Carbon Pocket. It is not a certificate, not a proof of neutralization, not carbon neutral, not net zero, not an official inventory, not a CRVE, and not valid for SBCE compliance or NDC claims. Compensation, not reduction: emissions still occur. Credits are retired in aggregate with other contributors.</p>
+    <p><a href="https://carbonpocket.app/carbonpocket-calculator/contributors.html">View contributors</a></p>
+  </main>
+</body>
+</html>`;
+        const blob = new Blob([confirmation], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `carbon-pocket-confirmation-${sessionId.replace(/[^A-Za-z0-9_-]/g, '_')}.html`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
 
       function showVerificationError() {
@@ -63,21 +137,23 @@
           if (!response.ok) throw new Error('Payment lookup failed');
           const payment = await response.json();
 
-          if (payment.payment_status === 'paid') {
+          if (
+            payment.payment_status === 'paid' ||
+            payment.payment_status === 'no_payment_required'
+          ) {
             heading.textContent = 'Contribution completed';
             message.textContent =
               'Your compensation purchase has been confirmed. Your emissions still occur.';
             document.getElementById('payment-quantity').textContent =
-              `${payment.quantity ?? payment.emissao_kg ?? '—'} kg CO₂e`;
+              `${payment.emissao_kg ?? payment.quantity ?? '—'} kg CO₂e`;
             document.getElementById('payment-amount').textContent =
-              payment.amount_total_display ?? formatarBRL(payment.amount_total) ?? 'Amount unavailable';
+              formatPaymentAmount(payment);
             document.getElementById('payment-email').textContent =
               payment.customer_email ?? 'Email unavailable';
             details.hidden = false;
-          } else if (
-            payment.payment_status === 'unpaid' ||
-            payment.payment_status === 'no_payment_required'
-          ) {
+            downloadButton.hidden = false;
+            downloadButton.addEventListener('click', () => downloadConfirmation(payment));
+          } else if (payment.payment_status === 'unpaid') {
             heading.textContent = 'Payment processing';
             message.textContent =
               'Your payment is being processed. You will receive confirmation shortly.';
