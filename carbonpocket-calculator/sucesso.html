@@ -14,7 +14,7 @@
         <h1 id="payment-heading">Checking your payment</h1>
         <p id="payment-message">Verifying your payment...</p>
         <dl id="payment-details" hidden>
-          <div><dt>Offset</dt><dd id="payment-quantity"></dd></div>
+          <div><dt>Compensated volume</dt><dd id="payment-quantity"></dd></div>
           <div><dt>Amount paid</dt><dd id="payment-amount"></dd></div>
           <div><dt>Email</dt><dd id="payment-email"></dd></div>
         </dl>
@@ -66,7 +66,7 @@
           if (payment.payment_status === 'paid') {
             heading.textContent = 'Contribution completed';
             message.textContent =
-              'Your contribution has been registered. Thank you for supporting carbon projects.';
+              'Your compensation purchase has been confirmed. Your emissions still occur.';
             document.getElementById('payment-quantity').textContent =
               `${payment.quantity ?? payment.emissao_kg ?? '—'} kg CO₂e`;
             document.getElementById('payment-amount').textContent =

@@ -21,13 +21,13 @@
         compare: 'Compare your expenses with national averages.',
         tag_how: 'How it works',
         section_how_title: 'Your carbon journey in 3 steps',
-        section_how_sub: 'From setup to offsetting - CarbonPocket guides you through every step of your climate journey.',
+        section_how_sub: 'From setup to carbon compensation - CarbonPocket guides you through every step of your climate journey.',
         step1_title: 'Sign up',
         step1_text: 'Choose your country and tell your lifestyle. We use real regional emission factors.',
         step2_title: 'Track',
         step2_text: 'View your footprint by Transport, Diet, Home, and Consumption - updated monthly.',
-        step3_title: 'Reduce & offset',
-        step3_text: 'Receive personalized advice and offset your footprint with verified REDD+ credits.',
+        step3_title: 'Reduce & compensate',
+        step3_text: 'Receive personalized advice and compensate your estimated footprint with REDD+ credits.',
         tag_dashboard: 'Dashboard',
         section_dash_title: 'Your footprint at a glance',
         section_dash_sub: 'A dark-mode carbon dashboard with real-time metrics, category breakdowns, and progress toward your goal.',
@@ -71,11 +71,11 @@
         th_region: 'Region',
         th_countries: 'Countries',
         tag_partner: 'Partner',
-        section_partner_title: 'Verified credits you can trust',
-        section_partner_sub: 'All offset credits in CarbonPocket are sourced through our partnership with BR Carbon, a leader in environmental credit trading in Brazil.',
-        partner_title: 'Powered by BR Carbon',
-        partner_text: 'Credits are sourced from REDD+ forest protection projects in the Brazilian Amazon with Verra Standard certification. Your offsets support local communities while protecting the world\'s most vital ecosystem.',
-        partner_subtitle: 'Environmental Credits',
+        section_partner_title: 'Verified credits, fully disclosed',
+        section_partner_sub: 'REDD+ credits use the Verra VCS standard. Cycle details will be published after verification: project [PROJECT_NAME], serial range [SERIAL_START]–[SERIAL_END], retirement ID [RETIREMENT_TX_ID], ledger [LEDGER_URL]. Carbon Pocket is not certified or endorsed by Verra.',
+        partner_title: 'Credit information',
+        partner_text: 'Credits come from REDD+ projects in the Brazilian Amazon under the Verra VCS standard. Co-benefit information is that published by the project developer.',
+        partner_subtitle: 'Credit supplier',
         partner_visit: 'Visit brcarbon.com.br →',
         tag_plans: 'Plans',
         section_plans_title: 'Choose your plan',
@@ -91,25 +91,25 @@
         plan_free_f2: 'Personalized reduction tips',
         plan_free_f3: 'Monthly footprint tracking',
         plan_free_cta: 'Get started',
-        plan_starter_name: 'Starter Offset',
+        plan_starter_name: 'Starter Compensation',
         plan_starter_period: '/mo',
-        plan_starter_desc: 'Offset your full monthly footprint - cancel whenever you want.',
+        plan_starter_desc: 'Compensate your estimated monthly footprint - cancel whenever you want.',
         plan_starter_f1: 'Everything in Free',
-        plan_starter_f2: 'Full monthly offset',
+        plan_starter_f2: 'Estimated monthly compensation',
         plan_starter_f3: 'Verra-certified REDD+ credits',
         plan_starter_cta: 'Get started',
-        plan_ai_name: 'Carbon Neutral + AI',
+        plan_ai_name: 'Annual Compensation + Founders Badge',
         plan_ai_period: '/yr',
         plan_ai_save: '✦ Save 15%',
-        plan_ai_desc: 'Go annual and save 15%. Offset your full footprint with verified REDD+ credits.',
+        plan_ai_desc: 'Go annual and save 15%. Compensate your estimated monthly footprint with REDD+ credits.',
         plan_ai_f1: 'Everything in Starter',
         plan_ai_f2: 'Priority support & insights',
         plan_ai_f3: 'Founders badge & early supporter perks',
         plan_ai_f4: '15% annual discount',
         plan_ai_cta: 'Get started',
-        plan_onetime_name: 'One-Time Offset',
-        plan_onetime_desc: 'Offset your current footprint once - priced at $20/ton CO₂.',
-        plan_onetime_f1: 'Single offset purchase',
+        plan_onetime_name: 'One-Time Compensation',
+        plan_onetime_desc: 'Compensate your estimated current emissions once - priced at $20/ton CO₂.',
+        plan_onetime_f1: 'Single compensation purchase',
         plan_onetime_f2: 'No subscription required',
         plan_onetime_f3: 'Verra-certified REDD+ credits',
         plan_onetime_cta: 'Get started',
@@ -121,7 +121,7 @@
         paygo_label_high: 'High',
         paygo_text_1: 'Minimal support',
         paygo_text_2: 'Starter contribution',
-        paygo_text_3: 'Standard monthly offset',
+        paygo_text_3: 'Standard estimated monthly compensation volume',
         paygo_text_4: 'Strong climate support',
         paygo_text_5: 'Maximum impact',
         footer_copy: 'All rights reserved.',
@@ -199,11 +199,11 @@
         th_region: 'Região',
         th_countries: 'Países',
         tag_partner: 'Parceiro',
-        section_partner_title: 'Créditos verificados em que você confia',
-        section_partner_sub: 'Todos os créditos são fornecidos através da parceria com a BR Carbon, líder em comercialização de créditos ambientais no Brasil.',
-        partner_title: 'Powered by BR Carbon',
-        partner_text: 'Créditos originados de projetos REDD+ de proteção florestal na Amazônia brasileira com certificação Verra Standard. Suas compensações apoiam comunidades locais enquanto protegem o ecossistema mais vital do mundo.',
-        partner_subtitle: 'Créditos ambientais',
+        section_partner_title: 'Créditos verificados, com divulgação completa',
+        section_partner_sub: 'Os créditos REDD+ seguem o padrão Verra VCS. Os dados do ciclo serão publicados após verificação: projeto [PROJECT_NAME], faixa de séries [SERIAL_START]–[SERIAL_END], ID de aposentadoria [RETIREMENT_TX_ID], ledger público [LEDGER_URL]. O Carbon Pocket não é certificado nem endossado pela Verra.',
+        partner_title: 'Informações sobre os créditos',
+        partner_text: 'Créditos de projetos REDD+ na Amazônia brasileira sob o padrão Verra VCS. As informações sobre co-benefícios são as publicadas pelo desenvolvedor do projeto.',
+        partner_subtitle: 'Fornecedor dos créditos',
         partner_visit: 'Visite brcarbon.com.br →',
         tag_plans: 'Planos',
         section_plans_title: 'Escolha seu plano',
@@ -211,6 +211,7 @@
         country_label: '🌍 Selecione seu país',
         avg_label: 'Média nacional:',
         avg_unit: 'kg CO₂e/mês',
+        avg_source_note: '(fonte: [FONTE], [ANO])',
         plan_free_name: 'Grátis',
         plan_free_price: '$0',
         plan_free_period: '/mês',
@@ -219,17 +220,17 @@
         plan_free_f2: 'Dicas personalizadas de redução',
         plan_free_f3: 'Acompanhamento mensal da pegada',
         plan_free_cta: 'Começar',
-        plan_starter_name: 'Starter Offset',
+        plan_starter_name: 'Starter Compensation',
         plan_starter_period: '/mês',
-        plan_starter_desc: 'Compense sua pegada mensal completa - cancele quando quiser.',
+        plan_starter_desc: 'Compense sua pegada mensal estimada - cancele quando quiser.',
         plan_starter_f1: 'Tudo em Grátis',
         plan_starter_f2: 'Compensação mensal total',
         plan_starter_f3: 'Créditos REDD+ certificados Verra',
         plan_starter_cta: 'Começar',
-        plan_ai_name: 'Carbon Neutral + IA',
+        plan_ai_name: 'Annual Compensation + Founders Badge',
         plan_ai_period: '/ano',
         plan_ai_save: '✦ Economize 15%',
-        plan_ai_desc: 'Plano anual com 15% de desconto. Compense sua pegada total com créditos REDD+ verificados.',
+        plan_ai_desc: 'Plano anual com 15% de desconto. Compense sua pegada mensal estimada com créditos REDD+.',
         plan_ai_f1: 'Tudo em Starter',
         plan_ai_f2: 'Suporte prioritário e insights',
         plan_ai_f3: 'Badge de fundador e benefícios exclusivos',
@@ -410,17 +411,17 @@
 
       // Starter
       if (document.getElementById('starterPrice')) document.getElementById('starterPrice').textContent = '$' + monthlyCost.toFixed(2);
-      if (document.getElementById('starterMetric')) document.getElementById('starterMetric').innerHTML = 'Offsets <strong>' + avg + '</strong> kg CO₂e/mo';
+      if (document.getElementById('starterMetric')) document.getElementById('starterMetric').innerHTML = 'Estimated monthly compensation of <strong>' + avg + '</strong> kg CO₂e/mo';
 
       // Annual Plan (15% off)
       if (document.getElementById('aiPrice')) document.getElementById('aiPrice').textContent = '$' + annualCost.toFixed(2);
       var monthlyFromAnnual = (annualCost / 12).toFixed(2);
       if (document.getElementById('aiPeriod')) document.getElementById('aiPeriod').textContent = '$' + monthlyFromAnnual + '/mo - 15% off the monthly price';
-      if (document.getElementById('aiMetric')) document.getElementById('aiMetric').innerHTML = 'Offsets <strong>' + avg + '</strong> kg CO₂e/mo';
+      if (document.getElementById('aiMetric')) document.getElementById('aiMetric').innerHTML = 'Estimated monthly compensation of <strong>' + avg + '</strong> kg CO₂e/mo';
 
       // One-Time
       if (document.getElementById('oneTimePrice')) document.getElementById('oneTimePrice').textContent = '$' + monthlyCost.toFixed(2);
-      if (document.getElementById('oneTimeMetric')) document.getElementById('oneTimeMetric').innerHTML = 'Offsets <strong>' + avg + '</strong> kg CO₂e · $20/ton';
+      if (document.getElementById('oneTimeMetric')) document.getElementById('oneTimeMetric').innerHTML = 'Estimated compensation of <strong>' + avg + '</strong> kg CO₂e · $20/ton';
 
       // Update paygo
       var slider = document.getElementById('paygo-slider');
@@ -438,7 +439,7 @@
       var kg = Math.round(avg * pct / 100);
       var price = ((avg / 1000) * pricePerTon * pct / 100).toFixed(2);
       if (document.getElementById('paygo-price')) document.getElementById('paygo-price').innerHTML = '$' + price + '<span>/mo</span>';
-      if (document.getElementById('paygo-metric')) document.getElementById('paygo-metric').textContent = 'Offsets ' + kg + ' kg CO₂e/mo';
+      if (document.getElementById('paygo-metric')) document.getElementById('paygo-metric').textContent = 'Estimated monthly compensation volume: ' + kg + ' kg CO₂e';
       if (document.getElementById('paygoPct')) document.getElementById('paygoPct').textContent = pct + '%';
     }
 

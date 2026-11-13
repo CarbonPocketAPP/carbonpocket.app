@@ -222,6 +222,51 @@
   font-weight: 700;
 }
 
+.qualification-notice {
+  margin: 16px 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(114, 225, 154, 0.35);
+  border-radius: 10px;
+  background: rgba(114, 225, 154, 0.08);
+  color: #eaf5e9;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.qualification-notice h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.qualification-notice p {
+  margin: 0;
+}
+
+.qualification-notice details {
+  margin-top: 10px;
+}
+
+.qualification-notice summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.qualification-notice ul {
+  margin: 8px 0 0 18px;
+  padding: 0;
+}
+
+.qualification-notice li {
+  margin: 0 0 6px;
+}
+
+.qualification-reinforcement {
+  margin: -4px 0 8px;
+  color: #d3e2d7;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .checkout-parceiro-cabecalho {
   display: flex;
   align-items: center;

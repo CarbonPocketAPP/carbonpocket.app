@@ -1,0 +1,4 @@
+/neutralization-service/neutralization-service.html /compensation-service/ 301
+/neutralization-service/neutralization-service /compensation-service/ 301
+/neutralization-service/* /compensation-service/:splat 301
+/neutralization-service /compensation-service/ 301

@@ -14,6 +14,9 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
   <link rel="icon" type="image/png" href="/carbonpocket-calculator/carbonpocket-app-icon.png" />
   <title>CarbonPocket | Know your carbon story</title>
   <meta name="description" content="CarbonPocket calculates your personal footprint based on real emission factors for your country - and helps you reduce it." />
+  <link rel="canonical" href="https://carbonpocket.app/" />
+  <meta property="og:title" content="CarbonPocket | Know your carbon story" />
+  <meta property="og:description" content="Estimate your personal emissions with published factors and explore ways to reduce them." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/brand.css" />
@@ -469,7 +472,7 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
     <section id="how" class="reveal section">
       <span class="section-tag" data-i18n="tag_how">How it works</span>
       <h2 class="section-title" data-i18n="section_how_title">Your carbon journey in 3 steps</h2>
-      <p class="section-sub" data-i18n="section_how_sub">From setup to offsetting - CarbonPocket guides you through every step of your climate journey.</p>
+      <p class="section-sub" data-i18n="section_how_sub">From setup to carbon compensation - CarbonPocket guides you through every step of your climate journey.</p>
       <div class="steps">
         <article class="step">
           <div class="step-num">1</div>
@@ -483,8 +486,8 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
         </article>
         <article class="step">
           <div class="step-num">3</div>
-          <h3 data-i18n="step3_title">Reduce & offset</h3>
-          <p data-i18n="step3_text">Receive personalized advice and offset your footprint with verified REDD+ credits.</p>
+          <h3 data-i18n="step3_title">Reduce & compensate</h3>
+          <p data-i18n="step3_text">Receive personalized advice and compensate your estimated footprint with REDD+ credits.</p>
         </article>
       </div>
     </section>
@@ -635,23 +638,25 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
     <section id="partners" class="reveal section">
       <span class="section-tag" data-i18n="tag_partner">Partner</span>
       <h2 class="section-title" data-i18n="section_partner_title">Verified credits you can trust</h2>
-      <p class="section-sub" data-i18n="section_partner_sub">All offset credits in CarbonPocket are sourced through our partnership with BR Carbon, a leader in environmental credit trading in Brazil.</p>
+      <!-- TODO: Replace cycle placeholders with verified registry data before publishing cycle details. -->
+      <p class="section-sub" data-i18n="section_partner_sub">REDD+ credits use the Verra VCS standard. Cycle details will be published after verification: project [PROJECT_NAME], serial range [SERIAL_START]–[SERIAL_END], retirement ID [RETIREMENT_TX_ID], ledger [LEDGER_URL]. Carbon Pocket is not certified or endorsed by Verra.</p>
       <div class="partner-banner">
         <div class="partner-left">
           <div class="badge-group">
-            <span>Verra Standard</span>
-            <span>REDD+</span>
-            <span>Verified Carbon Units</span>
+            <span>Verra VCS: certification standard for the credits</span>
+            <span>REDD+ (avoided deforestation)</span>
+            <span>BR Carbon: credit supplier</span>
           </div>
-          <h3 data-i18n="partner_title">Powered by BR Carbon</h3>
-          <p data-i18n="partner_text">Credits are sourced from REDD+ forest protection projects in the Brazilian Amazon with Verra Standard certification. Your offsets support local communities while protecting the world's most vital ecosystem.</p>
+          <h3 data-i18n="partner_title">Verified credits, fully disclosed</h3>
+          <p data-i18n="partner_text">Verra VCS certified REDD+ credits, retired in the public registry. Project, serial range and retirement ID are published for every cycle. Carbon Pocket is not certified or endorsed by Verra. Co-benefit information is that published by the project developer.</p>
           <a class="partner-visit" href="https://brcarbon.com.br" target="_blank" rel="noopener">Visit brcarbon.com.br →</a>
         </div>
         <div class="partner-right">
-          <div class="partner-logo">BR</div>
+          <div class="partner-logo" aria-label="BR Carbon supplier mark">BR</div>
           <div class="company">BR Carbon</div>
-          <div class="subtitle" data-i18n="partner_subtitle">Environmental Credits</div>
+          <div class="subtitle" data-i18n="partner_subtitle">Credit supplier</div>
           <div class="website">brcarbon.com.br</div>
+          <p class="subtitle" data-i18n="partner_standard_label">Verra VCS is the credit certification standard, not an endorsement of this app.</p>
         </div>
       </div>
     </section>
@@ -759,7 +764,8 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
           <option value="SR">🇸🇷 Suriname (420 kg/mo)</option>
           <option value="GLOBAL">🌐 Other / Global average (500 kg/mo)</option>
         </select>
-        <div class="country-avg"><span data-i18n="avg_label">National average:</span> <strong id="avgDisplay">440</strong> <span data-i18n="avg_unit">kg CO₂e/month</span></div>
+        <!-- TODO: Replace the source/year placeholders with validated source data. -->
+        <div class="country-avg"><span data-i18n="avg_label">National average:</span> <strong id="avgDisplay">440</strong> <span data-i18n="avg_unit">kg CO₂e/month</span> <span data-i18n="avg_source_note">(source: [SOURCE], [YEAR])</span></div>
       </div>
       <div class="plans-grid">
         <article class="plan-card">
@@ -774,10 +780,10 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
         </article>
         <article class="plan-card featured">
           <div class="badge-save" data-i18n="plan_ai_save">✦ Save 15%</div>
-          <div class="plan-name" data-i18n="plan_ai_name">Annual Offset + Founders Badge</div>
+          <div class="plan-name" data-i18n="plan_ai_name">Annual Compensation + Founders Badge</div>
           <div class="plan-price" id="aiPrice">$199</div>
           <div class="plan-period" id="aiPeriod" data-i18n="plan_ai_period">/yr</div>
-          <div class="plan-desc" data-i18n="plan_ai_desc">Go annual and save 15%. Offset your full footprint with verified REDD+ credits.</div>
+          <div class="plan-desc" data-i18n="plan_ai_desc">Go annual and save 15%. Compensate your estimated monthly footprint with REDD+ credits.</div>
           <div class="plan-metric" data-i18n="plan_ai_f1">Everything in Starter</div>
           <div class="plan-metric" data-i18n="plan_ai_f3">Founders badge & early supporter perks</div>
           <div class="plan-metric" data-i18n="plan_ai_f4">15% annual discount</div>
@@ -785,12 +791,12 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
           <a href="/carbonpocket-calculator/" class="btn-plan" data-i18n="plan_ai_cta">Get started</a>
         </article>
         <article class="plan-card">
-          <div class="plan-name" data-i18n="plan_starter_name">Starter Offset</div>
+          <div class="plan-name" data-i18n="plan_starter_name">Starter Compensation</div>
           <div class="plan-price" id="starterPrice">$20</div>
           <div class="plan-period" data-i18n="plan_starter_period">/mo</div>
-          <div class="plan-desc" data-i18n="plan_starter_desc">Offset your full monthly footprint - cancel whenever you want.</div>
+          <div class="plan-desc" data-i18n="plan_starter_desc">Compensate your estimated monthly footprint - cancel whenever you want.</div>
           <div class="plan-metric" data-i18n="plan_starter_f1">Everything in Free</div>
-          <div class="plan-metric" id="starterMetric">Full monthly offset</div>
+          <div class="plan-metric" id="starterMetric">Estimated monthly compensation</div>
           <div class="plan-metric" data-i18n="plan_starter_f3">Verra-certified REDD+ credits</div>
           <div class="plan-metric plan-metric-highlight" data-i18n="plan_starter_f4">Includes a Sprout badge</div>
           <a href="/carbonpocket-calculator/" class="btn-plan" data-i18n="plan_starter_cta">Get started</a>
@@ -805,7 +811,7 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
         <div class="paygo-header" data-i18n="paygo_name">Pay-as-you-go</div>
         <div class="paygo-desc" data-i18n="paygo_desc">Set your own monthly contribution - every bit helps.</div>
         <div class="paygo-price" id="paygo-price">$20<span>/mo</span></div>
-        <div class="paygo-metric" id="paygo-metric">Standard monthly offset contribution.</div>
+        <div class="paygo-metric" id="paygo-metric">Standard monthly compensation volume.</div>
         <div class="paygo-slider-wrap">
           <input type="range" id="paygo-slider" min="10" max="100" step="10" value="50" />
         </div>
@@ -819,7 +825,7 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
     <div class="copy" data-i18n="footer_copy">© 2026 CarbonPocket. All rights reserved.</div>
     <div class="links">
       <a href="/privacy/privacy" data-i18n="footer_privacy">Privacy</a>
-      <a href="/neutralization-service/neutralization-service" data-i18n="footer_neutralization">Neutralization Service</a>
+      <a href="/compensation-service/" data-i18n="footer_compensation">Compensation Service</a>
       <a href="/delete-account/delete-account" data-i18n="footer_delete_account">Delete Account</a>
       <a href="#hero" data-i18n="footer_top">Back to top</a>
       <a href="#" id="contactLink" data-i18n="footer_contact">Contact</a>
@@ -873,8 +879,7 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
 
       document.documentElement.lang = normalizedLang;
 
-      const ps = document.getElementById('paygo-slider');
-      if (ps) updatePaygo(ps.value);
+      updateCountry(document.getElementById('countrySelect')?.value || 'BR');
     }
 
     const countryData = {
@@ -985,26 +990,34 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
       var c = countryData[code] || countryData['BR'];
       var avg = c.avg;
       var pricePerTon = 20;
+      var isPortuguese = currentLanguage === 'pt';
       var monthlyCost = (avg / 1000) * pricePerTon;
       var annualCost = monthlyCost * 12 * 0.85; // 15% off
 
       // Update display
       if (document.getElementById('avgDisplay')) document.getElementById('avgDisplay').textContent = avg;
       if (document.getElementById('avgDisplayPt')) document.getElementById('avgDisplayPt').textContent = avg;
+      var sourceNote = document.querySelector('[data-i18n="avg_source_note"]');
+      if (sourceNote) sourceNote.textContent = isPortuguese
+        ? '(fonte: [FONTE], [ANO])'
+        : '(source: [SOURCE], [YEAR])';
 
       // Starter
       if (document.getElementById('starterPrice')) document.getElementById('starterPrice').textContent = '$' + monthlyCost.toFixed(2);
-      if (document.getElementById('starterMetric')) document.getElementById('starterMetric').innerHTML = 'Offsets <strong>' + avg + '</strong> kg CO₂e/mo';
+      if (document.getElementById('starterMetric')) document.getElementById('starterMetric').innerHTML =
+        (isPortuguese ? 'Compensação mensal estimada de <strong>' : 'Estimated monthly compensation of <strong>') + avg + '</strong> kg CO₂e/mo';
 
       // Annual Plan (15% off)
       if (document.getElementById('aiPrice')) document.getElementById('aiPrice').textContent = '$' + annualCost.toFixed(2);
       var monthlyFromAnnual = (annualCost / 12).toFixed(2);
       if (document.getElementById('aiPeriod')) document.getElementById('aiPeriod').textContent = '$' + monthlyFromAnnual + '/mo - 15% off the monthly price';
-      if (document.getElementById('aiMetric')) document.getElementById('aiMetric').innerHTML = 'Offsets <strong>' + avg + '</strong> kg CO₂e/mo';
+      if (document.getElementById('aiMetric')) document.getElementById('aiMetric').innerHTML =
+        (isPortuguese ? 'Compensação mensal estimada de <strong>' : 'Estimated monthly compensation of <strong>') + avg + '</strong> kg CO₂e/mo';
 
       // One-Time
       if (document.getElementById('oneTimePrice')) document.getElementById('oneTimePrice').textContent = '$' + monthlyCost.toFixed(2);
-      if (document.getElementById('oneTimeMetric')) document.getElementById('oneTimeMetric').innerHTML = 'Offsets <strong>' + avg + '</strong> kg CO₂e · $20/ton';
+      if (document.getElementById('oneTimeMetric')) document.getElementById('oneTimeMetric').innerHTML =
+        (isPortuguese ? 'Compensação estimada de <strong>' : 'Estimated compensation of <strong>') + avg + '</strong> kg CO₂e · $20/ton';
 
       // Update paygo
       var slider = document.getElementById('paygo-slider');
@@ -1018,11 +1031,15 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
       var c = countryData[code] || countryData['BR'];
       var avg = c.avg;
       var pricePerTon = 20;
+      var isPortuguese = currentLanguage === 'pt';
 
       var kg = Math.round(avg * pct / 100);
       var price = ((avg / 1000) * pricePerTon * pct / 100).toFixed(2);
       if (document.getElementById('paygo-price')) document.getElementById('paygo-price').innerHTML = '$' + price + '<span>/mo</span>';
-      if (document.getElementById('paygo-metric')) document.getElementById('paygo-metric').textContent = 'Offsets ' + kg + ' kg CO₂e/mo';
+      if (document.getElementById('paygo-metric')) document.getElementById('paygo-metric').textContent =
+        isPortuguese
+          ? 'Volume mensal estimado de compensação: ' + kg + ' kg CO₂e'
+          : 'Estimated monthly compensation volume: ' + kg + ' kg CO₂e';
       if (document.getElementById('paygoPct')) document.getElementById('paygoPct').textContent = pct + '%';
     }
 
