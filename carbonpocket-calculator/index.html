@@ -20,8 +20,25 @@
     <link rel="stylesheet" crossorigin href="./assets/index-hQOtl3ms.css">
     <link rel="stylesheet" href="./calculator-overrides.css" />
     <script src="translations.js?v=1"></script>
+    <script src="translation2.js?v=1"></script>
   </head>
   <body>
+    <div class="lang-bar">
+      <select id="langSelect" class="lang-select" aria-label="Select language">
+        <option value="en">🇬🇧 English</option>
+        <option value="pt">🇧🇷 Português</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="it">🇮🇹 Italiano</option>
+        <option value="ja">🇯🇵 日本語</option>
+        <option value="ko">🇰🇷 한국어</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="ru">🇷🇺 Русский</option>
+        <option value="ar">🇸🇦 العربية</option>
+        <option value="sv">🇸🇪 Svenska</option>
+      </select>
+    </div>
     <div id="root"></div>
     <script>
       // Configuracao do checkout de compensacao.
@@ -46,6 +63,7 @@
       const CREDITOS_KG_PASSO = 100;
       const PRECO_BR_AVULSO_POR_KG = 0.11;
       let paisSelecionado = 'nao_informado';
+      let idiomaSelecionado = 'en';
       const seletoresPaisRegistrados = new WeakSet();
       // Valores em dólar são referência comercial; em real são a cobrança efetiva. cambioReferencia define preços, sem conversão em tempo real.
       const PRECOS = {
@@ -456,25 +474,133 @@
         }
       }
 
-      const IDIOMAS_POR_PAIS = {
-        BR: 'pt',
-        AR: 'es', CL: 'es', CO: 'es', MX: 'es', PE: 'es', UY: 'es', VE: 'es',
-        EC: 'es', BO: 'es', PY: 'es', CR: 'es', GT: 'es', HN: 'es', NI: 'es',
-        PA: 'es', SV: 'es', DO: 'es', CU: 'es', PR: 'es',
-        FR: 'fr',
-        DE: 'de', AT: 'de', CH: 'de',
-        IT: 'it',
-        CN: 'zh', TW: 'zh', HK: 'zh', SG: 'zh',
-        JP: 'ja',
-        KR: 'ko',
-        RU: 'ru', UA: 'ru', KZ: 'ru',
-        SA: 'ar', AE: 'ar', EG: 'ar', JO: 'ar', KW: 'ar', QA: 'ar',
-        OM: 'ar', BH: 'ar', IQ: 'ar', LB: 'ar', IR: 'ar',
-        SE: 'sv',
-      };
-
       function resolverIdiomaCheckout() {
-        return IDIOMAS_POR_PAIS[paisSelecionado] || 'en';
+        return idiomaSelecionado;
+      }
+
+      const chavesTextoCalculadora = new Map();
+      Object.entries(uiTranslations.en).forEach(([chave, texto]) => {
+        if (!chavesTextoCalculadora.has(texto)) {
+          chavesTextoCalculadora.set(texto, chave);
+        }
+      });
+      [
+        [
+          'A calm, two-minute estimate of your carbon daily. No blame, no perfect answers, just a place to begin.',
+          'intro_hero_subtitle',
+        ],
+        ['Answer the survey', 'intro_hero_cta'],
+        ['Continue', 'nav_next'],
+        ['Calculate my footprint', 'nav_finish'],
+        ['How much do you drive in a typical week?', 'move_distance_label'],
+        ['How much do you fly in a year?', 'move_flights_question'],
+        ['How often do you use public transit?', 'move_transit_question'],
+        ['We use local electricity data and a country baseline. Nothing is stored.', 'move_country_helper'],
+        ['Petrol car', 'move_vehicle_gas'],
+        ['Electric car', 'move_vehicle_electric'],
+        ['I do not drive', 'move_vehicle_none'],
+        ['Food choices - especially beef - have a major climate impact.', 'eat_guidance'],
+        ['Air conditioning at home', 'home_ac_question'],
+        ['What powers your home?', 'home_elec_question'],
+        ['Mostly grid', 'home_elec_grid'],
+        ['Mixed sources', 'home_elec_mixed'],
+        ['Your answers never leave this browser.', 'home_privacy'],
+        ['How would you describe your monthly spending?', 'more_spending_question'],
+        ['How much water do you use?', 'more_water_question'],
+        ['How often do you buy clothing?', 'more_clothing_question'],
+        ['How often do you replace electronics?', 'more_electronics_question'],
+        ['Any pets at home?', 'more_pets_question'],
+        ['A month in your shoes', 'results_title'],
+        ['Your estimate', 'results_total_label'],
+        ['Where it comes from', 'results_chart_title'],
+        ['What shapes your footprint', 'results_chart_title'],
+        ['Buy carbon compensation', 'comp_title'],
+        ['Compensate once', 'comp_control_once'],
+        ['Monthly subscription', 'comp_control_monthly'],
+        ['Please enter your email address.', 'checkout_error_email'],
+        ['Home.', 'chapter_home'],
+        ['Eat.', 'chapter_eat'],
+        ['More.', 'chapter_more'],
+      ].forEach(([texto, chave]) => chavesTextoCalculadora.set(texto, chave));
+
+      const textosOriginaisCalculadora = new WeakMap();
+      const textosAplicadosCalculadora = new WeakMap();
+      const nomesOriginaisPaises = new WeakMap();
+      const htmlOriginalTitulosHero = new WeakMap();
+      const htmlAplicadoTitulosHero = new WeakMap();
+
+      function aplicarTraducoesCalculadora() {
+        const percorredor = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        let noTexto = percorredor.nextNode();
+
+        while (noTexto) {
+          const atual = noTexto.nodeValue;
+          let original = textosOriginaisCalculadora.get(noTexto);
+          if (original === undefined || textosAplicadosCalculadora.get(noTexto) !== atual) {
+            original = atual;
+            textosOriginaisCalculadora.set(noTexto, original);
+          }
+
+          const correspondencia = original.match(/^(\s*)([\s\S]*?)(\s*)$/);
+          if (correspondencia) {
+            const chave = chavesTextoCalculadora.get(correspondencia[2]);
+            if (chave) {
+              const texto = idiomaSelecionado === 'en'
+                ? correspondencia[2]
+                : t(chave, idiomaSelecionado);
+              const traduzido = `${correspondencia[1]}${texto}${correspondencia[3]}`;
+              if (traduzido !== atual) {
+                textosAplicadosCalculadora.set(noTexto, traduzido);
+                noTexto.nodeValue = traduzido;
+              }
+            }
+          }
+
+          noTexto = percorredor.nextNode();
+        }
+
+        const tituloHero = document.querySelector('main h1');
+        if (tituloHero) {
+          let htmlOriginal = htmlOriginalTitulosHero.get(tituloHero);
+          const htmlAplicado = htmlAplicadoTitulosHero.get(tituloHero);
+          if (htmlOriginal === undefined || (htmlAplicado !== undefined && htmlAplicado !== tituloHero.innerHTML)) {
+            htmlOriginal = tituloHero.innerHTML;
+            htmlOriginalTitulosHero.set(tituloHero, htmlOriginal);
+          }
+          if (idiomaSelecionado === 'en') {
+            if (tituloHero.innerHTML !== htmlOriginal) {
+              tituloHero.innerHTML = htmlOriginal;
+            }
+          } else {
+            const tituloTraduzido = t('intro_hero_title', idiomaSelecionado);
+            if (tituloHero.textContent !== tituloTraduzido) {
+              tituloHero.textContent = tituloTraduzido;
+            }
+          }
+          htmlAplicadoTitulosHero.set(tituloHero, tituloHero.innerHTML);
+        }
+
+        const seletorPais = document.querySelector('[data-testid="select-country"]');
+        if (seletorPais) {
+          seletorPais.querySelectorAll('option').forEach((opcao) => {
+            let original = nomesOriginaisPaises.get(opcao);
+            if (!original) {
+              const partes = opcao.textContent.match(/^(\S+)\s+(.*)$/);
+              original = partes
+                ? { bandeira: partes[1], nome: partes[2] }
+                : { bandeira: '', nome: opcao.textContent };
+              nomesOriginaisPaises.set(opcao, original);
+            }
+            const nome = idiomaSelecionado === 'en'
+              ? original.nome
+              : countryName(opcao.value, idiomaSelecionado);
+            if (nome === opcao.value) return;
+            const textoTraduzido = original.bandeira ? `${original.bandeira} ${nome}` : nome;
+            if (opcao.textContent !== textoTraduzido) {
+              opcao.textContent = textoTraduzido;
+            }
+          });
+        }
       }
 
       function obterValoresTokens(quantidadeKg) {
@@ -585,6 +711,34 @@
         atualizarConteudoPagina();
       }
 
+      function configurarSeletorIdioma() {
+        const seletor = document.getElementById('langSelect');
+        if (!seletor) return;
+
+        let idiomaSalvo = 'en';
+        try {
+          idiomaSalvo = localStorage.getItem('carbonpocket-lang') || 'en';
+        } catch (erro) {
+          // Keep the default language when browser storage is unavailable.
+        }
+
+        idiomaSelecionado = translations[idiomaSalvo] ? idiomaSalvo : 'en';
+        seletor.value = idiomaSelecionado;
+        document.documentElement.lang = idiomaSelecionado;
+        seletor.addEventListener('change', () => {
+          idiomaSelecionado = translations[seletor.value] ? seletor.value : 'en';
+          seletor.value = idiomaSelecionado;
+          document.documentElement.lang = idiomaSelecionado;
+          try {
+            localStorage.setItem('carbonpocket-lang', idiomaSelecionado);
+          } catch (erro) {
+            // Language selection still works for this page view.
+          }
+          renderizarPainelCheckout();
+          aplicarTraducoesCalculadora();
+        });
+      }
+
       // Observa o resultado produzido pela calculadora React sem alterar seu calculo.
       const raizCalculadora = document.getElementById('root');
       const observadorCalculadora = new MutationObserver(() => {
@@ -592,6 +746,7 @@
         try {
           atualizarCheckout();
           renderizarPainelCheckout();
+          aplicarTraducoesCalculadora();
         } finally {
           observadorCalculadora.observe(raizCalculadora, {
             childList: true,
@@ -605,6 +760,7 @@
         characterData: true,
         subtree: true,
       });
+      configurarSeletorIdioma();
       atualizarCheckout();
       renderizarPainelCheckout();
     </script>
