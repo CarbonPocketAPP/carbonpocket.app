@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="./calculator-overrides.css" />
     <script src="translations.js?v=1"></script>
     <script src="translation2.js?v=1"></script>
+    <script src="translation.js?v=1"></script>
   </head>
   <body>
     <div class="lang-bar">
@@ -525,9 +526,206 @@
 
       const textosOriginaisCalculadora = new WeakMap();
       const textosAplicadosCalculadora = new WeakMap();
+      const atributosOriginaisCalculadora = new WeakMap();
+      const atributosAplicadosCalculadora = new WeakMap();
       const nomesOriginaisPaises = new WeakMap();
       const htmlOriginalTitulosHero = new WeakMap();
       const htmlAplicadoTitulosHero = new WeakMap();
+      const textosOriginaisComparacao = new WeakMap();
+      const textosAplicadosComparacao = new WeakMap();
+      const textosOriginaisProgresso = new WeakMap();
+      const textosAplicadosProgresso = new WeakMap();
+
+      Object.entries(surveyTranslations.en).forEach(([chave, texto]) => {
+        if (!chavesTextoCalculadora.has(texto)) {
+          chavesTextoCalculadora.set(texto, chave);
+        }
+      });
+
+      const modelosTextoDinamicoCalculadora = Object.entries(surveyTranslations.en)
+        .filter(([, texto]) => /\[[A-Z][A-Z0-9_-]*\]/.test(texto))
+        .map(([chave, texto]) => {
+          const tokens = [];
+          const partes = texto.split(/(\[[A-Z][A-Z0-9_-]*\])/g);
+          const expressao = partes.map((parte) => {
+            const token = parte.match(/^\[([A-Z][A-Z0-9_-]*)\]$/);
+            if (token) {
+              tokens.push(token[1]);
+              return ['N', 'KG', 'PCT'].includes(token[1])
+                ? '([\\d,.]+)'
+                : ['ONCE', 'MONTHLY', 'ANNUAL'].includes(token[1])
+                  ? '(\\s*[\\d,.]+)'
+                  : '(.+?)';
+            }
+            return parte.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          }).join('');
+          return { chave, tokens, regex: new RegExp(`^${expressao}$`) };
+        });
+
+      const nomesPetsSingulares = {
+        en: { cat: 'cat', smallDog: 'small dog', largeDog: 'large dog' },
+        pt: { cat: 'gato', smallDog: 'cão pequeno', largeDog: 'cão grande' },
+        es: { cat: 'gato', smallDog: 'perro pequeño', largeDog: 'perro grande' },
+        fr: { cat: 'chat', smallDog: 'petit chien', largeDog: 'grand chien' },
+        de: { cat: 'Katze', smallDog: 'kleinen Hund', largeDog: 'großen Hund' },
+        it: { cat: 'gatto', smallDog: 'cane piccolo', largeDog: 'cane grande' },
+      };
+
+      function identificarTipoPetCalculadora(texto) {
+        const nome = texto.toLocaleLowerCase();
+        const tipos = [
+          { tipo: 'cat', chave: 'pets_cats', ingles: 'cats' },
+          { tipo: 'smallDog', chave: 'pets_small_dogs', ingles: 'small dogs' },
+          { tipo: 'largeDog', chave: 'pets_large_dogs', ingles: 'large dogs' },
+        ];
+        return tipos.find((pet) => pet.ingles === nome
+          || Object.values(surveyTranslations).some(
+            (idioma) => idioma[pet.chave]?.toLocaleLowerCase() === nome,
+          ))?.tipo;
+      }
+
+      function obterTraducaoTextoCalculadora(texto) {
+        const chaveDireta = chavesTextoCalculadora.get(texto);
+        let chave = chaveDireta;
+        let valores = {};
+
+        if (!chave) {
+          const contagemPet = texto.match(/^([\d,.]+)\s+(.+)$/);
+          const tipoPet = contagemPet && identificarTipoPetCalculadora(contagemPet[2]);
+          const progresso = texto.match(/^(\d+) of 4 chapters complete$/);
+          if (tipoPet) {
+            chave = `pets_count_${tipoPet === 'cat'
+              ? 'cats'
+              : tipoPet === 'smallDog'
+                ? 'small_dogs'
+                : 'large_dogs'}`;
+            valores.N = contagemPet[1];
+          } else if (progresso) {
+            chave = 'intro_chapter_count';
+            valores.N = progresso[1];
+          } else {
+            for (const modelo of modelosTextoDinamicoCalculadora) {
+              const correspondencia = texto.match(modelo.regex);
+              if (!correspondencia) continue;
+
+              chave = modelo.chave;
+              modelo.tokens.forEach((token, indice) => {
+                valores[token] = correspondencia[indice + 1];
+              });
+              break;
+            }
+          }
+        }
+
+        if (!chave) return texto;
+
+        let tipoPet;
+        if (valores.PET) {
+          tipoPet = identificarTipoPetCalculadora(valores.PET);
+          valores.PET = nomesPetsSingulares[idiomaSelecionado]?.[tipoPet]
+            || nomesPetsSingulares.en[tipoPet]
+            || valores.PET;
+        }
+
+        if (idiomaSelecionado === 'en') return texto;
+
+        const traduzido = tTokens(chave, idiomaSelecionado, valores);
+        if (idiomaSelecionado === 'de' && ['pets_add_one', 'pets_remove_one'].includes(chave)) {
+          return traduzido.replace(/^Ein /, tipoPet === 'cat' ? 'Eine ' : 'Einen ');
+        }
+        return traduzido;
+      }
+
+      function aplicarTraducoesAtributosCalculadora() {
+        const atributos = ['aria-label', 'placeholder', 'title'];
+        document.querySelectorAll('[aria-label], [placeholder], [title]').forEach((elemento) => {
+          atributos.forEach((atributo) => {
+            if (!elemento.hasAttribute(atributo)) return;
+
+            const atual = elemento.getAttribute(atributo);
+            const originais = atributosOriginaisCalculadora.get(elemento) || {};
+            const aplicados = atributosAplicadosCalculadora.get(elemento) || {};
+            if (originais[atributo] === undefined || aplicados[atributo] !== atual) {
+              originais[atributo] = atual;
+              atributosOriginaisCalculadora.set(elemento, originais);
+            }
+
+            const traduzido = obterTraducaoTextoCalculadora(originais[atributo]);
+            if (traduzido !== atual) {
+              elemento.setAttribute(atributo, traduzido);
+              aplicados[atributo] = traduzido;
+              atributosAplicadosCalculadora.set(elemento, aplicados);
+            }
+          });
+        });
+      }
+
+      function aplicarTraducaoProgresso() {
+        document.querySelectorAll('.progress-label').forEach((elemento) => {
+          const atual = elemento.textContent;
+          let original = textosOriginaisProgresso.get(elemento);
+          if (original === undefined || textosAplicadosProgresso.get(elemento) !== atual) {
+            original = atual;
+            textosOriginaisProgresso.set(elemento, original);
+          }
+
+          const correspondencia = original.trim().match(/^Chapter (\d+) of 4$/);
+          if (!correspondencia) return;
+
+          const traduzido = idiomaSelecionado === 'en'
+            ? original
+            : tTokens('intro_chapter_count', idiomaSelecionado, { N: correspondencia[1] });
+          if (traduzido !== atual) {
+            elemento.textContent = traduzido;
+          }
+          textosAplicadosProgresso.set(elemento, elemento.textContent);
+        });
+      }
+
+      function aplicarTraducaoComparacaoBaseline() {
+        document.querySelectorAll('main span').forEach((elemento) => {
+          const atual = elemento.textContent;
+          let original = textosOriginaisComparacao.get(elemento);
+          if (original === undefined || textosAplicadosComparacao.get(elemento) !== atual) {
+            original = atual;
+            textosOriginaisComparacao.set(elemento, original);
+          }
+
+          const correspondencia = original.trim().match(
+            /^That is\s+([\d,.]+%)\s+of the\s+(.+?)\s+baseline\.$/,
+          );
+          if (!correspondencia) return;
+
+          let texto = original;
+          if (idiomaSelecionado !== 'en' && translations[idiomaSelecionado]?.baseline_pct) {
+            const seletorPais = document.querySelector('[data-testid="select-country"]');
+            const codigoPais = seletorPais?.value || paisSelecionado;
+            const nomePais = countryName(codigoPais, idiomaSelecionado);
+            texto = tTokens('baseline_pct', idiomaSelecionado, {
+              PCT: correspondencia[1].replace('%', ''),
+              COUNTRY: nomePais && nomePais !== codigoPais
+                ? nomePais
+                : t('a11y_country', idiomaSelecionado),
+            });
+          }
+
+          if (texto !== atual) {
+            const percentual = texto.match(/[\d,.]+\s*%/);
+            const forte = elemento.querySelector('strong');
+            if (percentual && forte) {
+              forte.textContent = percentual[0];
+              elemento.replaceChildren(
+                document.createTextNode(texto.slice(0, percentual.index)),
+                forte,
+                document.createTextNode(texto.slice(percentual.index + percentual[0].length)),
+              );
+            } else {
+              elemento.textContent = texto;
+            }
+          }
+          textosAplicadosComparacao.set(elemento, elemento.textContent);
+        });
+      }
 
       function aplicarTraducoesCalculadora() {
         const percorredor = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -543,21 +741,18 @@
 
           const correspondencia = original.match(/^(\s*)([\s\S]*?)(\s*)$/);
           if (correspondencia) {
-            const chave = chavesTextoCalculadora.get(correspondencia[2]);
-            if (chave) {
-              const texto = idiomaSelecionado === 'en'
-                ? correspondencia[2]
-                : t(chave, idiomaSelecionado);
-              const traduzido = `${correspondencia[1]}${texto}${correspondencia[3]}`;
-              if (traduzido !== atual) {
-                textosAplicadosCalculadora.set(noTexto, traduzido);
-                noTexto.nodeValue = traduzido;
-              }
+            const texto = obterTraducaoTextoCalculadora(correspondencia[2]);
+            const traduzido = `${correspondencia[1]}${texto}${correspondencia[3]}`;
+            if (traduzido !== atual) {
+              textosAplicadosCalculadora.set(noTexto, traduzido);
+              noTexto.nodeValue = traduzido;
             }
           }
 
           noTexto = percorredor.nextNode();
         }
+
+        aplicarTraducaoProgresso();
 
         const tituloHero = document.querySelector('main h1');
         if (tituloHero) {
@@ -580,6 +775,14 @@
           htmlAplicadoTitulosHero.set(tituloHero, tituloHero.innerHTML);
         }
 
+        const descricao = document.querySelector('meta[name="description"]');
+        document.title = t('meta_title', idiomaSelecionado);
+        if (descricao) {
+          descricao.setAttribute('content', t('meta_description', idiomaSelecionado));
+        }
+        aplicarTraducoesAtributosCalculadora();
+        aplicarTraducaoComparacaoBaseline();
+
         const seletorPais = document.querySelector('[data-testid="select-country"]');
         if (seletorPais) {
           seletorPais.querySelectorAll('option').forEach((opcao) => {
@@ -593,7 +796,9 @@
             }
             const nome = idiomaSelecionado === 'en'
               ? original.nome
-              : countryName(opcao.value, idiomaSelecionado);
+              : original.nome === surveyTranslations.en.country_other_global
+                ? t('country_other_global', idiomaSelecionado)
+                : countryName(opcao.value, idiomaSelecionado);
             if (nome === opcao.value) return;
             const textoTraduzido = original.bandeira ? `${original.bandeira} ${nome}` : nome;
             if (opcao.textContent !== textoTraduzido) {
