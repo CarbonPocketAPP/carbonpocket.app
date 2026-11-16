@@ -241,12 +241,6 @@
           </div>
         `;
 
-        painel.querySelectorAll('[data-categoria]').forEach((botao) => {
-          const reforco = document.createElement('p');
-          reforco.className = 'qualification-reinforcement';
-          reforco.textContent = 'Compensation only, your emissions still occur. Credits are retired in a public registry.';
-          botao.insertAdjacentElement('afterend', reforco);
-        });
         moverCamposCheckoutParaPainel(painel);
         destino.appendChild(painel);
         ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
@@ -333,7 +327,6 @@
             </details>
           </aside>
           <button type="button" class="creditos-comprar">Buy carbon compensation</button>
-          <p class="qualification-reinforcement"></p>
           <p class="creditos-erro" role="alert"></p>
         `;
 
@@ -833,10 +826,6 @@
           'checkout_check_integrity',
           'checkout_check_standard',
         ];
-
-        document.querySelectorAll('.qualification-reinforcement').forEach((linha) => {
-          linha.textContent = t('checkout_notice_short', idioma);
-        });
 
         document.querySelectorAll('.qualification-notice').forEach((aviso) => {
           const secaoCreditos = aviso.closest('#creditos-avulsos');

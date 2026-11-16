@@ -6,7 +6,6 @@
 
 const translations = {
   en: {
-    checkout_notice_short: 'Compensation only, your emissions still occur. Credits are retired in a public registry.',
     checkout_what_buying: 'What you are buying',
     checkout_buying_fixed: 'This compensates [KG] kg CO2e with Verra VCS-certified REDD+ credits. Compensation, not reduction: your emissions still occur. Credits are retired in pooled retirements, published each cycle at [LEDGER_URL]. Not an official inventory, not a CRVE, and not valid for SBCE compliance or NDC claims.',
     checkout_buying_monthly: 'This compensates [KG] kg CO2e of your estimated monthly footprint with Verra VCS-certified REDD+ credits. Compensation, not reduction: your emissions still occur. Credits are retired in pooled retirements, published each cycle at [LEDGER_URL]. Not an official inventory, not a CRVE, and not valid for SBCE compliance or NDC claims.',
@@ -26,7 +25,6 @@ const translations = {
   },
 
   pt: {
-    checkout_notice_short: 'Apenas compensação: suas emissões continuam ocorrendo. Os créditos são aposentados em registro público.',
     checkout_what_buying: 'O que você está comprando',
     checkout_buying_fixed: 'Isto compensa [KG] kg CO2e com créditos REDD+ certificados pelo padrão Verra VCS. É compensação, não redução: suas emissões continuam ocorrendo. Os créditos são aposentados em lotes, publicados a cada ciclo em [LEDGER_URL]. Não é inventário oficial, não é CRVE e não serve para cumprir obrigações do SBCE nem metas de NDC.',
     checkout_buying_monthly: 'Isto compensa [KG] kg CO2e da sua pegada mensal estimada com créditos REDD+ certificados pelo padrão Verra VCS. É compensação, não redução: suas emissões continuam ocorrendo. Os créditos são aposentados em lotes, publicados a cada ciclo em [LEDGER_URL]. Não é inventário oficial, não é CRVE e não serve para cumprir obrigações do SBCE nem metas de NDC.',
@@ -48,7 +46,6 @@ const translations = {
 
 translations.es = {
   ...translations.en,
-  checkout_notice_short: 'Solo compensación: tus emisiones siguen ocurriendo. Los créditos se retiran en un registro público.',
   checkout_what_buying: 'Qué estás comprando',
   checkout_buying_fixed: 'Esto compensa [KG] kg CO2e con créditos REDD+ certificados por el estándar Verra VCS. Es compensación, no reducción: tus emisiones siguen ocurriendo. Los créditos se retiran en lotes, publicados en cada ciclo en [LEDGER_URL]. No es un inventario oficial, no es un CRVE y no sirve para cumplir obligaciones del SBCE ni metas de NDC.',
   checkout_buying_monthly: 'Esto compensa [KG] kg CO2e de tu huella mensual estimada con créditos REDD+ certificados por el estándar Verra VCS. Es compensación, no reducción: tus emisiones siguen ocurriendo. Los créditos se retiran en lotes, publicados en cada ciclo en [LEDGER_URL]. No es un inventario oficial, no es un CRVE y no sirve para cumplir obligaciones del SBCE ni metas de NDC.',
@@ -69,7 +66,6 @@ translations.es = {
 
 translations.fr = {
   ...translations.en,
-  checkout_notice_short: 'Compensation uniquement : vos émissions continuent. Les crédits sont retirés dans un registre public.',
   checkout_what_buying: 'Ce que vous achetez',
   checkout_buying_fixed: "Cette contribution compense [KG] kg CO2e avec des crédits REDD+ certifiés Verra VCS. Compensation, pas réduction : vos émissions continuent. Les crédits sont retirés par lots, publiés à chaque cycle sur [LEDGER_URL]. Ce n'est pas un inventaire officiel, ni un CRVE, et cela ne permet pas de respecter les obligations du SBCE ni les objectifs CDN.",
   checkout_buying_monthly: "Cette contribution compense [KG] kg CO2e de votre empreinte mensuelle estimée avec des crédits REDD+ certifiés Verra VCS. Compensation, pas réduction : vos émissions continuent. Les crédits sont retirés par lots, publiés à chaque cycle sur [LEDGER_URL]. Ce n'est pas un inventaire officiel, ni un CRVE, et cela ne permet pas de respecter les obligations du SBCE ni les objectifs CDN.",
@@ -90,7 +86,6 @@ translations.fr = {
 
 translations.de = {
   ...translations.en,
-  checkout_notice_short: 'Nur Kompensation: Ihre Emissionen entstehen weiterhin. Die Gutschriften werden in einem öffentlichen Register stillgelegt.',
   checkout_what_buying: 'Was Sie kaufen',
   checkout_buying_fixed: 'Dies kompensiert [KG] kg CO2e mit Verra-VCS-zertifizierten REDD+-Gutschriften. Kompensation, keine Reduktion: Ihre Emissionen entstehen weiterhin. Die Gutschriften werden in Sammelstilllegungen gebündelt und in jedem Zyklus unter [LEDGER_URL] veröffentlicht. Kein offizielles Inventar, kein CRVE und nicht geeignet zur Erfüllung von SBCE-Pflichten oder NDC-Zielen.',
   checkout_buying_monthly: 'Dies kompensiert [KG] kg CO2e Ihres geschätzten Monatsfußabdrucks mit Verra-VCS-zertifizierten REDD+-Gutschriften. Kompensation, keine Reduktion: Ihre Emissionen entstehen weiterhin. Die Gutschriften werden in Sammelstilllegungen gebündelt und in jedem Zyklus unter [LEDGER_URL] veröffentlicht. Kein offizielles Inventar, kein CRVE und nicht geeignet zur Erfüllung von SBCE-Pflichten oder NDC-Zielen.',
@@ -111,7 +106,6 @@ translations.de = {
 
 translations.it = {
   ...translations.en,
-  checkout_notice_short: 'Solo compensazione: le tue emissioni continuano. I crediti vengono ritirati in un registro pubblico.',
   checkout_what_buying: 'Che cosa stai acquistando',
   checkout_buying_fixed: 'Questo compensa [KG] kg CO2e con crediti REDD+ certificati Verra VCS. Compensazione, non riduzione: le tue emissioni continuano. I crediti vengono ritirati in lotti, pubblicati a ogni ciclo su [LEDGER_URL]. Non è un inventario ufficiale, non è un CRVE e non serve a rispettare gli obblighi del SBCE né gli obiettivi NDC.',
   checkout_buying_monthly: 'Questo compensa [KG] kg CO2e della tua impronta mensile stimata con crediti REDD+ certificati Verra VCS. Compensazione, non riduzione: le tue emissioni continuano. I crediti vengono ritirati in lotti, pubblicati a ogni ciclo su [LEDGER_URL]. Non è un inventario ufficiale, non è un CRVE e non serve a rispettare gli obblighi del SBCE né gli obiettivi NDC.',
@@ -132,7 +126,6 @@ translations.it = {
 
 translations.zh = {
   ...translations.en,
-  checkout_notice_short: '仅为补偿：您的排放仍然发生。信用额在公共登记处注销。',
   checkout_what_buying: '您正在购买什么',
   checkout_buying_fixed: '本次补偿 [KG] kg CO2e，使用经 Verra VCS 认证的 REDD+ 信用额。补偿而非减排：您的排放仍然发生。信用额按批次注销，每个周期在 [LEDGER_URL] 公布。这不是官方清单，不是 CRVE，也不适用于履行 SBCE 义务或 NDC 目标。',
   checkout_buying_monthly: '本次补偿您月度估算足迹中的 [KG] kg CO2e，使用经 Verra VCS 认证的 REDD+ 信用额。补偿而非减排：您的排放仍然发生。信用额按批次注销，每个周期在 [LEDGER_URL] 公布。这不是官方清单，不是 CRVE，也不适用于履行 SBCE 义务或 NDC 目标。',
@@ -153,7 +146,6 @@ translations.zh = {
 
 translations.ja = {
   ...translations.en,
-  checkout_notice_short: '補償のみ：あなたの排出は続きます。クレジットは公開登録簿で償却されます。',
   checkout_what_buying: '購入内容',
   checkout_buying_fixed: 'これは [KG] kg CO2e を Verra VCS 認証 REDD+ クレジットで補償します。削減ではなく補償です。あなたの排出は続きます。クレジットはバッチで償却され、各サイクルごとに [LEDGER_URL] で公開されます。公式インベントリではなく、CRVE でもなく、SBCE の義務や NDC 目標の達成には使用できません。',
   checkout_buying_monthly: 'これは推定月間フットプリントのうち [KG] kg CO2e を Verra VCS 認証 REDD+ クレジットで補償します。削減ではなく補償です。あなたの排出は続きます。クレジットはバッチで償却され、各サイクルごとに [LEDGER_URL] で公開されます。公式インベントリではなく、CRVE でもなく、SBCE の義務や NDC 目標の達成には使用できません。',
@@ -174,7 +166,6 @@ translations.ja = {
 
 translations.ko = {
   ...translations.en,
-  checkout_notice_short: '보상만 해당: 배출은 계속 발생합니다. 크레딧은 공개 등록부에서 소각됩니다.',
   checkout_what_buying: '구매하시는 내용',
   checkout_buying_fixed: '이것은 [KG] kg CO2e를 Verra VCS 인증 REDD+ 크레딧으로 보상합니다. 감축이 아닌 보상입니다. 배출은 계속 발생합니다. 크레딧은 배치로 소각되며 각 주기마다 [LEDGER_URL]에 공개됩니다. 공식 인벤토리가 아니며, CRVE가 아니고, SBCE 의무나 NDC 목표 이행에 사용할 수 없습니다.',
   checkout_buying_monthly: '이것은 추정 월간 발자국의 [KG] kg CO2e를 Verra VCS 인증 REDD+ 크레딧으로 보상합니다. 감축이 아닌 보상입니다. 배출은 계속 발생합니다. 크레딧은 배치로 소각되며 각 주기마다 [LEDGER_URL]에 공개됩니다. 공식 인벤토리가 아니며, CRVE가 아니고, SBCE 의무나 NDC 목표 이행에 사용할 수 없습니다.',
@@ -195,7 +186,6 @@ translations.ko = {
 
 translations.ru = {
   ...translations.en,
-  checkout_notice_short: 'Только компенсация: ваши выбросы продолжаются. Кредиты списываются в публичном реестре.',
   checkout_what_buying: 'Что вы покупаете',
   checkout_buying_fixed: 'Это компенсирует [KG] кг CO2e кредитами REDD+, сертифицированными по стандарту Verra VCS. Компенсация, а не сокращение: ваши выбросы продолжаются. Кредиты списываются пулами и публикуются каждый цикл на [LEDGER_URL]. Это не официальная инвентаризация, не CRVE и не подходит для выполнения обязательств SBCE или целей NDC.',
   checkout_buying_monthly: 'Это компенсирует [KG] кг CO2e из вашего расчётного месячного следа кредитами REDD+, сертифицированными по стандарту Verra VCS. Компенсация, а не сокращение: ваши выбросы продолжаются. Кредиты списываются пулами и публикуются каждый цикл на [LEDGER_URL]. Это не официальная инвентаризация, не CRVE и не подходит для выполнения обязательств SBCE или целей NDC.',
@@ -216,7 +206,6 @@ translations.ru = {
 
 translations.ar = {
   ...translations.en,
-  checkout_notice_short: 'تعويض فقط: انبعاثاتك مستمرة. تُلغى الأرصدة في سجل عام.',
   checkout_what_buying: 'ما الذي تشتريه',
   checkout_buying_fixed: 'هذا يعوّض [KG] كجم CO2e بأرصدة REDD+ معتمدة من معيار Verra VCS. تعويض لا تخفيض: انبعاثاتك مستمرة. تُلغى الأرصدة في دفعات وتُنشر كل دورة على [LEDGER_URL]. ليس جردًا رسميًا، وليس CRVE، ولا يصلح للامتثال لالتزامات SBCE أو أهداف NDC.',
   checkout_buying_monthly: 'هذا يعوّض [KG] كجم CO2e من بصمتك الشهرية المقدرة بأرصدة REDD+ معتمدة من معيار Verra VCS. تعويض لا تخفيض: انبعاثاتك مستمرة. تُلغى الأرصدة في دفعات وتُنشر كل دورة على [LEDGER_URL]. ليس جردًا رسميًا، وليس CRVE، ولا يصلح للامتثال لالتزامات SBCE أو أهداف NDC.',
@@ -237,7 +226,6 @@ translations.ar = {
 
 translations.sv = {
   ...translations.en,
-  checkout_notice_short: 'Endast kompensation: dina utsläpp fortsätter. Krediterna dras in i ett offentligt register.',
   checkout_what_buying: 'Vad du köper',
   checkout_buying_fixed: 'Detta kompenserar [KG] kg CO2e med Verra VCS-certifierade REDD+-krediter. Kompensation, inte minskning: dina utsläpp fortsätter. Krediterna dras in i samlade omgångar och publiceras varje cykel på [LEDGER_URL]. Inte ett officiellt inventarium, inte ett CRVE och gäller inte för att uppfylla SBCE-krav eller NDC-mål.',
   checkout_buying_monthly: 'Detta kompenserar [KG] kg CO2e av ditt beräknade månadsavtryck med Verra VCS-certifierade REDD+-krediter. Kompensation, inte minskning: dina utsläpp fortsätter. Krediterna dras in i samlade omgångar och publiceras varje cykel på [LEDGER_URL]. Inte ett officiellt inventarium, inte ett CRVE och gäller inte för att uppfylla SBCE-krav eller NDC-mål.',
