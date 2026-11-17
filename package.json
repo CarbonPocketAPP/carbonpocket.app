@@ -9,5 +9,10 @@
   "devDependencies": {
     "dotenv": "^18.0.10",
     "drizzle-kit": "^0.31.11"
+  },
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    }
   }
 }

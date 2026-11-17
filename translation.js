@@ -73,7 +73,7 @@ const translations = {
         th_countries: 'Countries',
         tag_partner: 'Partner',
         section_partner_title: 'Verified credits, fully disclosed',
-        section_partner_sub: 'REDD+ credits use the Verra VCS standard. Cycle details will be published after verification: project [PROJECT_NAME], serial range [SERIAL_START]–[SERIAL_END], retirement ID [RETIREMENT_TX_ID], ledger [LEDGER_URL]. Carbon Pocket is not certified or endorsed by Verra.',
+        section_partner_sub: 'Credits are from the Brazilian Amazon REDD+ APD Project. Carbon Pocket is not certified or endorsed by Verra.',
         partner_title: 'Credit information',
         partner_text: 'Credits come from REDD+ projects in the Brazilian Amazon under the Verra VCS standard. Co-benefit information is that published by the project developer.',
         partner_subtitle: 'Credit supplier',
@@ -221,7 +221,7 @@ const translations = {
         th_countries: 'Países',
         tag_partner: 'Parceiro',
         section_partner_title: 'Créditos verificados, com divulgação completa',
-        section_partner_sub: 'Os créditos REDD+ seguem o padrão Verra VCS. Os dados do ciclo serão publicados após verificação: projeto [PROJECT_NAME], faixa de séries [SERIAL_START]–[SERIAL_END], ID de aposentadoria [RETIREMENT_TX_ID], ledger público [LEDGER_URL]. O Carbon Pocket não é certificado nem endossado pela Verra.',
+        section_partner_sub: 'Os créditos são do projeto Brazilian Amazon REDD+ APD. O Carbon Pocket não é certificado nem endossado pela Verra.',
         partner_title: 'Informações sobre os créditos',
         partner_text: 'Créditos de projetos REDD+ na Amazônia brasileira sob o padrão Verra VCS. As informações sobre co-benefícios são as publicadas pelo desenvolvedor do projeto.',
         partner_subtitle: 'Fornecedor dos créditos',
@@ -377,7 +377,7 @@ const translations = {
 
     tag_partner: 'Socio',
     section_partner_title: 'Créditos verificados, con divulgación completa',
-    section_partner_sub: 'REDD+ credits use the Verra VCS standard. Cycle details will be published after verification: project [PROJECT_NAME], serial range [SERIAL_START]–[SERIAL_END], retirement ID [RETIREMENT_TX_ID], ledger [LEDGER_URL]. Carbon Pocket is not certified or endorsed by Verra.',
+    section_partner_sub: 'Credits are from the Brazilian Amazon REDD+ APD Project. Carbon Pocket is not certified or endorsed by Verra.',
     partner_title: 'Información sobre los créditos',
     partner_text: 'Credits come from REDD+ projects in the Brazilian Amazon under the Verra VCS standard. Co-benefit information is that published by the project developer.',
     partner_subtitle: 'Credit supplier',
@@ -533,7 +533,7 @@ const translations = {
 
     tag_partner: 'Partenaire',
     section_partner_title: 'Crédits vérifiés, informations publiées',
-    section_partner_sub: 'REDD+ credits use the Verra VCS standard. Cycle details will be published after verification: project [PROJECT_NAME], serial range [SERIAL_START]–[SERIAL_END], retirement ID [RETIREMENT_TX_ID], ledger [LEDGER_URL]. Carbon Pocket is not certified or endorsed by Verra.',
+    section_partner_sub: 'Credits are from the Brazilian Amazon REDD+ APD Project. Carbon Pocket is not certified or endorsed by Verra.',
     partner_title: 'Informations sur les crédits',
     partner_text: 'Credits come from REDD+ projects in the Brazilian Amazon under the Verra VCS standard. Co-benefit information is that published by the project developer.',
     partner_subtitle: 'Credit supplier',
@@ -689,7 +689,7 @@ const translations = {
 
     tag_partner: 'Partner',
     section_partner_title: 'Verifizierte Gutschriften, vollständig offengelegt',
-    section_partner_sub: 'REDD+ credits use the Verra VCS standard. Cycle details will be published after verification: project [PROJECT_NAME], serial range [SERIAL_START]–[SERIAL_END], retirement ID [RETIREMENT_TX_ID], ledger [LEDGER_URL]. Carbon Pocket is not certified or endorsed by Verra.',
+    section_partner_sub: 'Credits are from the Brazilian Amazon REDD+ APD Project. Carbon Pocket is not certified or endorsed by Verra.',
     partner_title: 'Informationen zu den Gutschriften',
     partner_text: 'Credits come from REDD+ projects in the Brazilian Amazon under the Verra VCS standard. Co-benefit information is that published by the project developer.',
     partner_subtitle: 'Credit supplier',
@@ -845,7 +845,7 @@ const translations = {
 
     tag_partner: 'Partner',
     section_partner_title: 'Crediti verificati, informazioni complete',
-    section_partner_sub: 'REDD+ credits use the Verra VCS standard. Cycle details will be published after verification: project [PROJECT_NAME], serial range [SERIAL_START]–[SERIAL_END], retirement ID [RETIREMENT_TX_ID], ledger [LEDGER_URL]. Carbon Pocket is not certified or endorsed by Verra.',
+    section_partner_sub: 'Credits are from the Brazilian Amazon REDD+ APD Project. Carbon Pocket is not certified or endorsed by Verra.',
     partner_title: 'Informazioni sui crediti',
     partner_text: 'Credits come from REDD+ projects in the Brazilian Amazon under the Verra VCS standard. Co-benefit information is that published by the project developer.',
     partner_subtitle: 'Credit supplier',
@@ -1001,7 +1001,7 @@ const translations = {
 
     tag_partner: '合作伙伴',
     section_partner_title: '经核证的碳信用，信息完整公开',
-    section_partner_sub: 'REDD+ credits use the Verra VCS standard. Cycle details will be published after verification: project [PROJECT_NAME], serial range [SERIAL_START]–[SERIAL_END], retirement ID [RETIREMENT_TX_ID], ledger [LEDGER_URL]. Carbon Pocket is not certified or endorsed by Verra.',
+    section_partner_sub: 'Credits are from the Brazilian Amazon REDD+ APD Project. Carbon Pocket is not certified or endorsed by Verra.',
     partner_title: '碳信用信息',
     partner_text: 'Credits come from REDD+ projects in the Brazilian Amazon under the Verra VCS standard. Co-benefit information is that published by the project developer.',
     partner_subtitle: 'Credit supplier',
@@ -1157,7 +1157,7 @@ const translations = {
 
     tag_partner: 'パートナー',
     section_partner_title: '検証済みクレジットの情報を公開',
-    section_partner_sub: 'REDD+ credits use the Verra VCS standard. Cycle details will be published after verification: project [PROJECT_NAME], serial range [SERIAL_START]–[SERIAL_END], retirement ID [RETIREMENT_TX_ID], ledger [LEDGER_URL]. Carbon Pocket is not certified or endorsed by Verra.',
+    section_partner_sub: 'Credits are from the Brazilian Amazon REDD+ APD Project. Carbon Pocket is not certified or endorsed by Verra.',
     partner_title: 'クレジット情報',
     partner_text: 'Credits come from REDD+ projects in the Brazilian Amazon under the Verra VCS standard. Co-benefit information is that published by the project developer.',
     partner_subtitle: 'Credit supplier',
@@ -1313,7 +1313,7 @@ const translations = {
 
     tag_partner: '파트너',
     section_partner_title: '검증된 크레딧 정보 공개',
-    section_partner_sub: 'REDD+ credits use the Verra VCS standard. Cycle details will be published after verification: project [PROJECT_NAME], serial range [SERIAL_START]–[SERIAL_END], retirement ID [RETIREMENT_TX_ID], ledger [LEDGER_URL]. Carbon Pocket is not certified or endorsed by Verra.',
+    section_partner_sub: 'Credits are from the Brazilian Amazon REDD+ APD Project. Carbon Pocket is not certified or endorsed by Verra.',
     partner_title: '크레딧 정보',
     partner_text: 'Credits come from REDD+ projects in the Brazilian Amazon under the Verra VCS standard. Co-benefit information is that published by the project developer.',
     partner_subtitle: 'Credit supplier',
@@ -1469,7 +1469,7 @@ const translations = {
 
     tag_partner: 'Партнёр',
     section_partner_title: 'Проверенные кредиты с полной информацией',
-    section_partner_sub: 'REDD+ credits use the Verra VCS standard. Cycle details will be published after verification: project [PROJECT_NAME], serial range [SERIAL_START]–[SERIAL_END], retirement ID [RETIREMENT_TX_ID], ledger [LEDGER_URL]. Carbon Pocket is not certified or endorsed by Verra.',
+    section_partner_sub: 'Credits are from the Brazilian Amazon REDD+ APD Project. Carbon Pocket is not certified or endorsed by Verra.',
     partner_title: 'Информация о кредитах',
     partner_text: 'Credits come from REDD+ projects in the Brazilian Amazon under the Verra VCS standard. Co-benefit information is that published by the project developer.',
     partner_subtitle: 'Credit supplier',
@@ -1625,7 +1625,7 @@ const translations = {
 
     tag_partner: 'الشريك',
     section_partner_title: 'أرصدة موثقة مع إفصاح كامل',
-    section_partner_sub: 'REDD+ credits use the Verra VCS standard. Cycle details will be published after verification: project [PROJECT_NAME], serial range [SERIAL_START]–[SERIAL_END], retirement ID [RETIREMENT_TX_ID], ledger [LEDGER_URL]. Carbon Pocket is not certified or endorsed by Verra.',
+    section_partner_sub: 'Credits are from the Brazilian Amazon REDD+ APD Project. Carbon Pocket is not certified or endorsed by Verra.',
     partner_title: 'معلومات عن الأرصدة',
     partner_text: 'Credits come from REDD+ projects in the Brazilian Amazon under the Verra VCS standard. Co-benefit information is that published by the project developer.',
     partner_subtitle: 'Credit supplier',
