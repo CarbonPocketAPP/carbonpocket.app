@@ -956,12 +956,13 @@
           botao.id = 'button-use-country-average';
           botao.type = 'button';
           botao.className = 'button button-primary result-gate-button';
+          botao.style.marginBottom = '1rem';
           botao.addEventListener('click', selecionarMediaPais);
         }
         botao.textContent = tTokens('intro_use_country_average', idiomaSelecionado, {
           KG: new Intl.NumberFormat(idiomaSelecionado).format(mediaKg),
         });
-        botaoPesquisa.insertAdjacentElement('afterend', botao);
+        botaoPesquisa.insertAdjacentElement('beforebegin', botao);
       }
 
       function atualizarCheckout() {
