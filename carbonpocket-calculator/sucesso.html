@@ -3,136 +3,278 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1713" />
     <title>Contribution confirmation | Carbon Pocket</title>
     <link rel="stylesheet" href="./assets/index-hQOtl3ms.css" />
     <link rel="stylesheet" href="./calculator-overrides.css" />
+    <style>
+      .receipt-language-bar {
+        position: fixed;
+        top: 16px;
+        right: 20px;
+        z-index: 1;
+        width: auto;
+        padding: 0;
+        background: transparent;
+      }
+
+      .receipt-language-bar .lang-select {
+        max-width: min(230px, calc(100vw - 40px));
+      }
+
+      .receipt-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .receipt-actions[hidden] {
+        display: none;
+      }
+
+      .receipt-print-hint {
+        margin: 12px 0 0;
+        color: #9fb0a2;
+        font-size: 13px;
+      }
+
+      .receipt-project a {
+        color: #72e19a;
+      }
+
+      .receipt-brand {
+        display: block;
+        width: 96px;
+        height: 96px;
+        margin: 0 auto 16px;
+        border-radius: 20px;
+        object-fit: cover;
+      }
+
+      #payment-details {
+        margin: 24px auto;
+        max-width: 500px;
+      }
+
+      #payment-details > div {
+        display: grid;
+        grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.4fr);
+        align-items: baseline;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(234, 245, 233, 0.1);
+        text-align: left;
+      }
+
+      #payment-details > div[hidden] {
+        display: none;
+      }
+
+      #payment-details dt {
+        color: #b9c8bc;
+        font-weight: 500;
+      }
+
+      #payment-details dd {
+        margin: 0;
+        color: #a5f3c7;
+        font-weight: 650;
+        overflow-wrap: anywhere;
+      }
+
+      .receipt-project a {
+        color: #a5f3c7;
+        font-weight: 650;
+      }
+
+      @media (max-width: 480px) {
+        #payment-details > div {
+          grid-template-columns: minmax(105px, 0.8fr) minmax(0, 1.2fr);
+          gap: 8px;
+        }
+      }
+
+      @media print {
+        @page {
+          size: auto;
+          margin: 12mm;
+        }
+
+        html,
+        body {
+          min-height: 0 !important;
+          background: #0b1713 !important;
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
+        }
+
+        .receipt-language-bar,
+        .receipt-actions,
+        #share-status,
+        .receipt-print-hint {
+          display: none !important;
+        }
+
+        .checkout-sucesso {
+          min-height: 0 !important;
+          display: block !important;
+          padding: 0 !important;
+        }
+
+        .checkout-sucesso-card {
+          width: 100% !important;
+          max-width: 720px !important;
+          margin: 36px auto !important;
+          break-inside: avoid;
+          box-shadow: none !important;
+        }
+
+        .receipt-brand {
+          width: 82px;
+          height: 82px;
+        }
+      }
+    </style>
+    <script src="./receipt-translations.js"></script>
   </head>
   <body>
+    <div class="lang-bar receipt-language-bar">
+      <select id="receipt-language" class="lang-select" aria-label="Select language">
+        <option value="en">🇬🇧 English</option>
+        <option value="pt">🇧🇷 Português</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="it">🇮🇹 Italiano</option>
+        <option value="ja">🇯🇵 日本語</option>
+        <option value="ko">🇰🇷 한국어</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="ru">🇷🇺 Русский</option>
+        <option value="ar">🇸🇦 العربية</option>
+        <option value="sv">🇸🇪 Svenska</option>
+      </select>
+    </div>
     <main class="checkout-sucesso">
       <section class="panel checkout-sucesso-card" aria-live="polite">
-        <p class="result-kicker">Payment status</p>
+        <img
+          class="receipt-brand"
+          id="receipt-logo"
+          src="./carbonpocket-logo.png"
+          alt="Carbon Pocket"
+        />
+        <p class="result-kicker" id="payment-status">Payment status</p>
         <h1 id="payment-heading">Checking your payment</h1>
         <p id="payment-message">Verifying your payment...</p>
         <dl id="payment-details" hidden>
-          <div id="payment-name-row" hidden><dt>Contributor</dt><dd id="payment-name"></dd></div>
-          <div><dt>Compensated volume</dt><dd id="payment-quantity"></dd></div>
-          <div><dt>Amount paid</dt><dd id="payment-amount"></dd></div>
-          <div><dt>Email</dt><dd id="payment-email"></dd></div>
-          <div><dt>Database record code</dt><dd id="payment-code"></dd></div>
+          <div id="payment-name-row" hidden><dt id="payment-name-label"></dt><dd id="payment-name"></dd></div>
+          <div><dt id="payment-project-label"></dt><dd class="receipt-project"><a id="payment-project" href="https://brcarbon.com.br/brazilian-amazon/" target="_blank" rel="noopener noreferrer">Brazilian Amazon REDD+ APD</a></dd></div>
+          <div><dt id="payment-quantity-label"></dt><dd id="payment-quantity"></dd></div>
+          <div><dt id="payment-email-label"></dt><dd id="payment-email"></dd></div>
+          <div><dt id="payment-code-label"></dt><dd id="payment-code"></dd></div>
         </dl>
-        <button id="download-confirmation" class="button button-primary" type="button" hidden>
-          Download confirmation
-        </button>
-        <button id="share-confirmation" class="button button-primary" type="button" hidden>
-          Share confirmation image
-        </button>
+        <div class="receipt-actions" id="receipt-actions" hidden>
+          <button id="print-confirmation" class="button button-primary" type="button"></button>
+          <button id="share-confirmation" class="button button-primary" type="button"></button>
+        </div>
+        <p class="receipt-print-hint" id="print-hint" hidden></p>
         <p id="share-status" role="status" aria-live="polite" hidden></p>
         <a
           id="calculator-link"
           class="button button-primary"
           href="https://carbonpocket.app/carbonpocket-calculator/"
           hidden
-        >
-          Back to calculator
-        </a>
+        ></a>
       </section>
     </main>
     <script>
       const CHECKOUT_API = 'https://carbonpocketapp.vercel.app/api/session';
       const sessionId = new URLSearchParams(window.location.search).get('session_id');
+      const receiptTranslations = window.CARBONPOCKET_RECEIPT_TRANSLATIONS;
+      const receiptLocales = {
+        en: 'en-US', pt: 'pt-BR', es: 'es-ES', fr: 'fr-FR', de: 'de-DE',
+        it: 'it-IT', ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN', ru: 'ru-RU',
+        ar: 'ar', sv: 'sv-SE',
+      };
       const heading = document.getElementById('payment-heading');
       const message = document.getElementById('payment-message');
       const details = document.getElementById('payment-details');
-      const downloadButton = document.getElementById('download-confirmation');
+      const actions = document.getElementById('receipt-actions');
+      const printButton = document.getElementById('print-confirmation');
       const shareButton = document.getElementById('share-confirmation');
       const shareStatus = document.getElementById('share-status');
+      const printHint = document.getElementById('print-hint');
       const calculatorLink = document.getElementById('calculator-link');
+      const languageSelect = document.getElementById('receipt-language');
+      let currentLanguage = 'en';
+      let currentPayment = null;
+      let paymentState = 'checking';
 
-      function formatPaymentAmount(payment) {
-        if (
-          !Number.isSafeInteger(payment.amount_total) ||
-          typeof payment.currency !== 'string' ||
-          !/^[a-z]{3}$/i.test(payment.currency)
-        ) {
-          return 'Amount unavailable';
-        }
-
-        const currency = payment.currency.toUpperCase();
-        const fractionDigits = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency,
-        }).resolvedOptions().maximumFractionDigits;
-        const amount = new Intl.NumberFormat('en-US', {
-          minimumFractionDigits: fractionDigits,
-          maximumFractionDigits: fractionDigits,
-        }).format(payment.amount_total / (10 ** fractionDigits));
-        return `${currency} ${amount}`;
+      function text(key) {
+        return receiptTranslations[currentLanguage][key];
       }
 
-      function escapeHtml(value) {
-        return String(value).replace(/[&<>"']/g, (character) => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;',
-        })[character]);
-      }
-
-      function downloadConfirmation(payment) {
-        const issuedOn = new Date().toISOString().slice(0, 10);
-        const kg = Number(payment.emissao_kg);
-        const hasKg = payment.emissao_kg !== null &&
-          payment.emissao_kg !== undefined &&
-          String(payment.emissao_kg).trim() !== '';
-        const compensatedKg = hasKg && Number.isFinite(kg) && kg >= 0
-          ? `${new Intl.NumberFormat('en-US').format(kg)} kg CO₂e`
-          : 'Not available';
-        const contributorName = typeof payment.nome === 'string' && payment.nome.trim()
+      function contributorName(payment) {
+        return typeof payment.nome === 'string' &&
+          payment.nome.trim() &&
+          payment.nome.trim().toLowerCase() !== 'anonymous'
           ? payment.nome.trim()
-          : 'Not provided';
-        const amount = formatPaymentAmount(payment);
-        const confirmation = `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Contribution confirmation | Carbon Pocket</title>
-</head>
-<body>
-  <main>
-    <h1>Contribution confirmation</h1>
-    <p><strong>Carbon Pocket</strong></p>
-    <dl>
-      <dt>Issue date</dt><dd>${escapeHtml(issuedOn)}</dd>
-      <dt>Contributor name</dt><dd>${escapeHtml(contributorName)}</dd>
-      <dt>Database record code</dt><dd>${escapeHtml(payment.database_code || 'Not available yet')}</dd>
-      <dt>Compensated volume</dt><dd>${escapeHtml(compensatedKg)}</dd>
-      <dt>Amount paid</dt><dd>${escapeHtml(amount)}</dd>
-      <dt>Transaction reference</dt><dd>${escapeHtml(sessionId)}</dd>
-    </dl>
-    <p>This document records a contribution made through Carbon Pocket. It is not a certificate, not a proof of neutralization, not carbon neutral, not net zero, not an official inventory, not a CRVE, and not valid for SBCE compliance or NDC claims. Compensation, not reduction: emissions still occur. Credits are retired in aggregate with other contributors.</p>
-    <p><a href="https://carbonpocket.app/carbonpocket-calculator/contributors.html">View contributors</a></p>
-  </main>
-</body>
-</html>`;
-        const blob = new Blob([confirmation], { type: 'text/html;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `carbon-pocket-confirmation-${sessionId.replace(/[^A-Za-z0-9_-]/g, '_')}.html`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+          : '';
       }
 
-      function roundedRect(context, x, y, width, height, radius) {
-        context.beginPath();
-        context.roundRect(x, y, width, height, radius);
+      function applyLanguage() {
+        const locale = receiptLocales[currentLanguage];
+        document.documentElement.lang = currentLanguage;
+        document.documentElement.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+        document.title = text('pageTitle');
+        languageSelect.setAttribute('aria-label', text('language'));
+        document.getElementById('payment-status').textContent = text('status');
+        document.getElementById('payment-name-label').textContent = text('contributor');
+        document.getElementById('payment-project-label').textContent = text('project');
+        document.getElementById('payment-quantity-label').textContent = text('volume');
+        document.getElementById('payment-email-label').textContent = text('email');
+        document.getElementById('payment-code-label').textContent = text('code');
+        printButton.textContent = text('printPdf');
+        shareButton.textContent = text('shareImage');
+        printHint.textContent = text('printHint');
+        calculatorLink.textContent = text('back');
+
+        if (paymentState === 'checking') {
+          heading.textContent = text('checking');
+          message.textContent = text('verifying');
+        } else if (paymentState === 'completed' && currentPayment) {
+          heading.textContent = text('completed');
+          message.textContent = text('completedMessage');
+          renderPaymentDetails(currentPayment, locale);
+        } else if (paymentState === 'processing') {
+          heading.textContent = text('processing');
+          message.textContent = text('processingMessage');
+        } else {
+          heading.textContent = text('error');
+          message.textContent = text('errorMessage');
+        }
       }
 
-      function createConfirmationImage(payment) {
+      function renderPaymentDetails(payment, locale) {
+        const name = contributorName(payment);
+        document.getElementById('payment-name').textContent = name;
+        document.getElementById('payment-name-row').hidden = !name;
+        const rawKg = payment.emissao_kg ?? payment.quantity;
+        const kg = Number(rawKg);
+        document.getElementById('payment-quantity').textContent =
+          Number.isFinite(kg) && kg >= 0
+            ? `${new Intl.NumberFormat(locale).format(kg)} kg CO₂e`
+            : '—';
+        document.getElementById('payment-email').textContent =
+          payment.customer_email ?? text('unavailable');
+        document.getElementById('payment-code').textContent =
+          payment.database_code ?? text('codePending');
+        details.hidden = false;
+        actions.hidden = false;
+        printHint.hidden = false;
+      }
+
+      async function createConfirmationImage(payment) {
         const canvas = document.createElement('canvas');
         canvas.width = 1200;
         canvas.height = 675;
@@ -146,53 +288,62 @@
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         context.fillStyle = 'rgba(22, 44, 33, 0.92)';
-        roundedRect(context, 56, 48, 1088, 579, 28);
+        context.beginPath();
+        context.roundRect(56, 48, 1088, 579, 28);
         context.fill();
         context.strokeStyle = 'rgba(234, 245, 233, 0.16)';
         context.lineWidth = 2;
         context.stroke();
 
-        context.fillStyle = '#72e19a';
-        context.font = '700 25px Inter, system-ui, sans-serif';
-        context.fillText('CARBON POCKET', 104, 116);
-
-        context.fillStyle = '#eaf5e9';
-        context.font = '700 52px Inter, system-ui, sans-serif';
-        context.fillText('Contribution confirmed', 104, 198);
-
-        const name = typeof payment.nome === 'string' &&
-          payment.nome.trim() &&
-          payment.nome.trim().toLowerCase() !== 'anonymous'
-          ? payment.nome.trim()
-          : '';
-        if (name) {
-          context.fillStyle = '#b9c8bc';
-          context.font = '400 28px Inter, system-ui, sans-serif';
-          context.fillText(`Contributor: ${name.slice(0, 48)}`, 104, 252);
+        const logo = document.getElementById('receipt-logo');
+        if (!logo.complete) {
+          await new Promise((resolve, reject) => {
+            logo.addEventListener('load', resolve, { once: true });
+            logo.addEventListener('error', reject, { once: true });
+          });
         }
+        context.drawImage(logo, 92, 72, 128, 128);
 
+        const name = contributorName(payment);
+        const locale = receiptLocales[currentLanguage];
         const rawKg = payment.emissao_kg ?? payment.quantity;
         const kg = Number(rawKg);
         const volume = Number.isFinite(kg) && kg >= 0
-          ? `${new Intl.NumberFormat('en-US').format(kg)} kg CO₂e`
-          : 'Volume unavailable';
-        context.fillStyle = '#72e19a';
-        context.font = '700 76px Inter, system-ui, sans-serif';
-        context.fillText(volume, 104, name ? 376 : 334);
-        context.fillStyle = '#b9c8bc';
-        context.font = '400 25px Inter, system-ui, sans-serif';
-        context.fillText('Contribution intended for emissions compensation', 104, name ? 426 : 384);
+          ? `${new Intl.NumberFormat(locale).format(kg)} kg CO₂e`
+          : '—';
 
+        context.fillStyle = '#eaf5e9';
+        context.font = '700 48px Inter, system-ui, sans-serif';
+        context.fillText(text('imageTitle'), 260, 148, 820);
+
+        let nextLine = 280;
+        const drawReceiptRow = (label, value) => {
+          context.fillStyle = '#b9c8bc';
+          context.font = '500 24px Inter, system-ui, sans-serif';
+          context.fillText(`${label}:`, 104, nextLine, 330);
+          context.fillStyle = '#a5f3c7';
+          context.font = '650 26px Inter, system-ui, sans-serif';
+          context.fillText(value, 390, nextLine, 700);
+          nextLine += 58;
+        };
+        if (name) {
+          drawReceiptRow(text('contributor'), name.slice(0, 48));
+        }
+        drawReceiptRow(text('project'), 'Brazilian Amazon REDD+ APD');
+        drawReceiptRow(text('volume'), volume);
         if (payment.database_code) {
-          context.fillStyle = '#eaf5e9';
-          context.font = '600 23px Inter, system-ui, sans-serif';
-          context.fillText(`Record code: ${payment.database_code}`, 104, name ? 484 : 442);
+          drawReceiptRow(text('code'), payment.database_code);
         }
 
-        context.fillStyle = '#9fb0a2';
-        context.font = '400 20px Inter, system-ui, sans-serif';
-        context.fillText('Compensation is not emissions reduction; emissions still occur.', 104, 562);
-        context.fillText('Credits are retired in aggregate. carbonpocket.app', 104, 596);
+        context.fillStyle = '#b9c8bc';
+        context.font = '400 21px Inter, system-ui, sans-serif';
+        context.fillText(text('imageEmissions'), 104, 554, 980);
+        context.fillText(
+          `${text('imageCredits')} carbonpocket.app`,
+          104,
+          596,
+          980,
+        );
         return new Promise((resolve, reject) => {
           canvas.toBlob((blob) => {
             if (blob) resolve(blob);
@@ -201,19 +352,19 @@
         });
       }
 
-      async function shareConfirmation(payment) {
+      async function shareConfirmation() {
         shareButton.disabled = true;
         shareStatus.hidden = true;
         try {
-          const blob = await createConfirmationImage(payment);
+          const blob = await createConfirmationImage(currentPayment);
           const file = new File([blob], 'carbon-pocket-confirmation.png', {
             type: 'image/png',
           });
           if (navigator.canShare?.({ files: [file] }) && navigator.share) {
             await navigator.share({
               files: [file],
-              title: 'Carbon Pocket contribution confirmation',
-              text: 'My contribution is intended for emissions compensation. Emissions still occur.',
+              title: text('shareTitle'),
+              text: text('shareText'),
             });
           } else {
             const url = URL.createObjectURL(blob);
@@ -224,13 +375,12 @@
             link.click();
             link.remove();
             setTimeout(() => URL.revokeObjectURL(url), 1000);
-            shareStatus.textContent =
-              'Image downloaded. You can now share it on your preferred social network.';
+            shareStatus.textContent = text('shareReady');
             shareStatus.hidden = false;
           }
         } catch (error) {
           if (error.name !== 'AbortError') {
-            shareStatus.textContent = 'Could not create or share the image. Please try again.';
+            shareStatus.textContent = text('shareError');
             shareStatus.hidden = false;
           }
         } finally {
@@ -239,10 +389,35 @@
       }
 
       function showVerificationError() {
-        heading.textContent = 'Payment could not be verified';
-        message.textContent = 'We could not verify this payment. Please check the link you received.';
+        paymentState = 'error';
+        applyLanguage();
         calculatorLink.hidden = false;
       }
+
+      languageSelect.addEventListener('change', () => {
+        currentLanguage = receiptTranslations[languageSelect.value]
+          ? languageSelect.value
+          : 'en';
+        try {
+          localStorage.setItem('carbonpocket-lang', currentLanguage);
+        } catch {
+          // Language selection remains available for the current page view.
+        }
+        shareStatus.hidden = true;
+        applyLanguage();
+      });
+
+      printButton.addEventListener('click', () => window.print());
+      shareButton.addEventListener('click', shareConfirmation);
+
+      try {
+        const savedLanguage = localStorage.getItem('carbonpocket-lang');
+        if (receiptTranslations[savedLanguage]) currentLanguage = savedLanguage;
+      } catch {
+        // Use English when browser storage is unavailable.
+      }
+      languageSelect.value = currentLanguage;
+      applyLanguage();
 
       async function verifyPayment() {
         if (!sessionId || !sessionId.startsWith('cs_') || sessionId.length < 10 || sessionId.length > 255) {
@@ -272,35 +447,12 @@
             payment.payment_status === 'paid' ||
             payment.payment_status === 'no_payment_required'
           ) {
-            heading.textContent = 'Contribution completed';
-            message.textContent =
-              'Your compensation purchase has been confirmed. Your emissions still occur.';
-            const contributorName = typeof payment.nome === 'string' &&
-              payment.nome.trim() &&
-              payment.nome.trim().toLowerCase() !== 'anonymous'
-              ? payment.nome.trim()
-              : '';
-            if (contributorName) {
-              document.getElementById('payment-name').textContent = contributorName;
-              document.getElementById('payment-name-row').hidden = false;
-            }
-            document.getElementById('payment-quantity').textContent =
-              `${payment.emissao_kg ?? payment.quantity ?? '—'} kg CO₂e`;
-            document.getElementById('payment-amount').textContent =
-              formatPaymentAmount(payment);
-            document.getElementById('payment-email').textContent =
-              payment.customer_email ?? 'Email unavailable';
-            document.getElementById('payment-code').textContent =
-              payment.database_code ?? 'Being generated';
-            details.hidden = false;
-            downloadButton.hidden = false;
-            shareButton.hidden = false;
-            downloadButton.addEventListener('click', () => downloadConfirmation(payment));
-            shareButton.addEventListener('click', () => shareConfirmation(payment));
+            currentPayment = payment;
+            paymentState = 'completed';
+            applyLanguage();
           } else if (payment.payment_status === 'unpaid') {
-            heading.textContent = 'Payment processing';
-            message.textContent =
-              'Your payment is being processed. You will receive confirmation shortly.';
+            paymentState = 'processing';
+            applyLanguage();
           } else {
             showVerificationError();
           }
