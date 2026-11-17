@@ -1,5 +1,8 @@
 import Stripe from 'stripe';
+import { eq } from 'drizzle-orm';
 import { sanitizeName } from './name.js';
+import { db } from '../lib/db.js';
+import { attestations } from '../lib/schema.js';
 
 function formatarBRL(centavos) {
   if (centavos === null || centavos === undefined) return null;
@@ -37,6 +40,18 @@ export default async function handler(req, res) {
       expand: ['line_items'],
     });
 
+    let databaseCode = null;
+    try {
+      const [contribution] = await db
+        .select({ code: attestations.code })
+        .from(attestations)
+        .where(eq(attestations.paymentReference, session.id))
+        .limit(1);
+      databaseCode = contribution?.code ?? null;
+    } catch (error) {
+      console.error('ERRO_COD_REGISTRO_CONTRIBUICAO', error.name);
+    }
+
     return res.status(200).json({
       status: session.status,
       payment_status: session.payment_status,
@@ -49,6 +64,7 @@ export default async function handler(req, res) {
       categoria: session.metadata?.categoria ?? null,
       emissao_kg: session.metadata?.emissao_kg ?? null,
       nome: sanitizeName(session.metadata?.nome),
+      database_code: databaseCode,
     });
   } catch {
     console.error('ERRO_STRIPE_SESSAO');
