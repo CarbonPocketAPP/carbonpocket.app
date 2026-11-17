@@ -4,7 +4,7 @@ const ui = {
   en: {
     // Intro e navegação
     intro_hero_title: 'Know your carbon footprint in minutes',
-    intro_hero_subtitle: 'Answer a short survey about how you move, eat and live. Get an estimate in kg CO2e per year and practical ways to reduce it.',
+    intro_hero_subtitle: 'Answer a short survey about how you move, eat and live. Get an estimate in kg CO2e per month and practical ways to reduce it.',
     intro_hero_cta: 'Start the survey',
     intro_how_it_works: 'How it works',
     intro_private: 'Private by design · calculated in your browser',
@@ -258,7 +258,7 @@ const ui = {
   },
   pt: {
     intro_hero_title: 'Descubra sua pegada de carbono em minutos',
-    intro_hero_subtitle: 'Responda a um questionário curto sobre como você se desloca, come e vive. Receba uma estimativa em kg CO2e por ano e formas práticas de reduzi-la.',
+    intro_hero_subtitle: 'Responda a um questionário curto sobre como você se desloca, come e vive. Receba uma estimativa em kg CO2e por mês e formas práticas de reduzi-la.',
     intro_hero_cta: 'Começar o questionário',
     intro_how_it_works: 'Como funciona',
     intro_private: 'Privado por padrão · calculado no seu navegador',
@@ -509,7 +509,7 @@ const ui = {
 ui.es = {
   ...ui.en,
   intro_hero_title: 'Conoce tu huella de carbono en minutos',
-  intro_hero_subtitle: 'Responde una encuesta breve sobre cómo te desplazas, comes y vives. Obtén una estimación en kg CO2e al año y formas prácticas de reducirla.',
+  intro_hero_subtitle: 'Responde una encuesta breve sobre cómo te desplazas, comes y vives. Obtén una estimación en kg CO2e al mes y formas prácticas de reducirla.',
   intro_hero_cta: 'Empezar la encuesta',
   intro_how_it_works: 'Cómo funciona',
   intro_private: 'Privado por diseño · calculado en tu navegador',
@@ -759,7 +759,7 @@ ui.es = {
 ui.fr = {
   ...ui.en,
   intro_hero_title: 'Connaissez votre empreinte carbone en quelques minutes',
-  intro_hero_subtitle: 'Répondez à un court questionnaire sur vos déplacements, votre alimentation et votre mode de vie. Obtenez une estimation en kg CO2e par an et des pistes concrètes pour la réduire.',
+  intro_hero_subtitle: 'Répondez à un court questionnaire sur vos déplacements, votre alimentation et votre mode de vie. Obtenez une estimation en kg CO2e par mois et des pistes concrètes pour la réduire.',
   intro_hero_cta: 'Commencer le questionnaire',
   intro_how_it_works: 'Comment ça marche',
   intro_private: 'Privé par défaut · calculé dans votre navigateur',
@@ -1009,7 +1009,7 @@ ui.fr = {
 ui.de = {
   ...ui.en,
   intro_hero_title: 'Ermitteln Sie Ihren CO2-Fußabdruck in wenigen Minuten',
-  intro_hero_subtitle: 'Beantworten Sie eine kurze Umfrage zu Mobilität, Ernährung und Alltag. Sie erhalten eine Schätzung in kg CO2e pro Jahr und konkrete Wege zur Reduktion.',
+  intro_hero_subtitle: 'Beantworten Sie eine kurze Umfrage zu Mobilität, Ernährung und Alltag. Sie erhalten eine Schätzung in kg CO2e pro Monat und konkrete Wege zur Reduktion.',
   intro_hero_cta: 'Umfrage starten',
   intro_how_it_works: 'So funktioniert es',
   intro_private: 'Privat by design · im Browser berechnet',
@@ -1259,7 +1259,7 @@ ui.de = {
 ui.it = {
   ...ui.en,
   intro_hero_title: 'Scopri la tua impronta di carbonio in pochi minuti',
-  intro_hero_subtitle: "Rispondi a un breve questionario su come ti muovi, mangi e vivi. Ottieni una stima in kg CO2e all'anno e modi concreti per ridurla.",
+  intro_hero_subtitle: "Rispondi a un breve questionario su come ti muovi, mangi e vivi. Ottieni una stima in kg CO2e al mese e modi concreti per ridurla.",
   intro_hero_cta: 'Inizia il questionario',
   intro_how_it_works: 'Come funziona',
   intro_private: 'Privato per design · calcolato nel tuo browser',

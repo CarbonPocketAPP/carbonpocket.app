@@ -5,7 +5,7 @@
 const uiTranslations = {
   en: {
     intro_hero_title: 'Know your carbon footprint in minutes',
-    intro_hero_subtitle: 'Answer a short survey about how you move, eat and live. Get an estimate in kg CO2e per year and practical ways to reduce it.',
+    intro_hero_subtitle: 'Answer a short survey about how you move, eat and live. Get an estimate in kg CO2e per month and practical ways to reduce it.',
     intro_hero_cta: 'Start the survey',
     intro_how_it_works: 'How it works',
     intro_survey_intro: 'Answer a few questions about your routine. The result is an estimate, not an official inventory.',
@@ -97,7 +97,7 @@ const uiTranslations = {
   },
   pt: {
     intro_hero_title: 'Descubra sua pegada de carbono em minutos',
-    intro_hero_subtitle: 'Responda a um questionário curto sobre como você se desloca, come e vive. Receba uma estimativa em kg CO2e por ano e formas práticas de reduzi-la.',
+    intro_hero_subtitle: 'Responda a um questionário curto sobre como você se desloca, come e vive. Receba uma estimativa em kg CO2e por mês e formas práticas de reduzi-la.',
     intro_hero_cta: 'Começar o questionário',
     intro_how_it_works: 'Como funciona',
     intro_survey_intro: 'Responda a algumas perguntas sobre a sua rotina. O resultado é uma estimativa, não um inventário oficial.',
@@ -191,7 +191,7 @@ const uiTranslations = {
 uiTranslations.es = {
   ...uiTranslations.en,
   intro_hero_title: 'Conoce tu huella de carbono en minutos',
-  intro_hero_subtitle: 'Responde una encuesta breve sobre cómo te desplazas, comes y vives. Obtén una estimación en kg CO2e al año y formas prácticas de reducirla.',
+  intro_hero_subtitle: 'Responde una encuesta breve sobre cómo te desplazas, comes y vives. Obtén una estimación en kg CO2e al mes y formas prácticas de reducirla.',
   intro_hero_cta: 'Empezar la encuesta',
   intro_how_it_works: 'Cómo funciona',
   intro_survey_intro: 'Responde algunas preguntas sobre tu rutina. El resultado es una estimación, no un inventario oficial.',
@@ -284,7 +284,7 @@ uiTranslations.es = {
 uiTranslations.fr = {
   ...uiTranslations.en,
   intro_hero_title: 'Connaissez votre empreinte carbone en quelques minutes',
-  intro_hero_subtitle: 'Répondez à un court questionnaire sur vos déplacements, votre alimentation et votre mode de vie. Obtenez une estimation en kg CO2e par an et des pistes concrètes pour la réduire.',
+  intro_hero_subtitle: 'Répondez à un court questionnaire sur vos déplacements, votre alimentation et votre mode de vie. Obtenez une estimation en kg CO2e par mois et des pistes concrètes pour la réduire.',
   intro_hero_cta: 'Commencer le questionnaire',
   intro_how_it_works: 'Comment ça marche',
   intro_survey_intro: 'Répondez à quelques questions sur votre quotidien. Le résultat est une estimation, pas un inventaire officiel.',
@@ -377,7 +377,7 @@ uiTranslations.fr = {
 uiTranslations.de = {
   ...uiTranslations.en,
   intro_hero_title: 'Ermitteln Sie Ihren CO2-Fußabdruck in wenigen Minuten',
-  intro_hero_subtitle: 'Beantworten Sie eine kurze Umfrage zu Mobilität, Ernährung und Alltag. Sie erhalten eine Schätzung in kg CO2e pro Jahr und konkrete Wege zur Reduktion.',
+  intro_hero_subtitle: 'Beantworten Sie eine kurze Umfrage zu Mobilität, Ernährung und Alltag. Sie erhalten eine Schätzung in kg CO2e pro Monat und konkrete Wege zur Reduktion.',
   intro_hero_cta: 'Umfrage starten',
   intro_how_it_works: 'So funktioniert es',
   intro_survey_intro: 'Beantworten Sie einige Fragen zu Ihrem Alltag. Das Ergebnis ist eine Schätzung, kein offizielles Inventar.',
@@ -470,7 +470,7 @@ uiTranslations.de = {
 uiTranslations.it = {
   ...uiTranslations.en,
   intro_hero_title: 'Scopri la tua impronta di carbonio in pochi minuti',
-  intro_hero_subtitle: "Rispondi a un breve questionario su come ti muovi, mangi e vivi. Ottieni una stima in kg CO2e all'anno e modi concreti per ridurla.",
+  intro_hero_subtitle: "Rispondi a un breve questionario su come ti muovi, mangi e vivi. Ottieni una stima in kg CO2e al mese e modi concreti per ridurla.",
   intro_hero_cta: 'Inizia il questionario',
   intro_how_it_works: 'Come funziona',
   intro_survey_intro: 'Rispondi a qualche domanda sulla tua routine. Il risultato è una stima, non un inventario ufficiale.',
@@ -563,7 +563,7 @@ uiTranslations.it = {
 uiTranslations.zh = {
   ...uiTranslations.en,
   intro_hero_title: '几分钟了解你的碳足迹',
-  intro_hero_subtitle: '回答一份关于出行、饮食和生活方式的简短问卷，即可获得以 kg CO2e/年 为单位的估算值，以及切实可行的减排方法。',
+  intro_hero_subtitle: '回答一份关于出行、饮食和生活方式的简短问卷，即可获得以 kg CO2e/月 为单位的估算值，以及切实可行的减排方法。',
   intro_hero_cta: '开始问卷',
   intro_how_it_works: '如何运作',
   intro_survey_intro: '回答几个关于你日常习惯的问题。结果是估算值，并非官方清单。',
@@ -656,7 +656,7 @@ uiTranslations.zh = {
 uiTranslations.ja = {
   ...uiTranslations.en,
   intro_hero_title: '数分で自分のカーボンフットプリントを把握',
-  intro_hero_subtitle: '移動・食事・暮らしについての短いアンケートに答えると、年間 kg CO2e の推定値と、削減のための具体的な方法がわかります。',
+  intro_hero_subtitle: '移動・食事・暮らしについての短いアンケートに答えると、月間 kg CO2e の推定値と、削減のための具体的な方法がわかります。',
   intro_hero_cta: 'アンケートを始める',
   intro_how_it_works: '仕組み',
   intro_survey_intro: '日常についてのいくつかの質問に答えてください。結果は推定値であり、正式なインベントリではありません。',
@@ -749,7 +749,7 @@ uiTranslations.ja = {
 uiTranslations.ko = {
   ...uiTranslations.en,
   intro_hero_title: '몇 분 만에 내 탄소 발자국 확인하기',
-  intro_hero_subtitle: '이동, 식사, 생활 방식에 대한 짧은 설문에 답하면 연간 kg CO2e 추정치와 실질적인 감축 방법을 알려드립니다.',
+  intro_hero_subtitle: '이동, 식사, 생활 방식에 대한 짧은 설문에 답하면 월간 kg CO2e 추정치와 실질적인 감축 방법을 알려드립니다.',
   intro_hero_cta: '설문 시작',
   intro_how_it_works: '이용 방법',
   intro_survey_intro: '일상에 대한 몇 가지 질문에 답해 주세요. 결과는 추정치이며 공식 인벤토리가 아닙니다.',
@@ -842,7 +842,7 @@ uiTranslations.ko = {
 uiTranslations.ru = {
   ...uiTranslations.en,
   intro_hero_title: 'Узнайте свой углеродный след за несколько минут',
-  intro_hero_subtitle: 'Ответьте на короткий опрос о том, как вы передвигаетесь, питаетесь и живёте. Получите оценку в кг CO2e в год и практичные способы её снизить.',
+  intro_hero_subtitle: 'Ответьте на короткий опрос о том, как вы передвигаетесь, питаетесь и живёте. Получите оценку в кг CO2e в месяц и практичные способы её снизить.',
   intro_hero_cta: 'Начать опрос',
   intro_how_it_works: 'Как это работает',
   intro_survey_intro: 'Ответьте на несколько вопросов о вашем распорядке. Результат — оценка, а не официальная инвентаризация.',
@@ -935,7 +935,7 @@ uiTranslations.ru = {
 uiTranslations.ar = {
   ...uiTranslations.en,
   intro_hero_title: 'اعرف بصمتك الكربونية في دقائق',
-  intro_hero_subtitle: 'أجب عن استبيان قصير حول تنقلك وطعامك ونمط حياتك. احصل على تقدير بالكيلوغرام CO2e سنويًا وطرق عملية لتقليله.',
+  intro_hero_subtitle: 'أجب عن استبيان قصير حول تنقلك وطعامك ونمط حياتك. احصل على تقدير بالكيلوغرام CO2e شهريًا وطرق عملية لتقليله.',
   intro_hero_cta: 'ابدأ الاستبيان',
   intro_how_it_works: 'كيف يعمل',
   intro_survey_intro: 'أجب عن بعض الأسئلة حول روتينك. النتيجة تقدير وليست جردًا رسميًا.',
@@ -1028,7 +1028,7 @@ uiTranslations.ar = {
 uiTranslations.sv = {
   ...uiTranslations.en,
   intro_hero_title: 'Se ditt koldioxidavtryck på några minuter',
-  intro_hero_subtitle: 'Svara på en kort enkät om hur du reser, äter och bor. Du får en uppskattning i kg CO2e per år och konkreta sätt att minska den.',
+  intro_hero_subtitle: 'Svara på en kort enkät om hur du reser, äter och bor. Du får en uppskattning i kg CO2e per månad och konkreta sätt att minska den.',
   intro_hero_cta: 'Starta enkäten',
   intro_how_it_works: 'Så fungerar det',
   intro_survey_intro: 'Svara på några frågor om din vardag. Resultatet är en uppskattning, inte ett officiellt inventarium.',
