@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
 import { db } from '../../lib/db.js';
 import { attestations, retirementBatches } from '../../lib/schema.js';
-import { isAuthorizedContributionsRequest } from '../../lib/mobile.js';
+import { contributionsAuthorizationError } from '../../lib/mobile.js';
 
 const LIMITS = 'Compensation, not reduction: emissions still occur. Credits are retired in aggregate with other contributors. Not carbon neutral, not net zero, not an official inventory, not a CRVE, and not valid for SBCE compliance or NDC claims.';
 const MAX_DEVICES = 10;
@@ -14,9 +14,13 @@ function parseDevices(queryValue) {
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'private, no-store');
-  if (req.headers?.origin !== undefined) return res.status(403).json({ error: 'origin_not_allowed' });
   if (req.method !== 'GET') return res.status(405).json({ error: 'method_not_allowed' });
-  if (!isAuthorizedContributionsRequest(req)) return res.status(401).json({ error: 'unauthorized' });
+  const authorizationError = contributionsAuthorizationError(req);
+  if (authorizationError) {
+    const status = authorizationError === 'server_misconfigured' ? 500 : 401;
+    return res.status(status).json({ error: authorizationError });
+  }
+  if (req.headers?.origin !== undefined) return res.status(403).json({ error: 'origin_not_allowed' });
 
   const devices = parseDevices(req.query?.device);
   if (devices.length === 0 || devices.length > MAX_DEVICES ||

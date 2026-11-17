@@ -7,3 +7,7 @@ sets the security response headers for static assets. GitHub Pages does not
 apply `_headers`; if the custom domain is still served by GitHub Pages, move
 the deployment or put Cloudflare in front of it for these headers to take
 effect.
+
+## Database schema changes
+
+This project must never run `drizzle-kit push`. Use `drizzle-kit generate` only, and review the generated SQL before applying it to Neon.

@@ -1,14 +1,18 @@
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { attestations } from '../../lib/schema.js';
 import { db } from '../../lib/db.js';
-import { isAuthorizedContributionsRequest } from '../../lib/mobile.js';
+import { contributionsAuthorizationError } from '../../lib/mobile.js';
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
 // Somente REFUND e chargeback devem chamar esta rota; cancelar renovação não é devolução.
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
-  if (!isAuthorizedContributionsRequest(req)) return res.status(401).json({ error: 'unauthorized' });
+  const authorizationError = contributionsAuthorizationError(req);
+  if (authorizationError) {
+    const status = authorizationError === 'server_misconfigured' ? 500 : 401;
+    return res.status(status).json({ error: authorizationError });
+  }
 
   const body = req.body;
   if (!body || typeof body !== 'object' || Array.isArray(body) ||

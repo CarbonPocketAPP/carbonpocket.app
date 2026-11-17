@@ -1,5 +1,5 @@
 import { MOBILE_CATALOG } from '../lib/mobile-catalog.js';
-import { isAuthorizedContributionsRequest, registrarContribuicaoMovel } from '../lib/mobile.js';
+import { contributionsAuthorizationError, registrarContribuicaoMovel } from '../lib/mobile.js';
 
 const REQUIRED_FIELDS = [
   'source', 'transactionId', 'productId', 'store', 'priceCents', 'currency',
@@ -35,7 +35,11 @@ function isValidPayload(body) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
-  if (!isAuthorizedContributionsRequest(req)) return res.status(401).json({ error: 'unauthorized' });
+  const authorizationError = contributionsAuthorizationError(req);
+  if (authorizationError) {
+    const status = authorizationError === 'server_misconfigured' ? 500 : 401;
+    return res.status(status).json({ error: authorizationError });
+  }
 
   const body = parseBody(req);
   if (!body || typeof body !== 'object' || Array.isArray(body)) return invalidPayload(res);
