@@ -62,9 +62,11 @@
       const CREDITOS_KG_MINIMO = 100;
       const CREDITOS_KG_MAXIMO = 10000;
       const CREDITOS_KG_PASSO = 100;
+      const CREDITOS_KG_MINIMO_MEDIA = 25;
       const PRECO_BR_AVULSO_POR_KG = 0.11;
       let paisSelecionado = 'nao_informado';
       let idiomaSelecionado = 'en';
+      let usarMediaPais = false;
       const seletoresPaisRegistrados = new WeakSet();
       // Valores em dólar são referência comercial; em real são a cobrança efetiva. cambioReferencia define preços, sem conversão em tempo real.
       const PRECOS = {
@@ -375,10 +377,11 @@
           if (campo.value === '') return;
           const valorDigitado = Number(campo.value);
           if (!Number.isFinite(valorDigitado)) return;
-          const arredondado = Math.round(valorDigitado / CREDITOS_KG_PASSO) * CREDITOS_KG_PASSO;
+          const passo = usarMediaPais ? 1 : CREDITOS_KG_PASSO;
+          const arredondado = Math.round(valorDigitado / passo) * passo;
           ultimoValorValido = Math.min(
             CREDITOS_KG_MAXIMO,
-            Math.max(CREDITOS_KG_MINIMO, arredondado),
+            Math.max(usarMediaPais ? CREDITOS_KG_MINIMO_MEDIA : CREDITOS_KG_MINIMO, arredondado),
           );
           slider.value = String(ultimoValorValido);
           exibirCreditos(ultimoValorValido);
@@ -389,10 +392,11 @@
           if (campo.value === '' || !Number.isFinite(valorDigitado)) {
             campo.value = String(ultimoValorValido);
           } else {
-            const arredondado = Math.round(valorDigitado / CREDITOS_KG_PASSO) * CREDITOS_KG_PASSO;
+            const passo = usarMediaPais ? 1 : CREDITOS_KG_PASSO;
+            const arredondado = Math.round(valorDigitado / passo) * passo;
             ultimoValorValido = Math.min(
               CREDITOS_KG_MAXIMO,
-              Math.max(CREDITOS_KG_MINIMO, arredondado),
+              Math.max(usarMediaPais ? CREDITOS_KG_MINIMO_MEDIA : CREDITOS_KG_MINIMO, arredondado),
             );
             campo.value = String(ultimoValorValido);
           }
@@ -883,18 +887,86 @@
         const seletor = document.querySelector('[data-testid="select-country"]');
         if (!seletor) return;
         paisSelecionado = seletor.value;
+        atualizarOpcaoMediaPais();
         if (seletoresPaisRegistrados.has(seletor)) return;
 
         seletoresPaisRegistrados.add(seletor);
         seletor.addEventListener('change', () => {
           paisSelecionado = seletor.value;
+          if (usarMediaPais) {
+            usarMediaPais = false;
+            const campo = document.getElementById('campo-kg');
+            const slider = document.getElementById('slider-kg');
+            if (campo && slider) {
+              campo.min = String(CREDITOS_KG_MINIMO);
+              campo.step = String(CREDITOS_KG_PASSO);
+              slider.min = String(CREDITOS_KG_MINIMO);
+              slider.step = String(CREDITOS_KG_PASSO);
+              const valor = Math.min(
+                CREDITOS_KG_MAXIMO,
+                Math.max(CREDITOS_KG_MINIMO, Math.round(Number(campo.value) / CREDITOS_KG_PASSO) * CREDITOS_KG_PASSO),
+              );
+              campo.value = String(valor);
+              slider.value = String(valor);
+              campo.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+          }
+          atualizarOpcaoMediaPais();
           atualizarCheckout();
           renderizarPainelCheckout();
         });
       }
 
+      function selecionarMediaPais() {
+        const seletorPais = document.querySelector('[data-testid="select-country"]');
+        const mediaKg = Number(seletorPais?.selectedOptions?.[0]?.dataset.average);
+        const secao = document.getElementById('creditos-avulsos');
+        const campo = secao?.querySelector('#campo-kg');
+        const slider = secao?.querySelector('#slider-kg');
+        if (!Number.isInteger(mediaKg) || mediaKg < CREDITOS_KG_MINIMO_MEDIA || mediaKg > CREDITOS_KG_MAXIMO || !campo || !slider) {
+          console.error('MEDIA_PAIS_INDISPONIVEL', paisSelecionado);
+          return;
+        }
+
+        usarMediaPais = true;
+        campo.min = String(CREDITOS_KG_MINIMO_MEDIA);
+        campo.step = '1';
+        slider.min = String(CREDITOS_KG_MINIMO_MEDIA);
+        slider.step = '1';
+        campo.value = String(mediaKg);
+        slider.value = String(mediaKg);
+        slider.dispatchEvent(new Event('input', { bubbles: true }));
+        secao.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        campo.focus({ preventScroll: true });
+      }
+
+      function atualizarOpcaoMediaPais() {
+        const botaoPesquisa = document.querySelector('[data-testid="button-start-survey"]');
+        const seletorPais = document.querySelector('[data-testid="select-country"]');
+        const mediaKg = Number(seletorPais?.selectedOptions?.[0]?.dataset.average);
+        let botao = document.getElementById('button-use-country-average');
+
+        if (!botaoPesquisa || !Number.isInteger(mediaKg) || mediaKg < CREDITOS_KG_MINIMO_MEDIA || mediaKg > CREDITOS_KG_MAXIMO) {
+          botao?.remove();
+          return;
+        }
+
+        if (!botao) {
+          botao = document.createElement('button');
+          botao.id = 'button-use-country-average';
+          botao.type = 'button';
+          botao.className = 'button button-primary result-gate-button';
+          botao.addEventListener('click', selecionarMediaPais);
+        }
+        botao.textContent = tTokens('intro_use_country_average', idiomaSelecionado, {
+          KG: new Intl.NumberFormat(idiomaSelecionado).format(mediaKg),
+        });
+        botaoPesquisa.insertAdjacentElement('afterend', botao);
+      }
+
       function atualizarCheckout() {
         registrarPaisSelecionado();
+        atualizarOpcaoMediaPais();
         const emissaoKg = obterEmissaoAtual();
         if (document.querySelector('[data-testid="text-total"]')) {
           criarPainelCheckout();
@@ -931,6 +1003,7 @@
             // Language selection still works for this page view.
           }
           renderizarPainelCheckout();
+          atualizarOpcaoMediaPais();
           aplicarTraducoesCalculadora();
         });
       }

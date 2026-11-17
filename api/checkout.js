@@ -83,7 +83,7 @@ export default async function handler(req, res) {
     (
       typeof body.emissaoKg !== 'number' ||
       !Number.isInteger(body.emissaoKg) ||
-      body.emissaoKg < 100 ||
+      body.emissaoKg < 25 ||
       body.emissaoKg > 10000
     )
   ) {

@@ -1118,6 +1118,24 @@ uiTranslations.sv = {
   footer_methodology: 'Metodik',
   footer_contact: 'Kontakt'
 };
+const averageCountryLabels = {
+  en: 'Use country average · [KG] kg CO2e/month',
+  pt: 'Usar média do país · [KG] kg CO2e/mês',
+  es: 'Usar la media del país · [KG] kg CO2e/mes',
+  fr: 'Utiliser la moyenne du pays · [KG] kg CO2e/mois',
+  de: 'Landesdurchschnitt verwenden · [KG] kg CO2e/Monat',
+  it: 'Usa la media del paese · [KG] kg CO2e/mese',
+  zh: '使用国家平均值 · [KG] kg CO2e/月',
+  ja: '国の平均を使う · [KG] kg CO2e/月',
+  ko: '국가 평균 사용 · [KG] kg CO2e/월',
+  ru: 'Использовать среднее по стране · [KG] кг CO2e/мес.',
+  ar: 'استخدم متوسط الدولة · [KG] كجم CO2e/شهر',
+  sv: 'Använd landets genomsnitt · [KG] kg CO2e/månad'
+};
+Object.entries(averageCountryLabels).forEach(function ([lang, text]) {
+  uiTranslations[lang].intro_use_country_average = text;
+});
+
 // Mescla as chaves de UI no objeto translations já existente.
 Object.keys(uiTranslations).forEach(function (lang) {
   translations[lang] = Object.assign({}, translations[lang], uiTranslations[lang]);
