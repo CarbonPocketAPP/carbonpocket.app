@@ -41,6 +41,7 @@ async function main() {
       .where(and(
         eq(attestations.status, 'pending_batch'),
         isNull(attestations.batchId),
+        isNull(attestations.reversedAt),
       ));
 
     const totalKg = Number(pending.totalKg);
@@ -115,6 +116,7 @@ async function main() {
         .where(and(
           eq(attestations.status, 'pending_batch'),
           isNull(attestations.batchId),
+          isNull(attestations.reversedAt),
         ));
     });
 
