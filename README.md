@@ -30,21 +30,27 @@ aggregates the stored payments into totals, active streaks, and plan badges.
 Monthly payments count in their paid month; annual invoices use the Stripe
 service period to credit the covered months to the streak.
 
-Before deploying this change:
+Before using the ledger:
 
 1. In the Neon SQL Editor, select the production database and run
    `scripts/add-contributor-ledger.sql`. This migration is additive and
    idempotent; do not use `drizzle-kit push`.
-2. Generate a random secret of at least 32 bytes and save it as
-   `CONTRIBUTOR_IDENTITY_SECRET` in both the Vercel environment and the local
-   `.env.local` used for backfill. Keep this secret stable; rotating it creates
-   different profile identities. Never commit or share it.
-3. With `STRIPE_SECRET_KEY` and `DATABASE_URL_UNPOOLED` configured locally, run
-   `node scripts/backfill-contributor-ledger.js` once. It imports paid
-   historical checkouts and subscription invoices idempotently; it does not
-   send email or print customer addresses.
-4. Confirm the backfill summary and that the ledger appears in Neon before
-   deploying the API that reads these tables.
+2. Set `CONTRIBUTOR_IDENTITY_SECRET` in the Vercel Production environment.
+   Keep it stable; rotating it creates different profile identities.
+3. Ensure Vercel Production has its existing `STRIPE_SECRET_KEY` and
+   `DATABASE_URL` values. Historical imports run inside Vercel and do not
+   require Stripe or Neon credentials on a local computer.
+4. Generate a temporary random key of at least 32 bytes, set it as
+   `CONTRIBUTOR_BACKFILL_KEY` in Vercel Production, and deploy. From the
+   checked-out repository, run
+   `.\scripts\run-vercel-contributor-backfill.ps1` in PowerShell and enter the
+   same temporary key at the secure prompt. The PowerShell script only sends
+   authenticated batch requests; Stripe and database access stay in Vercel.
+   The job is idempotent and can safely be restarted if interrupted.
+5. After `CONTRIBUTOR_LEDGER_BACKFILL_COMPLETE`, remove
+   `CONTRIBUTOR_BACKFILL_KEY` from Vercel and redeploy to disable the temporary
+   endpoint. The script imports paid checkouts and invoices; it does not send
+   email or print customer addresses.
 
 ## Contribution receipt emails
 
