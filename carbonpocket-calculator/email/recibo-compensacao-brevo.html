@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <!-- Brevo params: nome (use "Contributor" if empty), badge_usuario (badge icon URL or empty), emissao_kg, email, codigo_registro. -->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>Compensation receipt | Carbon Pocket</title>
+  </head>
+  <body style="margin:0;padding:0;background:#0b1713;color:#eaf5e9;font-family:Arial,Helvetica,sans-serif;">
+    <div style="display:none;font-size:1px;color:#0b1713;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+      Your compensation purchase is confirmed. Your emissions still occur.
+    </div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0b1713;">
+      <tr>
+        <td align="center" style="padding:24px 12px;">
+          <table role="presentation" width="720" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:720px;table-layout:fixed;background:#162c21;border:1px solid rgba(234,245,233,.16);border-radius:24px;">
+            <tr>
+              <td align="center" style="padding:28px 24px 0;">
+                <img
+                  src="https://carbonpocket.app/carbonpocket-calculator/carbonpocket-logo.png"
+                  width="96"
+                  height="96"
+                  alt="Carbon Pocket"
+                  style="display:block;width:96px;height:96px;margin:0 auto 16px;border:0;border-radius:20px;object-fit:cover;"
+                />
+                <p style="margin:0 0 8px;color:#9fb0a2;font-size:12px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;">
+                  Payment status
+                </p>
+                <h1 style="margin:0;color:#eaf5e9;font-size:30px;font-weight:500;line-height:1.25;text-align:center;">
+                  Contribution confirmed
+                </h1>
+                <p style="margin:14px auto 0;max-width:560px;color:#eaf5e9;font-size:16px;line-height:1.6;text-align:center;">
+                  Your compensation purchase is confirmed. Your emissions still occur.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:30px 32px 28px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:500px;margin:0 auto;border-collapse:collapse;table-layout:fixed;">
+                  <tr>
+                    <td width="42%" valign="top" style="padding:12px 12px 12px 0;border-bottom:1px solid rgba(234,245,233,.1);color:#b9c8bc;font-size:15px;line-height:1.5;">
+                      Contributor
+                    </td>
+                    <td valign="top" align="left" style="padding:12px 0;border-bottom:1px solid rgba(234,245,233,.1);color:#a5f3c7;font-size:15px;font-weight:bold;line-height:1.5;overflow-wrap:anywhere;">
+                      {{ params.nome }}
+                      <img
+                        src="{{ params.badge_usuario }}"
+                        width="24"
+                        height="24"
+                        alt=""
+                        style="display:inline-block;width:24px;height:24px;margin-left:6px;border:0;vertical-align:middle;"
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="42%" valign="top" style="padding:12px 12px 12px 0;border-bottom:1px solid rgba(234,245,233,.1);color:#b9c8bc;font-size:15px;line-height:1.5;">
+                      Project
+                    </td>
+                    <td valign="top" align="left" style="padding:12px 0;border-bottom:1px solid rgba(234,245,233,.1);font-size:15px;font-weight:bold;line-height:1.5;overflow-wrap:anywhere;">
+                      <a href="https://brcarbon.com.br/brazilian-amazon/" style="color:#a5f3c7;text-decoration:underline;">Brazilian Amazon REDD+ APD</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="42%" valign="top" style="padding:12px 12px 12px 0;border-bottom:1px solid rgba(234,245,233,.1);color:#b9c8bc;font-size:15px;line-height:1.5;">
+                      Compensation volume
+                    </td>
+                    <td valign="top" align="left" style="padding:12px 0;border-bottom:1px solid rgba(234,245,233,.1);color:#a5f3c7;font-size:15px;font-weight:bold;line-height:1.5;overflow-wrap:anywhere;">
+                      {{ params.emissao_kg }} kg CO₂e
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="42%" valign="top" style="padding:12px 12px 12px 0;border-bottom:1px solid rgba(234,245,233,.1);color:#b9c8bc;font-size:15px;line-height:1.5;">
+                      Email
+                    </td>
+                    <td valign="top" align="left" style="padding:12px 0;border-bottom:1px solid rgba(234,245,233,.1);color:#a5f3c7;font-size:15px;font-weight:bold;line-height:1.5;overflow-wrap:anywhere;">
+                      {{ params.email }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="42%" valign="top" style="padding:12px 12px 12px 0;color:#b9c8bc;font-size:15px;line-height:1.5;">
+                      Database record code
+                    </td>
+                    <td valign="top" align="left" style="padding:12px 0;color:#a5f3c7;font-size:15px;font-weight:bold;line-height:1.5;overflow-wrap:anywhere;">
+                      {{ params.codigo_registro }}
+                    </td>
+                  </tr>
+                </table>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:500px;margin:20px auto 0;table-layout:fixed;border:1px solid rgba(234,245,233,.16);border-radius:10px;background:rgba(11,23,19,.45);">
+                  <tr>
+                    <td style="padding:14px 16px;color:#b9c8bc;font-size:13px;line-height:1.6;">
+                      This contribution is not certified, does not constitute carbon neutralization, is not a CRVE, and is not valid for SBCE or NDC purposes.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

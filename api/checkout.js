@@ -116,7 +116,8 @@ export default async function handler(req, res) {
         Math.max(25, Math.round(Number(body.emissaoKg) || 0)),
       );
     const nome = sanitizeName(body.nome);
-      const optOut = body.exibirNome === false;
+    const publicNameConsent = body.exibirNome === true;
+    const optOut = !publicNameConsent;
     const email = String(body.email || '');
     const origensValidas = ['site', 'app'];
     const origem = origensValidas.includes(body.origem) ? body.origem : 'site';
@@ -129,17 +130,11 @@ export default async function handler(req, res) {
       emissao_kg: String(quantidade),
       categoria,
       opt_out: String(optOut),
+      exibir_nome: String(publicNameConsent),
       // Registra a origem da compra; o app deve enviar origem = 'app'.
       origem,
       pais,
     };
-    const subscriptionMetadata = {
-      ...metadata,
-      kg_por_ano: '{}',
-      faturas_por_ano: '{}',
-      ultima_invoice_id: '',
-    };
-
     const session = await stripe.checkout.sessions.create({
       mode,
       line_items: [
@@ -151,7 +146,7 @@ export default async function handler(req, res) {
       ...(email ? { customer_email: email } : {}),
       metadata,
       ...(!['unico', 'avulso'].includes(categoria)
-        ? { subscription_data: { metadata: subscriptionMetadata } }
+        ? { subscription_data: { metadata } }
         : {}),
       success_url: `${base}/carbonpocket-calculator/sucesso.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/carbonpocket-calculator/`,

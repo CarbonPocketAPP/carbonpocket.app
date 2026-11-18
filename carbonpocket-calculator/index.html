@@ -64,6 +64,20 @@
       const CREDITOS_KG_PASSO = 100;
       const CREDITOS_KG_MINIMO_MEDIA = 25;
       const PRECO_BR_AVULSO_POR_KG = 0.11;
+      const PUBLIC_NAME_CONSENT_LABELS = {
+        en: 'I agree to display my name on the public contributors page.',
+        pt: 'Autorizo a exibição do meu nome na página pública de colaboradores.',
+        es: 'Autorizo que mi nombre aparezca en la página pública de colaboradores.',
+        fr: 'J’accepte que mon nom apparaisse sur la page publique des contributeurs.',
+        de: 'Ich stimme zu, dass mein Name auf der öffentlichen Unterstützerseite erscheint.',
+        it: 'Acconsento alla visualizzazione del mio nome nella pagina pubblica dei sostenitori.',
+        ja: '公開貢献者ページに自分の名前を表示することに同意します。',
+        ko: '공개 기여자 페이지에 이름을 표시하는 데 동의합니다.',
+        zh: '我同意在公开贡献者页面显示我的姓名。',
+        ru: 'Я согласен(на) показывать своё имя на общедоступной странице участников.',
+        ar: 'أوافق على عرض اسمي في صفحة المساهمين العامة.',
+        sv: 'Jag samtycker till att mitt namn visas på den offentliga bidragssidan.',
+      };
       let paisSelecionado = 'nao_informado';
       let idiomaSelecionado = 'en';
       let usarMediaPais = false;
@@ -158,7 +172,7 @@
         }
       }
 
-      async function irParaCheckout(categoria, emissoesKg, nome, email) {
+      async function irParaCheckout(categoria, emissoesKg, nome, email, exibirNome) {
         if (!email) {
           throw new Error('Email is required');
         }
@@ -172,6 +186,7 @@
             nome,
             email,
             pais: paisSelecionado,
+            exibirNome,
           }),
         });
 
@@ -198,6 +213,7 @@
         const destino = painelReduzir || ancoraResultado;
 
         if (existente) {
+          adicionarConsentimentoNome(existente);
           moverCamposCheckoutParaPainel(existente);
           if (existente.parentElement !== destino) {
             destino.appendChild(existente);
@@ -220,6 +236,10 @@
             </div>
           </div>
           <div id="checkout-campos-slot"></div>
+          <label class="checkout-public-name-consent" style="display:flex;align-items:flex-start;gap:8px;margin:12px 0;color:#b9c8bc;font-size:13px;line-height:1.5;">
+            <input id="public-name-consent" type="checkbox" style="margin-top:3px;" />
+            <span data-public-name-consent-label></span>
+          </label>
           <p id="resumo-valor" class="checkout-resumo"></p>
           <aside class="qualification-notice" aria-live="polite">
             <h3 data-qualification-title></h3>
@@ -239,11 +259,12 @@
           </aside>
           <div class="checkout-acoes">
             <button type="button" class="button button-primary" data-categoria="unico">Compensate once</button>
-            <button type="button" class="button button-primary" data-categoria="mensal">Monthly subscription</button>
-            ${ANNUAL_ENABLED ? '<button type="button" class="button button-primary" data-categoria="anual">Annual subscription - 15% off</button>' : ''}
+            <button type="button" class="button button-primary" data-categoria="mensal"><span class="checkout-plan-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20v-8"/><path d="M12 12c-5 0-8-3-8-8 5 0 8 3 8 8Z"/><path d="M12 16c0-5 3-8 8-8 0 5-3 8-8 8Z"/></svg></span><span>Monthly subscription</span></button>
+            ${ANNUAL_ENABLED ? '<button type="button" class="button button-primary" data-categoria="anual"><span class="checkout-plan-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><span>Annual subscription - 15% off</span></button>' : ''}
           </div>
         `;
 
+        adicionarConsentimentoNome(painel);
         moverCamposCheckoutParaPainel(painel);
         destino.appendChild(painel);
         ancoraResultado.classList.toggle('checkout-visible', !painelReduzir);
@@ -253,6 +274,7 @@
             const emissaoKg = obterEmissaoAtual();
             const nome = painel.querySelector('#nome').value.trim();
             const email = painel.querySelector('#email').value.trim();
+            const exibirNome = painel.querySelector('#public-name-consent')?.checked === true;
             let mensagemErro = painel.querySelector('.checkout-erro');
 
             if (!mensagemErro) {
@@ -266,13 +288,30 @@
             botao.disabled = true;
 
             try {
-              await irParaCheckout(botao.dataset.categoria, emissaoKg, nome, email);
+              await irParaCheckout(botao.dataset.categoria, emissaoKg, nome, email, exibirNome);
             } catch (erro) {
               botao.disabled = false;
               mensagemErro.textContent = 'We could not start your payment. Please try again.';
             }
           });
         });
+      }
+
+      function adicionarConsentimentoNome(painel) {
+        if (painel.querySelector('#public-name-consent')) return;
+        const label = document.createElement('label');
+        label.className = 'checkout-public-name-consent';
+        label.style.cssText = 'display:flex;align-items:flex-start;gap:8px;margin:12px 0;color:#b9c8bc;font-size:13px;line-height:1.5;';
+        const checkbox = document.createElement('input');
+        checkbox.id = 'public-name-consent';
+        checkbox.type = 'checkbox';
+        checkbox.style.marginTop = '3px';
+        const text = document.createElement('span');
+        text.dataset.publicNameConsentLabel = '';
+        label.append(checkbox, text);
+        const fieldsSlot = painel.querySelector('#checkout-campos-slot');
+        if (fieldsSlot) fieldsSlot.insertAdjacentElement('afterend', label);
+        else painel.prepend(label);
       }
 
       function criarSeccaoCreditosAvulsos(destino, painelCheckout) {
@@ -841,10 +880,22 @@
           const valores = obterValoresTokens(quantidadeKg);
           aviso.querySelector('[data-qualification-title]').textContent =
             t('checkout_what_buying', idioma);
-          aviso.querySelector('[data-qualification-body]').textContent = tTokens(
+          const textoCompra = tTokens(
             volumeDefinido ? 'checkout_buying_fixed' : 'checkout_buying_monthly',
             idioma,
             valores,
+          );
+          const corpoCompra = aviso.querySelector('[data-qualification-body]');
+          const linkProjeto = document.createElement('a');
+          linkProjeto.href = 'https://brcarbon.com.br/brazilian-amazon/';
+          linkProjeto.target = '_blank';
+          linkProjeto.rel = 'noopener noreferrer';
+          linkProjeto.textContent = 'Brazilian Amazon REDD+ APD Project';
+          linkProjeto.style.color = '#72E19A';
+          linkProjeto.style.fontWeight = '700';
+          corpoCompra.replaceChildren(
+            document.createTextNode(`${textoCompra} ${t('checkout_buying_project', idioma)} `),
+            linkProjeto,
           );
           aviso.querySelector('[data-verification-summary]').textContent =
             t('checkout_how_verified', idioma);
@@ -860,6 +911,11 @@
         const painelCheckout = document.getElementById('checkout-compensacao');
         const painelParceiro = painelCheckout?.querySelector('.checkout-parceiro');
         if (!painelCheckout || !painelParceiro) return;
+        const consentLabel = painelCheckout.querySelector('[data-public-name-consent-label]');
+        if (consentLabel) {
+          consentLabel.textContent =
+            PUBLIC_NAME_CONSENT_LABELS[idioma] || PUBLIC_NAME_CONSENT_LABELS.en;
+        }
         const valores = obterValoresTokens(obterEmissaoAtual());
         painelParceiro.setAttribute('aria-label', t('checkout_partner_info', idioma));
         painelCheckout.querySelector('[data-supplier-name]').textContent =

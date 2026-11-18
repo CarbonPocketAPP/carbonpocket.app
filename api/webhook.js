@@ -1,6 +1,12 @@
 import Stripe from 'stripe';
 import { sanitizeName } from './name.js';
 import { registrarContribuicao } from '../lib/contributions.js';
+import {
+  linkAttestationToContributor,
+  recordContributorPayment,
+} from '../lib/contributor-ledger.js';
+import { sendContributionReceipt } from '../lib/receipt-email.js';
+import { db } from '../lib/db.js';
 
 export const config = { api: { bodyParser: false } };
 
@@ -20,50 +26,19 @@ function subscriptionIdFromInvoice(invoice) {
 }
 
 function invoiceQuantity(invoice, subscriptionId, fallback) {
-  const lines = invoice.lines?.data || [];
-  const matchingLine = lines.find((line) =>
-    line.subscription === subscriptionId ||
-    line.parent?.subscription_item_details?.subscription === subscriptionId,
-  );
-  const line = (matchingLine?.quantity !== null && matchingLine?.quantity !== undefined
-    ? matchingLine
-    : null) || lines.find((item) => item.quantity !== null && item.quantity !== undefined);
-  const quantity = line?.quantity;
+  const line = invoiceSubscriptionLine(invoice, subscriptionId);
+  const quantity = line?.quantity ?? invoice.lines?.data?.find(
+    (item) => item.quantity !== null && item.quantity !== undefined,
+  )?.quantity;
   return quantity === null || quantity === undefined ? Number(fallback) : Number(quantity);
 }
 
-function parseYearMap(rawValue, field, subscriptionId) {
-  if (!rawValue) return {};
-  try {
-    const parsed = JSON.parse(rawValue);
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      throw new TypeError('Invalid year map');
-    }
-
-    return Object.fromEntries(
-      Object.entries(parsed).filter(([year, value]) =>
-        /^\d{4}$/.test(year) && Number.isFinite(Number(value)) && Number(value) >= 0,
-      ),
-    );
-  } catch (error) {
-    console.warn('WEBHOOK_METADATA_ANUAL_INVALIDO', field, subscriptionId, error.name);
-    return {};
-  }
-}
-
-function serializeYearMap(yearMap, field, subscriptionId) {
-  const years = Object.keys(yearMap).sort();
-  let serialized = JSON.stringify(yearMap);
-  while (serialized.length >= 400 && years.length > 1) {
-    const oldestYear = years.shift();
-    delete yearMap[oldestYear];
-    serialized = JSON.stringify(yearMap);
-    console.warn('WEBHOOK_METADATA_ANUAL_TRUNCADO', field, subscriptionId, oldestYear);
-  }
-  if (serialized.length >= 400) {
-    console.warn('WEBHOOK_METADATA_ANUAL_MUITO_LONGO', field, subscriptionId);
-  }
-  return serialized;
+function invoiceSubscriptionLine(invoice, subscriptionId) {
+  const lines = invoice.lines?.data || [];
+  return lines.find((line) =>
+    line.subscription === subscriptionId ||
+    line.parent?.subscription_item_details?.subscription === subscriptionId,
+  ) || lines.find((item) => item.quantity !== null && item.quantity !== undefined);
 }
 
 async function accumulatePaidInvoice(stripe, invoice) {
@@ -77,16 +52,11 @@ async function accumulatePaidInvoice(stripe, invoice) {
     return;
   }
 
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+    expand: ['customer'],
+  });
   const metadata = subscription.metadata || {};
-  if (metadata.ultima_invoice_id === invoiceId) {
-    console.log('WEBHOOK_INVOICE_DUPLICATE', JSON.stringify({
-      invoice_id: invoiceId,
-      subscription_id: subscriptionId,
-    }));
-    return;
-  }
-
+  if (metadata.origem && metadata.origem !== 'site') return;
   if (!metadata.emissao_kg) {
     console.log('WEBHOOK_INVOICE_IGNORADA', JSON.stringify({
       invoice_id: invoiceId,
@@ -106,43 +76,123 @@ async function accumulatePaidInvoice(stripe, invoice) {
     return;
   }
 
-  const ano = new Date(invoice.created * 1000).getFullYear();
-  if (!Number.isFinite(ano)) {
-    console.log('WEBHOOK_INVOICE_IGNORADA', JSON.stringify({
-      invoice_id: invoiceId,
-      subscription_id: subscriptionId,
-      motivo: 'ano invalido',
-    }));
-    return;
-  }
-
-  const kgPorAno = parseYearMap(metadata.kg_por_ano, 'kg_por_ano', subscriptionId);
-  const faturasPorAno = parseYearMap(
-    metadata.faturas_por_ano,
-    'faturas_por_ano',
-    subscriptionId,
-  );
-  const totalAno = Number(kgPorAno[ano] || 0) + kg;
-  kgPorAno[ano] = totalAno;
-  faturasPorAno[ano] = Number(faturasPorAno[ano] || 0) + 1;
-
-  // ultima_invoice_id evita recontar a última entrega consecutiva; reenvios fora de ordem permanecem uma limitação aceita.
-  await stripe.subscriptions.update(subscriptionId, {
-    metadata: {
-      ...metadata,
-      kg_por_ano: serializeYearMap(kgPorAno, 'kg_por_ano', subscriptionId),
-      faturas_por_ano: serializeYearMap(faturasPorAno, 'faturas_por_ano', subscriptionId),
-      ultima_invoice_id: invoiceId,
-    },
+  const kgInteiro = Math.min(100000, Math.max(25, Math.round(kg)));
+  const countryCode = String(metadata.pais || '').toUpperCase();
+  const country = /^[A-Z]{2}$/.test(countryCode) ? countryCode : 'nao_informado';
+  const name = sanitizeName(metadata.nome || invoice.customer_name);
+  const customer = subscription.customer;
+  const liveCustomer = customer && typeof customer === 'object' && !customer.deleted
+    ? customer
+    : null;
+  const email = String(
+    invoice.customer_email ||
+    liveCustomer?.email ||
+    '',
+  ).trim().toLowerCase();
+  const customerName = liveCustomer?.name;
+  const invoiceLine = invoiceSubscriptionLine(invoice, subscriptionId);
+  const coverageStart = metadata.categoria === 'anual' && invoiceLine?.period?.start
+    ? new Date(invoiceLine.period.start * 1000)
+    : undefined;
+  const coverageEnd = metadata.categoria === 'anual' && invoiceLine?.period?.end
+    ? new Date(invoiceLine.period.end * 1000)
+    : undefined;
+  const result = await recordContributorPayment(db, {
+    stripeReference: invoiceId,
+    kg: kgInteiro,
+    country,
+    planType: metadata.categoria === 'mensal' || metadata.categoria === 'anual'
+      ? metadata.categoria
+      : null,
+    paymentType: 'invoice',
+    occurredAt: new Date((invoice.status_transitions?.paid_at || invoice.created) * 1000),
+    coverageStart,
+    coverageEnd,
+    email,
+    name: name === 'Anonymous' ? sanitizeName(customerName) : name,
+    consent: metadata.opt_out === 'false' && metadata.exibir_nome === 'true',
   });
-
-  console.log('WEBHOOK_INVOICE', JSON.stringify({
+  console.log(result.created ? 'WEBHOOK_INVOICE_RECORDED' : 'WEBHOOK_INVOICE_DUPLICATE', JSON.stringify({
     invoice_id: invoiceId,
     subscription_id: subscriptionId,
-    kg,
-    ano,
-    total_ano: totalAno,
+    kg: kgInteiro,
   }));
+}
+
+async function processCheckoutSession(stripe, session, eventId) {
+  const currentSession = await stripe.checkout.sessions.retrieve(session.id);
+  if (!['paid', 'no_payment_required'].includes(currentSession.payment_status)) return;
+
+  const contribution = await registrarContribuicao({ session: currentSession });
+  if (!contribution?.code) return;
+
+  const metadata = currentSession.metadata || {};
+  if (!metadata.origem || metadata.origem === 'site') {
+    const consent = metadata.opt_out === 'false' && metadata.exibir_nome === 'true';
+    const name = sanitizeName(metadata.nome || currentSession.customer_details?.name);
+    const email = currentSession.customer_details?.email ||
+      currentSession.customer_email || '';
+    const countryCode = String(metadata.pais || '').toUpperCase();
+    const country = /^[A-Z]{2}$/.test(countryCode) ? countryCode : 'nao_informado';
+    if (currentSession.mode === 'payment') {
+      await recordContributorPayment(db, {
+        stripeReference: currentSession.id,
+        kg: contribution.kg,
+        country,
+        planType: metadata.categoria || null,
+        paymentType: 'checkout',
+        occurredAt: new Date(currentSession.created * 1000),
+        email,
+        name,
+        consent,
+        attestationPaymentReference: currentSession.id,
+      });
+    } else {
+      await linkAttestationToContributor(db, {
+        paymentReference: currentSession.id,
+        email,
+        name,
+        consent,
+      });
+    }
+  }
+  await sendReceiptForContribution(currentSession, contribution, eventId);
+}
+
+async function sendReceiptForContribution(session, contribution, eventId) {
+  try {
+    const sanitizedName = sanitizeName(
+      session.metadata?.nome || session.customer_details?.name,
+    );
+    const result = await sendContributionReceipt(db, {
+      code: contribution.code,
+      email: session.customer_details?.email || session.customer_email,
+      name: sanitizedName === 'Anonymous' ? '' : sanitizedName,
+      badge: session.metadata?.categoria === 'anual'
+        ? 'https://carbonpocket.app/carbonpocket-calculator/contributors/icons/annual-badge.png'
+        : session.metadata?.categoria === 'mensal'
+          ? 'https://carbonpocket.app/carbonpocket-calculator/contributors/icons/monthly-badge.png'
+          : '',
+      plan: session.metadata?.categoria === 'anual'
+        ? 'Founders'
+        : session.metadata?.categoria === 'mensal'
+          ? 'Starter Compensation'
+          : 'One-time purchase',
+    });
+    if (!result.sent) {
+      console.warn('RECEIPT_EMAIL_NOT_SENT', {
+        event_id: eventId,
+        code: contribution.code,
+        reason: result.reason,
+      });
+    }
+  } catch (error) {
+    console.error('RECEIPT_EMAIL_FALHOU', {
+      event_id: eventId,
+      code: contribution.code,
+      erro: error.name,
+    });
+  }
 }
 
 export default async function handler(req, res) {
@@ -206,6 +256,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     const object = event.data?.object;
     const session = object?.object === 'checkout.session' ? object : null;
     const record = {
@@ -245,13 +296,14 @@ export default async function handler(req, res) {
     if (event.type === 'checkout.session.completed') {
       if (session?.payment_status === 'paid') {
         try {
-          await registrarContribuicao({ session });
+          await processCheckoutSession(stripe, session, event.id);
         } catch (error) {
           console.error('WEBHOOK_DB_ERROR', {
             event_id: event.id,
             session_id: session.id,
             error: error.name,
           });
+          throw error;
         }
       }
       return res.status(200).json({ received: true });
@@ -260,13 +312,14 @@ export default async function handler(req, res) {
     if (event.type === 'checkout.session.async_payment_succeeded') {
       if (session) {
         try {
-          await registrarContribuicao({ session });
+          await processCheckoutSession(stripe, session, event.id);
         } catch (error) {
           console.error('WEBHOOK_DB_ERROR', {
             event_id: event.id,
             session_id: session.id,
             error: error.name,
           });
+          throw error;
         }
       }
       return res.status(200).json({ received: true });
@@ -279,7 +332,6 @@ export default async function handler(req, res) {
         amount_paid: object?.amount_paid ?? null,
       }));
       // TODO: agregar renovações à rodada de compensação é uma decisão futura.
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
       await accumulatePaidInvoice(stripe, object);
       return res.status(200).json({ received: true });
     }

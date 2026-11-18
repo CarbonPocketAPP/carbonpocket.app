@@ -1,5 +1,6 @@
-import Stripe from 'stripe';
-import { sanitizeName } from './name.js';
+import { asc, eq } from 'drizzle-orm';
+import { db } from '../lib/db.js';
+import { contributorPayments, contributorProfiles } from '../lib/schema.js';
 
 export default async function handler(req, res) {
   const base = String(process.env.SITE_URL || '').replace(/\/$/, '');
@@ -7,9 +8,8 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', base);
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  const cachePolicy = 'public, s-maxage=300, stale-while-revalidate=600';
-  res.setHeader('Cache-Control', cachePolicy);
-  res.setHeader('Vercel-CDN-Cache-Control', cachePolicy);
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.setHeader('Vercel-CDN-Cache-Control', 'private, no-store');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -20,217 +20,174 @@ export default async function handler(req, res) {
   }
 
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    const total = { kg: 0, contributors: new Set(), sessions: 0 };
-    const origemStats = new Map();
-    const anoStats = new Map();
-    const matrizStats = new Map();
-    const paisStats = new Map();
-    const kgByName = new Map();
-    const latestContributionByName = new Map();
+    const rows = await db
+      .select({
+        paymentId: contributorPayments.id,
+        contributorId: contributorProfiles.id,
+        name: contributorProfiles.displayName,
+        consentToPublish: contributorProfiles.consentToPublish,
+        kg: contributorPayments.kg,
+        country: contributorPayments.country,
+        planType: contributorPayments.planType,
+        occurredAt: contributorPayments.occurredAt,
+        coverageStart: contributorPayments.coverageStart,
+        coverageEnd: contributorPayments.coverageEnd,
+      })
+      .from(contributorPayments)
+      .leftJoin(
+        contributorProfiles,
+        eq(contributorPayments.contributorId, contributorProfiles.id),
+      )
+      .orderBy(asc(contributorPayments.occurredAt));
 
-    function addContribution({
-      kg,
-      year,
-      country,
-      name,
-      optedOut,
-      sessions,
-      contributedAt,
-    }) {
-      const contributorName = optedOut || name.includes('@') ? 'Anonymous' : name;
-      total.kg += kg;
-      total.contributors.add(contributorName);
-      total.sessions += sessions;
+    const yearStats = new Map();
+    const countryStats = new Map();
+    const matrixStats = new Map();
+    const contributorsById = new Map();
+    let totalKg = 0;
 
-      const originStat = origemStats.get('site') || {
+    function addStatistic(map, key, kg, contributorKey) {
+      const statistic = map.get(key) || {
         kg: 0,
         contributors: new Set(),
-        sessions: 0,
       };
-      originStat.kg += kg;
-      originStat.contributors.add(contributorName);
-      originStat.sessions += sessions;
-      origemStats.set('site', originStat);
-
-      const yearStat = anoStats.get(year) || {
-        kg: 0,
-        contributors: new Set(),
-        sessions: 0,
-      };
-      yearStat.kg += kg;
-      yearStat.contributors.add(contributorName);
-      yearStat.sessions += sessions;
-      anoStats.set(year, yearStat);
-
-      const matrixKey = `${year}:site`;
-      const matrixStat = matrizStats.get(matrixKey) || {
-        ano: year,
-        origem: 'site',
-        kg: 0,
-        sessions: 0,
-      };
-      matrixStat.kg += kg;
-      matrixStat.sessions += sessions;
-      matrizStats.set(matrixKey, matrixStat);
-
-      const countryStat = paisStats.get(country) || {
-        kg: 0,
-        contributors: new Set(),
-        sessions: 0,
-      };
-      countryStat.kg += kg;
-      countryStat.contributors.add(contributorName);
-      countryStat.sessions += sessions;
-      paisStats.set(country, countryStat);
-
-      kgByName.set(contributorName, (kgByName.get(contributorName) || 0) + kg);
-      latestContributionByName.set(
-        contributorName,
-        Math.max(latestContributionByName.get(contributorName) || 0, contributedAt),
-      );
+      statistic.kg += kg;
+      statistic.contributors.add(contributorKey);
+      map.set(key, statistic);
     }
 
-    async function forEachPage(listPage, visit) {
-      let startingAfter;
-      let hasMore = true;
-      while (hasMore) {
-        const page = await listPage(startingAfter);
-        for (const item of page.data) visit(item);
-        hasMore = page.has_more;
-        if (hasMore && page.data.length > 0) {
-          startingAfter = page.data[page.data.length - 1].id;
-        } else {
-          hasMore = false;
+    for (const row of rows) {
+      const kg = Number(row.kg);
+      const occurredAt = row.occurredAt;
+      if (!Number.isFinite(kg) || kg <= 0 || !(occurredAt instanceof Date)) continue;
+      const publicProfile = Boolean(
+        row.contributorId && row.consentToPublish && row.name && row.name !== 'Anonymous',
+      );
+      const contributorKey = publicProfile ? `profile:${row.contributorId}` : 'anonymous';
+      const year = occurredAt.getUTCFullYear();
+      const country = /^[A-Z]{2}$/.test(row.country) ? row.country : 'nao_informado';
+      totalKg += kg;
+      addStatistic(yearStats, year, kg, contributorKey);
+      addStatistic(countryStats, country, kg, contributorKey);
+      addStatistic(matrixStats, `${year}:site`, kg, contributorKey);
+
+      if (!publicProfile) continue;
+
+      let profile = contributorsById.get(row.contributorId);
+      if (!profile) {
+        profile = {
+          name: row.name,
+          kg: 0,
+          contributedAt: 0,
+          countries: new Set(),
+          planTypes: new Set(),
+          paidMonths: new Set(),
+        };
+        contributorsById.set(row.contributorId, profile);
+      }
+
+      const occurredAtSeconds = Math.floor(occurredAt.getTime() / 1000);
+      profile.kg += kg;
+      profile.contributedAt = Math.max(profile.contributedAt, occurredAtSeconds);
+      profile.countries.add(country);
+      if (row.planType === 'mensal' || row.planType === 'anual') {
+        profile.planTypes.add(row.planType);
+      }
+      if (
+        row.planType === 'anual' &&
+        row.coverageStart instanceof Date &&
+        row.coverageEnd instanceof Date
+      ) {
+        const monthCursor = new Date(Date.UTC(
+          row.coverageStart.getUTCFullYear(),
+          row.coverageStart.getUTCMonth(),
+          1,
+        ));
+        const coveredUntil = new Date(row.coverageEnd.getTime() - 1);
+        const lastCoveredMonth = Date.UTC(
+          coveredUntil.getUTCFullYear(),
+          coveredUntil.getUTCMonth(),
+          1,
+        );
+        while (monthCursor.getTime() <= lastCoveredMonth) {
+          profile.paidMonths.add(
+            `${monthCursor.getUTCFullYear()}-${String(monthCursor.getUTCMonth() + 1).padStart(2, '0')}`,
+          );
+          monthCursor.setUTCMonth(monthCursor.getUTCMonth() + 1);
         }
+      } else {
+        profile.paidMonths.add(
+          `${year}-${String(occurredAt.getUTCMonth() + 1).padStart(2, '0')}`,
+        );
       }
     }
 
-    await forEachPage(
-      (startingAfter) => stripe.checkout.sessions.list({
-        status: 'complete',
-        limit: 100,
-        ...(startingAfter ? { starting_after: startingAfter } : {}),
-      }),
-      (session) => {
-        if (
-          session.mode !== 'payment' ||
-          !['paid', 'no_payment_required'].includes(session.payment_status)
-        ) {
-          return;
-        }
+    function consecutiveMonthStreak(months, currentMonth) {
+      const ordered = Array.from(months).sort().reverse();
+      if (ordered.length === 0) return 0;
+      const [currentYear, currentMonthNumber] = currentMonth.split('-').map(Number);
+      const [latestYear, latestMonthNumber] = ordered[0].split('-').map(Number);
+      const latestIndex = latestYear * 12 + latestMonthNumber;
+      const currentIndex = currentYear * 12 + currentMonthNumber;
+      if (currentIndex - latestIndex > 1) return 0;
 
-        // Compras com metadata.categoria = 'avulso' são créditos independentes das emissões calculadas e hoje somam normalmente nos totais.
-        // TODO: avaliar separar "emissions compensated" de "standalone credits purchased" na página pública.
-        // Sessões sem origem são históricas do site; quando o app criar sessões, elas terão origem = 'app'.
-        if (session.metadata?.origem && session.metadata.origem !== 'site') return;
-        const kg = Number(session.metadata?.emissao_kg);
-        const year = new Date(session.created * 1000).getFullYear();
-        if (!Number.isFinite(kg) || kg <= 0 || !Number.isFinite(year)) return;
+      let streak = 1;
+      let previousIndex = latestIndex;
+      for (const month of ordered.slice(1)) {
+        const [year, monthNumber] = month.split('-').map(Number);
+        const index = year * 12 + monthNumber;
+        if (previousIndex - index !== 1) break;
+        streak += 1;
+        previousIndex = index;
+      }
+      return streak;
+    }
 
-        const countryCode = String(session.metadata?.pais || '').toUpperCase();
-        const country = /^[A-Z]{2}$/.test(countryCode) ? countryCode : 'nao_informado';
-        addContribution({
-          kg,
-          year,
-          country,
-          name: sanitizeName(session.metadata?.nome),
-          optedOut: session.metadata?.opt_out === 'true',
-          sessions: 1,
-          contributedAt: session.created,
-        });
-      },
-    );
+    const now = new Date();
+    const currentMonth =
+      `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+    const contributors = Array.from(contributorsById.values())
+      .map((profile) => ({
+        name: profile.name,
+        kg: profile.kg,
+        contributedAt: profile.contributedAt,
+        countries: Array.from(profile.countries),
+        planTypes: Array.from(profile.planTypes),
+        monthsContributing: profile.paidMonths.size,
+        streak: consecutiveMonthStreak(profile.paidMonths, currentMonth),
+      }))
+      .sort((a, b) => b.contributedAt - a.contributedAt || b.kg - a.kg);
 
-    await forEachPage(
-      (startingAfter) => stripe.subscriptions.list({
-        status: 'all',
-        limit: 100,
-        ...(startingAfter ? { starting_after: startingAfter } : {}),
-      }),
-      (subscription) => {
-        const metadata = subscription.metadata || {};
-        // Sessões antigas sem origem são do site; quando o app criar assinaturas, exigir origem = 'site'.
-        if (metadata.origem && metadata.origem !== 'site') return;
-
-        let kgPorAno;
-        try {
-          kgPorAno = JSON.parse(metadata.kg_por_ano || '{}');
-        } catch (error) {
-          console.warn('CONTRIBUINTE_KG_POR_ANO_INVALIDO', subscription.id, error.name);
-          return;
-        }
-        if (!kgPorAno || typeof kgPorAno !== 'object' || Array.isArray(kgPorAno)) return;
-
-        let invoicesPorAno = {};
-        try {
-          const parsed = JSON.parse(metadata.faturas_por_ano || '{}');
-          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-            invoicesPorAno = parsed;
-          }
-        } catch (error) {
-          console.warn('CONTRIBUINTE_FATURAS_POR_ANO_INVALIDO', subscription.id, error.name);
-        }
-
-        const countryCode = String(metadata.pais || '').toUpperCase();
-        const country = /^[A-Z]{2}$/.test(countryCode) ? countryCode : 'nao_informado';
-        for (const [yearText, rawKg] of Object.entries(kgPorAno)) {
-          const year = Number(yearText);
-          const kg = Number(rawKg);
-          if (!/^\d{4}$/.test(yearText) || !Number.isFinite(kg) || kg <= 0) continue;
-
-          const storedInvoices = Number(invoicesPorAno[yearText]);
-          addContribution({
-            kg,
-            year,
-            country,
-            name: sanitizeName(metadata.nome),
-            optedOut: metadata.opt_out === 'true',
-            sessions: Number.isFinite(storedInvoices) && storedInvoices > 0
-              ? Math.floor(storedInvoices)
-              : 1,
-            contributedAt: subscription.created,
-          });
-        }
-      },
-    );
-
-    const contributors = Array.from(kgByName, ([name, kg]) => ({
-      name,
-      kg,
-      contributedAt: latestContributionByName.get(name) || 0,
-    }))
-      .sort((a, b) => b.contributedAt - a.contributedAt || b.kg - a.kg)
-      .map(({ name, kg }) => ({ name, kg }));
-    const porOrigem = Array.from(origemStats, ([origem, stats]) => ({
-      origem,
-      kg: stats.kg,
-      contributors: stats.contributors.size,
-      sessions: stats.sessions,
-    })).sort((a, b) => b.kg - a.kg);
-    const porAno = Array.from(anoStats, ([ano, stats]) => ({
+    const porAno = Array.from(yearStats, ([ano, statistic]) => ({
       ano,
-      kg: stats.kg,
-      contributors: stats.contributors.size,
-      sessions: stats.sessions,
+      kg: statistic.kg,
+      contributors: statistic.contributors.size,
     })).sort((a, b) => b.ano - a.ano);
-    const matriz = Array.from(matrizStats.values())
-      .sort((a, b) => b.ano - a.ano || a.origem.localeCompare(b.origem));
-    const porPais = Array.from(paisStats, ([pais, stats]) => ({
+    const porPais = Array.from(countryStats, ([pais, statistic]) => ({
       pais,
-      kg: stats.kg,
-      contributors: stats.contributors.size,
-      sessions: stats.sessions,
+      kg: statistic.kg,
+      contributors: statistic.contributors.size,
     })).sort((a, b) => b.kg - a.kg);
+    const matriz = Array.from(matrixStats, ([key, statistic]) => {
+      const [ano, origem] = key.split(':');
+      return {
+        ano: Number(ano),
+        origem,
+        kg: statistic.kg,
+        contributors: statistic.contributors.size,
+      };
+    }).sort((a, b) => b.ano - a.ano || a.origem.localeCompare(b.origem));
 
-    // TODO: separar sessões já compensadas por metadata ou data de corte quando houver mais de uma rodada.
     return res.status(200).json({
       total: {
-        kg: total.kg,
-        contributors: total.contributors.size,
-        sessions: total.sessions,
+        kg: totalKg,
+        contributors: contributors.length,
       },
-      por_origem: porOrigem,
+      por_origem: [{
+        origem: 'site',
+        kg: totalKg,
+        contributors: contributors.length,
+      }],
       por_ano: porAno,
       matriz,
       por_pais: porPais,
@@ -238,7 +195,7 @@ export default async function handler(req, res) {
       updated_at: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('ERRO_STRIPE_CONTRIBUINTES', error.type, error.code);
+    console.error('ERRO_NEON_CONTRIBUINTES', error?.name);
     return res.status(500).json({ erro: 'Unable to load contributors' });
   }
 }

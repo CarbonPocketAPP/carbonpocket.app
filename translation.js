@@ -1859,6 +1859,25 @@ const translations = {
     footer_delete_account: 'Ta bort konto',
     };
 
+const planBadgeLabels = {
+  en: { plan_badge_starter: 'Sprout badge', plan_badge_founders: 'Founders badge' },
+  pt: { plan_badge_starter: 'Selo Broto', plan_badge_founders: 'Selo Fundadores' },
+  es: { plan_badge_starter: 'Insignia Brote', plan_badge_founders: 'Insignia Fundadores' },
+  fr: { plan_badge_starter: 'Badge Pousse', plan_badge_founders: 'Badge Fondateurs' },
+  de: { plan_badge_starter: 'Keimling-Abzeichen', plan_badge_founders: 'Gründer-Abzeichen' },
+  it: { plan_badge_starter: 'Badge Germoglio', plan_badge_founders: 'Badge Fondatori' },
+  zh: { plan_badge_starter: '新芽徽章', plan_badge_founders: '创始者徽章' },
+  ja: { plan_badge_starter: '芽のバッジ', plan_badge_founders: '創設者バッジ' },
+  ko: { plan_badge_starter: '새싹 배지', plan_badge_founders: '창립자 배지' },
+  ru: { plan_badge_starter: 'Значок ростка', plan_badge_founders: 'Значок основателя' },
+  ar: { plan_badge_starter: 'شارة البرعم', plan_badge_founders: 'شارة المؤسسين' },
+  sv: { plan_badge_starter: 'Groddmärke', plan_badge_founders: 'Grundarmärke' },
+};
+
+Object.entries(planBadgeLabels).forEach(function ([lang, labels]) {
+  Object.assign(translations[lang], labels);
+});
+
 function t(key, lang) {
   if (translations[lang] && translations[lang][key] !== undefined) {
     return translations[lang][key];

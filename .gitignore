@@ -23,3 +23,4 @@ desktop.ini
 # Node and Wrangler
 node_modules/
 .wrangler
+public/

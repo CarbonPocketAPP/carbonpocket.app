@@ -396,3 +396,21 @@ window.CARBONPOCKET_RECEIPT_TRANSLATIONS = {
     shareText: 'Mitt bidrag är avsett för utsläppskompensation. Utsläppen fortsätter.'
   }
 };
+
+const receiptPlanBadgeLabels = {
+  en: { starterBadge: 'Starter', foundersBadge: 'Founder' },
+  pt: { starterBadge: 'Starter', foundersBadge: 'Fundador' },
+  es: { starterBadge: 'Starter', foundersBadge: 'Fundador' },
+  fr: { starterBadge: 'Starter', foundersBadge: 'Fondateur' },
+  de: { starterBadge: 'Starter', foundersBadge: 'Gründer' },
+  it: { starterBadge: 'Starter', foundersBadge: 'Fondatore' },
+  ja: { starterBadge: 'Starter', foundersBadge: '創設者' },
+  ko: { starterBadge: 'Starter', foundersBadge: '창립자' },
+  zh: { starterBadge: 'Starter', foundersBadge: '创始人' },
+  ru: { starterBadge: 'Starter', foundersBadge: 'Основатель' },
+  ar: { starterBadge: 'Starter', foundersBadge: 'المؤسس' },
+  sv: { starterBadge: 'Starter', foundersBadge: 'Grundare' },
+};
+Object.entries(receiptPlanBadgeLabels).forEach(function ([lang, labels]) {
+  Object.assign(window.CARBONPOCKET_RECEIPT_TRANSLATIONS[lang], labels);
+});

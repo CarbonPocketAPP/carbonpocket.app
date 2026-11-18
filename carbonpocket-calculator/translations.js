@@ -244,6 +244,24 @@ translations.sv = {
   checkout_check_standard: 'Standardstatus: Verra är certifieringsstandarden för krediterna. Carbon Pocket är inte certifierat, rekommenderat eller granskat av Verra eller BR Carbon.'
 };
 
+const projectCreditLabels = {
+  en: 'Credits from the project:',
+  pt: 'Créditos do projeto:',
+  es: 'Créditos del proyecto:',
+  fr: 'Crédits du projet :',
+  de: 'Gutschriften aus dem Projekt:',
+  it: 'Crediti del progetto:',
+  zh: '来自该项目的碳信用：',
+  ja: 'プロジェクトのクレジット：',
+  ko: '프로젝트 크레딧:',
+  ru: 'Кредиты проекта:',
+  ar: 'أرصدة المشروع:',
+  sv: 'Krediter från projektet:'
+};
+Object.entries(projectCreditLabels).forEach(function ([lang, label]) {
+  translations[lang].checkout_buying_project = label;
+});
+
 // Mesmo helper da página inicial.
 function t(key, lang) {
   if (translations[lang] && translations[lang][key] !== undefined) {

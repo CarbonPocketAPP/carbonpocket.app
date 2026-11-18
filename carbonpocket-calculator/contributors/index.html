@@ -3,100 +3,153 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1713" />
     <title>Our contributors | CarbonPocket</title>
     <link rel="stylesheet" href="../assets/index-hQOtl3ms.css" />
     <link rel="stylesheet" href="../calculator-overrides.css" />
     <script src="../countries.js"></script>
+    <script src="./translations.js"></script>
+    <style>
+      .contributors-language-bar { width: auto; margin: 0 0 18px auto; padding: 0; background: transparent; text-align: right; }
+      .contributors-language-bar .lang-select { max-width: min(230px, calc(100vw - 48px)); }
+      .contributors-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+      .contributors-heading h1 { margin-bottom: 8px; }
+      .contributors-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 22px 0; text-align: left; }
+      .contributors-controls label { display: grid; gap: 5px; color: #9fb0a2; font-size: 12px; }
+      .contributors-controls input, .contributors-controls select {
+        min-width: 0; width: 100%; padding: 10px 12px; border: 1px solid rgba(234,245,233,.16);
+        border-radius: 9px; background: #102119; color: #eaf5e9; font: inherit;
+      }
+      .contributors-list li { align-items: center; }
+      .contributor-identity { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-width: 0; }
+      .contributor-name { color: #eaf5e9; font-weight: 650; overflow-wrap: anywhere; }
+      .contributor-badges { display: inline-flex; align-items: center; gap: 7px; }
+      .contributor-badge { display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 0; background: transparent; font-size: 17px; line-height: 1; white-space: nowrap; }
+      .contributor-badge img { display: block; width: 24px; height: 24px; object-fit: contain; }
+      .badge-starter { color: #8de0ad; }
+      .badge-founders { color: #a6e9c2; }
+      .badge-streak-fire { color: #ffad70; }
+      .badge-streak-lightning { color: #ffe478; }
+      .badge-streak-diamond { color: #8bd5ff; }
+      .contributor-meta { color: #9fb0a2; font-size: 12px; }
+      .contributor-identity > .contributor-meta { flex-basis: 100%; }
+      .contributor-kg { color: #a5f3c7 !important; font-weight: 700; }
+      .contributors-pagination { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
+      .contributors-pagination button { padding: 8px 14px; border: 1px solid rgba(114,225,154,.3); border-radius: 9px; background: rgba(114,225,154,.1); color: #a5f3c7; cursor: pointer; }
+      .contributors-pagination button:disabled { cursor: not-allowed; opacity: .45; }
+      .contributors-pagination span { color: #b9c8bc; font-size: 13px; }
+      .contributors-empty { color: #9fb0a2; padding: 18px 0; }
+      [dir="rtl"] .contributors-section table, [dir="rtl"] .contributors-controls { text-align: right; }
+      @media (max-width: 560px) {
+        .contributors-heading { display: block; }
+        .contributors-list li { align-items: flex-start; }
+        .contributors-pagination { gap: 8px; }
+      }
+    </style>
   </head>
   <body>
     <main class="checkout-sucesso">
       <section class="panel checkout-sucesso-card contributors-card" aria-live="polite">
+        <div class="lang-bar contributors-language-bar">
+          <select id="contributors-language" class="lang-select" aria-label="Select language">
+            <option value="en">🇬🇧 English</option>
+            <option value="pt">🇧🇷 Português</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="ja">🇯🇵 日本語</option>
+            <option value="ko">🇰🇷 한국어</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="sv">🇸🇪 Svenska</option>
+          </select>
+        </div>
         <p class="result-kicker">CarbonPocket</p>
-        <h1>Our contributors</h1>
-        <p class="contributors-intro">This payment summary is not a public-registry retirement record.</p>
-        <p id="contributors-state" class="contributors-state" role="status">
-          Loading contributors...
-        </p>
+        <h1 id="contributors-title"></h1>
+        <p id="contributors-intro" class="contributors-intro"></p>
+        <p id="contributors-state" class="contributors-state" role="status"></p>
         <div id="contributors-content" hidden>
           <div class="contributors-summary">
-            <div>
-              <strong id="contributors-total-kg">0</strong>
-              <span>kg purchased for compensation</span>
-            </div>
-            <div>
-              <strong id="contributors-total-count">0</strong>
-              <span>contributors</span>
-            </div>
-            <div>
-              <strong id="contributors-total-sessions">0</strong>
-              <span>purchases</span>
-            </div>
+            <div><strong id="contributors-total-kg">0</strong><span id="contributors-total-kg-label"></span></div>
+            <div><strong id="contributors-total-count">0</strong><span id="contributors-total-count-label"></span></div>
           </div>
 
           <section id="contributors-year-section" class="contributors-section" hidden>
-            <h2>By year</h2>
-            <div class="contributors-table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Year</th>
-                    <th scope="col">kg</th>
-                    <th scope="col">Contributors</th>
-                    <th scope="col">Purchases</th>
-                  </tr>
-                </thead>
-                <tbody id="contributors-year-rows"></tbody>
-              </table>
-            </div>
+            <h2 id="contributors-year-title"></h2>
+            <div class="contributors-table-wrap"><table>
+              <thead><tr><th id="year-heading" scope="col"></th><th id="year-kg-heading" scope="col"></th><th id="year-people-heading" scope="col"></th></tr></thead>
+              <tbody id="contributors-year-rows"></tbody>
+            </table></div>
           </section>
 
           <section id="contributors-country-section" class="contributors-section" hidden>
-            <h2>By country</h2>
-            <!-- TODO em português: avaliar um mapa coroplético quando houver dados suficientes por país. -->
-            <div class="contributors-table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Country</th>
-                    <th scope="col">kg</th>
-                    <th scope="col">Contributors</th>
-                    <th scope="col">Purchases</th>
-                  </tr>
-                </thead>
-                <tbody id="contributors-country-rows"></tbody>
-              </table>
-            </div>
+            <h2 id="contributors-country-title"></h2>
+            <div class="contributors-table-wrap"><table>
+              <thead><tr><th id="country-heading" scope="col"></th><th id="country-kg-heading" scope="col"></th><th id="country-people-heading" scope="col"></th></tr></thead>
+              <tbody id="contributors-country-rows"></tbody>
+            </table></div>
           </section>
 
           <section class="contributors-section">
-            <h2>Contributors</h2>
+            <h2 id="contributors-list-title"></h2>
+            <div class="contributors-controls">
+              <label><span id="search-label"></span><input id="contributor-search" type="search" /></label>
+              <label><span id="country-filter-label"></span><select id="country-filter"></select></label>
+              <label><span id="plan-filter-label"></span><select id="plan-filter"></select></label>
+              <label><span id="sort-label"></span><select id="sort-filter"></select></label>
+              <label><span id="page-size-label"></span><select id="page-size"><option value="20">20</option><option value="50">50</option><option value="100">100</option></select></label>
+            </div>
             <ol id="contributors-list" class="contributors-list" hidden></ol>
-            <p id="contributors-private-state" class="contributors-state" hidden>
-              No contributors have chosen to publish their names.
-            </p>
+            <p id="contributors-private-state" class="contributors-state" hidden></p>
+            <p id="contributors-empty" class="contributors-empty" hidden></p>
+            <nav id="contributors-pagination" class="contributors-pagination" aria-label="Contributor pages" hidden>
+              <button id="page-previous" type="button"></button>
+              <span id="page-status"></span>
+              <button id="page-next" type="button"></button>
+            </nav>
           </section>
         </div>
-        <p class="compensation-service-link">
-          <a href="https://carbonpocket.app/carbonpocket-calculator/">
-            Back to calculator
-          </a>
-        </p>
+        <p class="compensation-service-link"><a id="back-link" href="https://carbonpocket.app/carbonpocket-calculator/"></a></p>
       </section>
     </main>
     <script>
       const contributorsApi = 'https://carbonpocketapp.vercel.app/api/contributors';
-      const kgFormatter = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
-      const countFormatter = new Intl.NumberFormat('en-US');
-      const countryLabels = Object.fromEntries(
-        window.CARBONPOCKET_COUNTRIES.map(({ code, name }) => [code, name]),
-      );
+      const labelsByLanguage = window.CARBONPOCKET_CONTRIBUTOR_TRANSLATIONS;
+      let kgFormatter = new Intl.NumberFormat('en', { maximumFractionDigits: 2 });
+      let countFormatter = new Intl.NumberFormat('en');
       const state = document.getElementById('contributors-state');
       const content = document.getElementById('contributors-content');
       const list = document.getElementById('contributors-list');
+      const languageSelect = document.getElementById('contributors-language');
+      let language = 'en';
+      let allContributors = [];
+      let countryStats = [];
+      let yearStats = [];
+      let currentPage = 1;
+      let loadStatus = 'loading';
 
-      function addCell(row, value, isHeader, scope = 'row') {
+      function t(key) {
+        return labelsByLanguage[language]?.[key] || labelsByLanguage.en[key] || key;
+      }
+
+      function countryName(code) {
+        if (code === 'nao_informado') return t('notInformed');
+        try {
+          return new Intl.DisplayNames([language], { type: 'region' }).of(code) || code;
+        } catch {
+          return code;
+        }
+      }
+
+      function setText(id, value) {
+        document.getElementById(id).textContent = value;
+      }
+
+      function addCell(row, value, isHeader) {
         const cell = document.createElement(isHeader ? 'th' : 'td');
-        if (isHeader) cell.scope = scope;
+        if (isHeader) cell.scope = 'col';
         cell.textContent = value;
         row.appendChild(cell);
       }
@@ -112,81 +165,269 @@
         }
       }
 
+      function setOptions(select, options, selectedValue) {
+        select.replaceChildren(...options.map(({ value, label }) => {
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = label;
+          return option;
+        }));
+        if (options.some((option) => option.value === selectedValue)) {
+          select.value = selectedValue;
+        }
+      }
+
+      function localizedDate(timestamp) {
+        if (!timestamp) return '';
+        return new Intl.DateTimeFormat(language, { year: 'numeric', month: 'short' })
+          .format(new Date(timestamp * 1000));
+      }
+
+      function appendBadge(container, className, icon, label, title) {
+        const badge = document.createElement('span');
+        badge.className = `contributor-badge ${className}`;
+        badge.title = title;
+        badge.setAttribute('aria-label', title);
+        const image = document.createElement('img');
+        image.src = `./icons/${icon}.png`;
+        image.alt = '';
+        image.setAttribute('aria-hidden', 'true');
+        badge.appendChild(image);
+        if (label) badge.appendChild(document.createTextNode(label));
+        container.appendChild(badge);
+      }
+
+      function visibleContributors() {
+        const query = document.getElementById('contributor-search').value.trim().toLocaleLowerCase();
+        const country = document.getElementById('country-filter').value;
+        const plan = document.getElementById('plan-filter').value;
+        const sort = document.getElementById('sort-filter').value;
+        const filtered = allContributors.filter((person) =>
+          person.name.toLocaleLowerCase().includes(query) &&
+          (country === 'all' || person.countries?.includes(country)) &&
+          (plan === 'all' || person.planTypes?.includes(plan)),
+        );
+        const sorts = {
+          recent: (a, b) => b.contributedAt - a.contributedAt || b.kg - a.kg,
+          kg: (a, b) => b.kg - a.kg || b.contributedAt - a.contributedAt,
+          months: (a, b) => b.monthsContributing - a.monthsContributing || b.kg - a.kg,
+          streak: (a, b) => b.streak - a.streak || b.monthsContributing - a.monthsContributing,
+        };
+        return filtered.sort(sorts[sort] || sorts.recent);
+      }
+
+      function renderContributorList() {
+        const filtered = visibleContributors();
+        const pageSize = Number(document.getElementById('page-size').value);
+        const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+        currentPage = Math.min(currentPage, pageCount);
+        const pageItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+        list.replaceChildren();
+
+        for (const person of pageItems) {
+          const item = document.createElement('li');
+          const identity = document.createElement('div');
+          identity.className = 'contributor-identity';
+          const name = document.createElement('strong');
+          name.className = 'contributor-name';
+          name.textContent = person.name;
+          const badges = document.createElement('div');
+          badges.className = 'contributor-badges';
+          if (person.planTypes?.includes('mensal')) {
+            appendBadge(badges, 'badge-starter', 'monthly-badge', '', t('starterBadge'));
+          }
+          if (person.planTypes?.includes('anual')) {
+            appendBadge(badges, 'badge-founders', 'annual-badge', '', t('foundersBadge'));
+          }
+          const streak = Number(person.streak) || 0;
+          if (streak > 0) {
+            const streakTier = streak >= 13
+              ? 'diamond'
+              : streak >= 7
+                ? 'lightning'
+                : 'fire';
+            const streakIcon = `streak-${streakTier}`;
+            appendBadge(
+              badges,
+              `badge-streak-${streakTier}`,
+              streakIcon,
+              '',
+              `${t('streak')}: ${streak} ${streak === 1 ? t('month') : t('months')}`,
+            );
+          }
+          const meta = document.createElement('span');
+          meta.className = 'contributor-meta';
+          const monthCount = Number(person.monthsContributing) || 0;
+          meta.textContent = `${countFormatter.format(monthCount)} ${t(monthCount === 1 ? 'month' : 'months')} · ${localizedDate(person.contributedAt)}`;
+          identity.append(name, badges, meta);
+          const quantity = document.createElement('span');
+          quantity.className = 'contributor-kg';
+          quantity.textContent = `${kgFormatter.format(Number(person.kg) || 0)} kg`;
+          item.append(identity, quantity);
+          list.appendChild(item);
+        }
+
+        const hasAnyPublicNames = allContributors.length > 0;
+        list.hidden = pageItems.length === 0;
+        document.getElementById('contributors-private-state').hidden = hasAnyPublicNames;
+        document.getElementById('contributors-empty').hidden = !hasAnyPublicNames || filtered.length > 0;
+        setText('contributors-empty', t('noResults'));
+        const pagination = document.getElementById('contributors-pagination');
+        pagination.hidden = filtered.length === 0;
+        document.getElementById('page-previous').disabled = currentPage <= 1;
+        document.getElementById('page-next').disabled = currentPage >= pageCount;
+        setText('page-status', `${t('page')} ${currentPage} / ${pageCount} · ${countFormatter.format(filtered.length)}`);
+      }
+
+      function applyLanguage() {
+        document.documentElement.lang = language;
+        document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+        kgFormatter = new Intl.NumberFormat(language, { maximumFractionDigits: 2 });
+        countFormatter = new Intl.NumberFormat(language);
+        document.title = `${t('title')} | CarbonPocket`;
+        languageSelect.setAttribute('aria-label', t('title'));
+        setText('contributors-title', t('title'));
+        setText('contributors-intro', t('intro'));
+        setText('contributors-total-kg-label', t('totalKg'));
+        setText('contributors-total-count-label', t('people'));
+        setText('contributors-year-title', t('byYear'));
+        setText('contributors-country-title', t('byCountry'));
+        setText('contributors-list-title', t('title'));
+        setText('year-heading', t('year'));
+        setText('year-kg-heading', t('kg'));
+        setText('year-people-heading', t('contributorsCol'));
+        setText('country-heading', t('byCountry'));
+        setText('country-kg-heading', t('kg'));
+        setText('country-people-heading', t('contributorsCol'));
+        setText('search-label', t('search'));
+        setText('country-filter-label', t('allCountries'));
+        setText('plan-filter-label', t('plan'));
+        setText('sort-label', t('sort'));
+        setText('page-size-label', t('pageSize'));
+        setText('contributors-private-state', t('noNames'));
+        setText('page-previous', t('previous'));
+        setText('page-next', t('next'));
+        setText('back-link', t('back'));
+        document.getElementById('contributor-search').placeholder = t('search');
+
+        setOptions(document.getElementById('plan-filter'), [
+          { value: 'all', label: t('allPlans') },
+          { value: 'mensal', label: t('monthly') },
+          { value: 'anual', label: t('annual') },
+        ], document.getElementById('plan-filter').value || 'all');
+        setOptions(document.getElementById('sort-filter'), [
+          { value: 'recent', label: t('recent') },
+          { value: 'kg', label: t('highestKg') },
+          { value: 'months', label: t('mostMonths') },
+          { value: 'streak', label: t('longestStreak') },
+        ], document.getElementById('sort-filter').value || 'recent');
+        setOptions(document.getElementById('country-filter'), [
+          { value: 'all', label: t('allCountries') },
+          ...Array.from(new Set(allContributors.flatMap((person) => person.countries || [])))
+            .sort()
+            .map((code) => ({
+              value: code,
+              label: code === 'nao_informado'
+                ? `🌍 ${t('notInformed')}`
+                : `${window.flagDe(code)} ${countryName(code)}`,
+            })),
+        ], document.getElementById('country-filter').value || 'all');
+
+        if (loadStatus !== 'ready') {
+          state.hidden = false;
+          state.textContent = t(loadStatus);
+        } else {
+          state.hidden = true;
+          renderTables();
+          renderContributorList();
+        }
+      }
+
+      function renderTables() {
+        if (yearStats.length) {
+          renderTableRows(document.getElementById('contributors-year-rows'), yearStats, [
+            { header: true, value: (entry) => entry.ano },
+            { value: (entry) => kgFormatter.format(entry.kg) },
+            { value: (entry) => countFormatter.format(entry.contributors) },
+          ]);
+          document.getElementById('contributors-year-section').hidden = false;
+        }
+        if (countryStats.length) {
+          renderTableRows(document.getElementById('contributors-country-rows'), countryStats, [
+            { header: true, value: (entry) => entry.pais === 'nao_informado'
+              ? `🌍 ${t('notInformed')}`
+              : `${window.flagDe(entry.pais)} ${countryName(entry.pais)}` },
+            { value: (entry) => kgFormatter.format(entry.kg) },
+            { value: (entry) => countFormatter.format(entry.contributors) },
+          ]);
+          document.getElementById('contributors-country-section').hidden = false;
+        }
+      }
+
       async function loadContributors() {
         try {
           const response = await fetch(contributorsApi);
           if (!response.ok) throw new Error('Unable to load contributors');
           const data = await response.json();
-          const total = data.total || { kg: 0, contributors: 0, sessions: 0 };
-          const years = Array.isArray(data.por_ano) ? data.por_ano : [];
-          const contributors = Array.isArray(data.contributors) ? data.contributors : [];
-
-          if (!Number(total.sessions)) {
-            state.textContent = 'The first compensation round has not been published yet.';
+          const total = data.total || { kg: 0, contributors: 0 };
+          allContributors = Array.isArray(data.contributors) ? data.contributors : [];
+          yearStats = Array.isArray(data.por_ano) ? data.por_ano : [];
+          countryStats = Array.isArray(data.por_pais) ? data.por_pais : [];
+          if (!Number(total.kg) && !Number(total.contributors)) {
+            loadStatus = 'noData';
+            state.textContent = t(loadStatus);
             return;
           }
 
-          document.getElementById('contributors-total-kg').textContent =
-            kgFormatter.format(Number(total.kg) || 0);
-          document.getElementById('contributors-total-count').textContent =
-            countFormatter.format(Number(total.contributors) || 0);
-          document.getElementById('contributors-total-sessions').textContent =
-            countFormatter.format(Number(total.sessions) || 0);
-
-          if (years.length > 0) {
-            renderTableRows(
-              document.getElementById('contributors-year-rows'),
-              years,
-              [
-                { header: true, value: (entry) => entry.ano },
-                { value: (entry) => kgFormatter.format(entry.kg) },
-                { value: (entry) => countFormatter.format(entry.contributors) },
-                { value: (entry) => countFormatter.format(entry.sessions) },
-              ],
-            );
-            document.getElementById('contributors-year-section').hidden = false;
-          }
-
-          const countries = Array.isArray(data.por_pais) ? data.por_pais : [];
-          if (countries.length > 0) {
-            renderTableRows(
-              document.getElementById('contributors-country-rows'),
-              countries,
-              [
-                {
-                  header: true,
-                  value: (entry) => entry.pais === 'nao_informado'
-                    ? `${window.flagDe(entry.pais)} Not informed`
-                    : `${window.flagDe(entry.pais)} ${countryLabels[entry.pais] || entry.pais}`,
-                },
-                { value: (entry) => kgFormatter.format(entry.kg) },
-                { value: (entry) => countFormatter.format(entry.contributors) },
-                { value: (entry) => countFormatter.format(entry.sessions) },
-              ],
-            );
-            document.getElementById('contributors-country-section').hidden = false;
-          }
-
-          for (const contributor of contributors.slice(0, 5)) {
-            const item = document.createElement('li');
-            const name = document.createElement('span');
-            const quantity = document.createElement('span');
-            name.textContent = contributor.name;
-            quantity.textContent = `${kgFormatter.format(contributor.kg)} kg`;
-            item.append(name, quantity);
-            list.appendChild(item);
-          }
-          list.hidden = contributors.length === 0;
-          document.getElementById('contributors-private-state').hidden =
-            contributors.length > 0;
+          setText('contributors-total-kg', kgFormatter.format(Number(total.kg) || 0));
+          setText('contributors-total-count', countFormatter.format(Number(total.contributors) || 0));
+          loadStatus = 'ready';
           content.hidden = false;
           state.hidden = true;
-        } catch {
+          applyLanguage();
+        } catch (error) {
+          console.error('CONTRIBUTORS_LOAD_FAILED', error.name);
+          loadStatus = 'error';
           state.hidden = false;
-          state.textContent = 'Unable to load contributors right now.';
+          state.textContent = t(loadStatus);
         }
       }
 
+      for (const control of document.querySelectorAll('#contributor-search, #country-filter, #plan-filter, #sort-filter, #page-size')) {
+        control.addEventListener('input', () => {
+          currentPage = 1;
+          renderContributorList();
+        });
+        control.addEventListener('change', () => {
+          currentPage = 1;
+          renderContributorList();
+        });
+      }
+      document.getElementById('page-previous').addEventListener('click', () => {
+        currentPage = Math.max(1, currentPage - 1);
+        renderContributorList();
+      });
+      document.getElementById('page-next').addEventListener('click', () => {
+        currentPage += 1;
+        renderContributorList();
+      });
+      languageSelect.addEventListener('change', () => {
+        language = labelsByLanguage[languageSelect.value] ? languageSelect.value : 'en';
+        try {
+          localStorage.setItem('carbonpocket-lang', language);
+        } catch (error) {
+          console.warn('CONTRIBUTORS_LANGUAGE_STORAGE_UNAVAILABLE', error.name);
+        }
+        applyLanguage();
+      });
+      try {
+        const savedLanguage = localStorage.getItem('carbonpocket-lang');
+        if (labelsByLanguage[savedLanguage]) language = savedLanguage;
+      } catch (error) {
+        console.warn('CONTRIBUTORS_LANGUAGE_STORAGE_UNAVAILABLE', error.name);
+      }
+      languageSelect.value = language;
+      applyLanguage();
       loadContributors();
     </script>
   </body>

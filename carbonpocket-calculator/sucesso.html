@@ -88,6 +88,37 @@
         font-weight: 650;
       }
 
+      .receipt-contributor {
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .receipt-plan-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 8px;
+        border: 1px solid rgba(114, 225, 154, 0.3);
+        border-radius: 999px;
+        background: rgba(114, 225, 154, 0.1);
+        color: #a5f3c7;
+        font-size: 12px;
+        font-weight: 650;
+        line-height: 1.4;
+      }
+
+      .receipt-plan-badge svg {
+        width: 14px;
+        height: 14px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
       @media (max-width: 480px) {
         #payment-details > div {
           grid-template-columns: minmax(105px, 0.8fr) minmax(0, 1.2fr);
@@ -167,7 +198,7 @@
         <h1 id="payment-heading">Checking your payment</h1>
         <p id="payment-message">Verifying your payment...</p>
         <dl id="payment-details" hidden>
-          <div id="payment-name-row" hidden><dt id="payment-name-label"></dt><dd id="payment-name"></dd></div>
+          <div id="payment-name-row" hidden><dt id="payment-name-label"></dt><dd class="receipt-contributor"><span id="payment-name"></span><span id="payment-plan-badge" class="receipt-plan-badge" hidden></span></dd></div>
           <div><dt id="payment-project-label"></dt><dd class="receipt-project"><a id="payment-project" href="https://brcarbon.com.br/brazilian-amazon/" target="_blank" rel="noopener noreferrer">Brazilian Amazon REDD+ APD</a></dd></div>
           <div><dt id="payment-quantity-label"></dt><dd id="payment-quantity"></dd></div>
           <div><dt id="payment-email-label"></dt><dd id="payment-email"></dd></div>
@@ -222,6 +253,21 @@
           : '';
       }
 
+      function createPlanIcon(type) {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('aria-hidden', 'true');
+        const paths = type === 'anual'
+          ? ['M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9', 'M10 21h4']
+          : ['M12 20v-8', 'M12 12c-5 0-8-3-8-8 5 0 8 3 8 8Z', 'M12 16c0-5 3-8 8-8 0 5-3 8-8 8Z'];
+        for (const d of paths) {
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', d);
+          svg.appendChild(path);
+        }
+        return svg;
+      }
+
       function applyLanguage() {
         const locale = receiptLocales[currentLanguage];
         document.documentElement.lang = currentLanguage;
@@ -259,6 +305,18 @@
         const name = contributorName(payment);
         document.getElementById('payment-name').textContent = name;
         document.getElementById('payment-name-row').hidden = !name;
+        const planBadge = document.getElementById('payment-plan-badge');
+        const planType = payment.categoria === 'mensal' || payment.categoria === 'anual'
+          ? payment.categoria
+          : null;
+        planBadge.hidden = !planType;
+        planBadge.replaceChildren();
+        if (planType) {
+          planBadge.append(
+            createPlanIcon(planType),
+            document.createTextNode(text(planType === 'anual' ? 'foundersBadge' : 'starterBadge')),
+          );
+        }
         const rawKg = payment.emissao_kg ?? payment.quantity;
         const kg = Number(rawKg);
         document.getElementById('payment-quantity').textContent =
@@ -328,6 +386,24 @@
         };
         if (name) {
           drawReceiptRow(text('contributor'), name.slice(0, 48));
+          const planType = payment.categoria === 'mensal' || payment.categoria === 'anual'
+            ? payment.categoria
+            : null;
+          if (planType) {
+            const badgeText = `${planType === 'anual' ? '🔔' : '🌱'} ${text(planType === 'anual' ? 'foundersBadge' : 'starterBadge')}`;
+            context.font = '650 19px Inter, system-ui, sans-serif';
+            const badgeWidth = context.measureText(badgeText).width + 26;
+            const badgeX = Math.min(1200 - badgeWidth - 100, 390 + context.measureText(name.slice(0, 48)).width + 16);
+            const badgeY = nextLine - 41;
+            context.fillStyle = 'rgba(114, 225, 154, 0.12)';
+            context.beginPath();
+            context.roundRect(badgeX, badgeY, badgeWidth, 34, 17);
+            context.fill();
+            context.strokeStyle = 'rgba(114, 225, 154, 0.35)';
+            context.stroke();
+            context.fillStyle = '#a5f3c7';
+            context.fillText(badgeText, badgeX + 13, badgeY + 23, badgeWidth - 20);
+          }
         }
         drawReceiptRow(text('project'), 'Brazilian Amazon REDD+ APD');
         drawReceiptRow(text('volume'), volume);
