@@ -2,6 +2,7 @@ import { timingSafeEqual } from 'node:crypto';
 import Stripe from 'stripe';
 import {
   initialContributorBackfillCursor,
+  linkHistoricalOneTimeCheckout,
   processContributorBackfillBatch,
 } from '../lib/contributor-backfill.js';
 import { db } from '../lib/db.js';
@@ -79,8 +80,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'invalid_request' });
   }
 
-  const cursor = readCursor(body.cursor);
-  if (!cursor) {
+  const isManualLink = body.action === 'link_historical_checkout';
+  const cursor = isManualLink ? null : readCursor(body.cursor);
+  if (!isManualLink && !cursor) {
     return res.status(400).json({ error: 'invalid_cursor' });
   }
   if (
@@ -94,6 +96,28 @@ export default async function handler(req, res) {
 
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    if (isManualLink) {
+      if (
+        typeof body.sessionId !== 'string' ||
+        !/^cs_(?:live|test)_[A-Za-z0-9]+$/.test(body.sessionId) ||
+        typeof body.displayName !== 'string' ||
+        body.displayName.trim().length === 0 ||
+        body.displayName.length > 100
+      ) {
+        return res.status(400).json({ error: 'invalid_request' });
+      }
+      const result = await linkHistoricalOneTimeCheckout(stripe, db, {
+        sessionId: body.sessionId,
+        displayName: body.displayName,
+      });
+      return res.status(result.linked ? 200 : 409).json({
+        linked: result.linked,
+        ...(result.linked
+          ? { created: result.created, kg: result.kg ?? null }
+          : { reason: result.reason }),
+      });
+    }
+
     const result = await processContributorBackfillBatch(stripe, db, cursor);
     return res.status(200).json({
       done: result.done,
@@ -102,7 +126,7 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('CONTRIBUTOR_LEDGER_BACKFILL_BATCH_FAILED', {
-      phase: cursor.phase,
+      phase: cursor?.phase || 'manual_link',
       error: error.name,
     });
     return res.status(500).json({ error: 'backfill_batch_failed' });

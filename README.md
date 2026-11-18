@@ -47,7 +47,15 @@ Before using the ledger:
    same temporary key at the secure prompt. The PowerShell script only sends
    authenticated batch requests; Stripe and database access stay in Vercel.
    The job is idempotent and can safely be restarted if interrupted.
-5. After `CONTRIBUTOR_LEDGER_BACKFILL_COMPLETE`, remove
+5. If an old paid one-time checkout has no public-consent metadata, the bulk
+   backfill keeps it anonymous. Only after the buyer explicitly opts in, use
+   `.\scripts\link-historical-checkout.ps1` to verify that specific paid
+   Checkout Session and link it to the supplied public display name. Run this
+   only for the buyer's own checkout. Enter its `cs_live_...` Checkout Session
+   ID and the approved public name in PowerShell; never share the ID or email
+   in chat.
+6. After `CONTRIBUTOR_LEDGER_BACKFILL_COMPLETE` and any authorized manual
+   linking, remove
    `CONTRIBUTOR_BACKFILL_KEY` from Vercel and redeploy to disable the temporary
    endpoint. The script imports paid checkouts and invoices; it does not send
    email or print customer addresses.
