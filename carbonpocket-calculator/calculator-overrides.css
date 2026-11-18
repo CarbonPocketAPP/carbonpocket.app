@@ -276,24 +276,17 @@
 }
 
 .checkout-plan-icon {
-  display: inline-grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  flex: 0 0 22px;
-  border-radius: 7px;
-  color: #72e19a;
-  background: rgba(114, 225, 154, 0.12);
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
 }
 
-.checkout-plan-icon svg {
-  width: 15px;
-  height: 15px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.checkout-plan-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .qualification-notice {

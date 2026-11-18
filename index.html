@@ -296,8 +296,8 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
     .plan-card .plan-name { font-size: 1rem; font-weight: 600; margin-bottom: 0.2rem; }
     .plan-title-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem; }
     .plan-title-row .plan-name { margin-bottom: 0; }
-    .plan-plan-icon { display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem; border-radius: 0.4rem; color: #34d399; background: rgba(52,211,153,0.12); }
-    .plan-plan-icon svg { width: 0.9rem; height: 0.9rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .plan-plan-icon { display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem; flex: 0 0 1.35rem; }
+    .plan-plan-icon img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .plan-badge { margin-left: auto; padding: 0.22rem 0.55rem; border-radius: 999px; background: #34d399; color: #0a120e; font-size: 0.62rem; font-weight: 700; white-space: nowrap; }
     .plan-card .plan-price { font-size: 1.8rem; font-weight: 800; color: #34d399; margin-bottom: 0.2rem; }
     .plan-card .plan-price span { font-size: 0.95rem; font-weight: 400; color: rgba(255,255,255,0.4); }
@@ -786,7 +786,7 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
         <article class="plan-card featured">
           <div class="badge-save" data-i18n="plan_ai_save">✦ Save 15%</div>
           <div class="plan-title-row">
-            <span class="plan-plan-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span>
+            <span class="plan-plan-icon" aria-hidden="true"><img src="/carbonpocket-calculator/contributors/icons/annual-badge.png" alt=""></span>
             <div class="plan-name" data-i18n="plan_ai_name">Annual Compensation + Founders Badge</div>
             <span class="plan-badge" data-i18n="plan_badge_founders">Founders badge</span>
           </div>
@@ -802,7 +802,7 @@ SECURITY HEADERS (configured in the root _headers file for Cloudflare):
         <article class="plan-card">
           <div class="plan-title-row">
             <div class="plan-name" data-i18n="plan_starter_name">Starter Compensation</div>
-            <span class="plan-plan-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20v-8"/><path d="M12 12c-5 0-8-3-8-8 5 0 8 3 8 8Z"/><path d="M12 16c0-5 3-8 8-8 0 5-3 8-8 8Z"/></svg></span>
+            <span class="plan-plan-icon" aria-hidden="true"><img src="/carbonpocket-calculator/contributors/icons/monthly-badge.png" alt=""></span>
             <span class="plan-badge" data-i18n="plan_badge_starter">Sprout badge</span>
           </div>
           <div class="plan-price" id="starterPrice">$20</div>
