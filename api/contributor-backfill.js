@@ -3,8 +3,8 @@ import Stripe from 'stripe';
 import {
   initialContributorBackfillCursor,
   processContributorBackfillBatch,
-} from '../../lib/contributor-backfill.js';
-import { db } from '../../lib/db.js';
+} from '../lib/contributor-backfill.js';
+import { db } from '../lib/db.js';
 
 function isCursorId(value) {
   return value === null ||

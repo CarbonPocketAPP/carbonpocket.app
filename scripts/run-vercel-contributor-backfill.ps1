@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$endpoint = 'https://carbonpocketapp.vercel.app/api/admin/contributor-backfill'
+$endpoint = 'https://carbonpocketapp.vercel.app/api/contributor-backfill'
 $secureKey = Read-Host 'Temporary Vercel backfill key' -AsSecureString
 $keyPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureKey)
 $key = $null
