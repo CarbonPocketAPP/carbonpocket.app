@@ -12,6 +12,7 @@
     <style>
       .contributors-language-bar { width: auto; margin: 0 0 18px auto; padding: 0; background: transparent; text-align: right; }
       .contributors-language-bar .lang-select { max-width: min(230px, calc(100vw - 48px)); }
+      .contributors-logo { display: block; width: 76px; height: 76px; margin: 4px auto 16px; object-fit: contain; }
       .contributors-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
       .contributors-heading h1 { margin-bottom: 8px; }
       .contributors-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 22px 0; text-align: left; }
@@ -66,7 +67,7 @@
             <option value="sv">🇸🇪 Svenska</option>
           </select>
         </div>
-        <p class="result-kicker">CarbonPocket</p>
+        <img class="contributors-logo" src="../carbonpocket-logo.png" width="76" height="76" alt="Carbon Pocket" />
         <h1 id="contributors-title"></h1>
         <p id="contributors-intro" class="contributors-intro"></p>
         <p id="contributors-state" class="contributors-state" role="status"></p>
@@ -240,7 +241,7 @@
             appendBadge(badges, 'badge-founders', 'annual-badge', '', t('foundersBadge'));
           }
           const streak = Number(person.streak) || 0;
-          if (streak > 0) {
+          if (streak >= 3) {
             const streakTier = streak >= 13
               ? 'diamond'
               : streak >= 7
