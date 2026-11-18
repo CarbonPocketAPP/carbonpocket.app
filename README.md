@@ -64,8 +64,15 @@ Before using the ledger:
 
 ## Contribution receipt emails
 
-The Stripe webhook sends the Brevo transactional template after an attestation
-is created and uses its send-once guard when Stripe retries an event. Before
+The Stripe webhook sends the Brevo transactional template after a paid
+contribution is recorded and uses its send-once guard when Stripe retries an
+event. Subscription checkout sends the initial receipt only when Checkout
+confirms payment. Renewals send one receipt for each paid Stripe
+`subscription_cycle` invoice; failed and non-cycle invoices do not trigger
+receipts. If the annual plan is configured in Stripe as a one-year commitment
+with monthly billing, it sends a receipt for each confirmed monthly invoice,
+just like the monthly plan. Every receipt shows the subscription's monthly kg
+amount, not the contributor's cumulative total or an annualized sum. Before
 deploying the code:
 
 1. Apply `scripts/add-receipt-email-columns.sql` to the production PostgreSQL
@@ -79,9 +86,10 @@ deploying the code:
    `codigo_registro`; `badge_usuario` is now an absolute badge-image URL or an
    empty value. The code also sends `plano`, which template #4 does not render
    today.
-3. Set `BREVO_API_KEY`, `BREVO_TEMPLATE_ID`, and `BREVO_SENDER_EMAIL` in the
-   Vercel environment for the webhook deployment. `BREVO_SENDER_NAME` is
-   optional.
+3. Set `BREVO_API_KEY`, `BREVO_TEMPLATE_ID` (value `4`), and
+   `BREVO_SENDER_EMAIL` in the Vercel environment for the webhook deployment.
+   `BREVO_TEMPLATE_ID_4` is accepted as a temporary fallback if that is the
+   variable name already configured. `BREVO_SENDER_NAME` is optional.
 4. To send a real test, use a fresh, unreversed attestation from your own test
    purchase and the matching inbox you control:
    `node scripts/test-receipt-email.js --code CP-YYYY-XXXXXXXX --email you@example.com`.

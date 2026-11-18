@@ -1,6 +1,9 @@
 import Stripe from 'stripe';
 import { sanitizeName } from './name.js';
-import { registrarContribuicao } from '../lib/contributions.js';
+import {
+  registrarContribuicao,
+  registrarContribuicaoFatura,
+} from '../lib/contributions.js';
 import {
   linkAttestationToContributor,
   recordContributorPayment,
@@ -27,10 +30,9 @@ function subscriptionIdFromInvoice(invoice) {
 
 function invoiceQuantity(invoice, subscriptionId, fallback) {
   const line = invoiceSubscriptionLine(invoice, subscriptionId);
-  const quantity = line?.quantity ?? invoice.lines?.data?.find(
-    (item) => item.quantity !== null && item.quantity !== undefined,
-  )?.quantity;
-  return quantity === null || quantity === undefined ? Number(fallback) : Number(quantity);
+  return line?.quantity === null || line?.quantity === undefined
+    ? Number(fallback)
+    : Number(line.quantity);
 }
 
 function invoiceSubscriptionLine(invoice, subscriptionId) {
@@ -38,7 +40,7 @@ function invoiceSubscriptionLine(invoice, subscriptionId) {
   return lines.find((line) =>
     line.subscription === subscriptionId ||
     line.parent?.subscription_item_details?.subscription === subscriptionId,
-  ) || lines.find((item) => item.quantity !== null && item.quantity !== undefined);
+  );
 }
 
 async function accumulatePaidInvoice(stripe, invoice) {
@@ -117,6 +119,30 @@ async function accumulatePaidInvoice(stripe, invoice) {
     subscription_id: subscriptionId,
     kg: kgInteiro,
   }));
+
+  const category = metadata.categoria;
+  if (
+    invoice.status === 'paid' &&
+    invoice.billing_reason === 'subscription_cycle' &&
+    (category === 'mensal' || category === 'anual')
+  ) {
+    const contribution = await registrarContribuicaoFatura({
+      invoice,
+      kg: kgInteiro,
+    });
+    if (contribution.code) {
+      await sendReceiptForContribution(
+        contribution,
+        {
+          email,
+          name: name === 'Anonymous' ? sanitizeName(customerName) : name,
+          category,
+        },
+        invoiceId,
+        invoiceId,
+      );
+    }
+  }
 }
 
 async function processCheckoutSession(stripe, session, eventId) {
@@ -156,32 +182,45 @@ async function processCheckoutSession(stripe, session, eventId) {
       });
     }
   }
-  await sendReceiptForContribution(currentSession, contribution, eventId);
+  if (currentSession.payment_status === 'paid') {
+    await sendReceiptForContribution(
+      contribution,
+      {
+        email: currentSession.customer_details?.email || currentSession.customer_email,
+        name: sanitizeName(
+          currentSession.metadata?.nome || currentSession.customer_details?.name,
+        ),
+        category: currentSession.metadata?.categoria,
+      },
+      eventId,
+      currentSession.id,
+    );
+  }
 }
 
-async function sendReceiptForContribution(session, contribution, eventId) {
+async function sendReceiptForContribution(contribution, details, eventId, paymentReference) {
   try {
-    const sanitizedName = sanitizeName(
-      session.metadata?.nome || session.customer_details?.name,
-    );
+    const name = details.name === 'Anonymous' ? '' : details.name;
+    const category = details.category;
     const result = await sendContributionReceipt(db, {
       code: contribution.code,
-      email: session.customer_details?.email || session.customer_email,
-      name: sanitizedName === 'Anonymous' ? '' : sanitizedName,
-      badge: session.metadata?.categoria === 'anual'
+      email: details.email,
+      name,
+      badge: category === 'anual'
         ? 'https://carbonpocket.app/carbonpocket-calculator/contributors/icons/annual-badge.png'
-        : session.metadata?.categoria === 'mensal'
+        : category === 'mensal'
           ? 'https://carbonpocket.app/carbonpocket-calculator/contributors/icons/monthly-badge.png'
           : '',
-      plan: session.metadata?.categoria === 'anual'
+      plan: category === 'anual'
         ? 'Founders'
-        : session.metadata?.categoria === 'mensal'
+        : category === 'mensal'
           ? 'Starter Compensation'
           : 'One-time purchase',
     });
     if (!result.sent) {
       console.warn('RECEIPT_EMAIL_NOT_SENT', {
         event_id: eventId,
+        payment_reference: paymentReference,
         code: contribution.code,
         reason: result.reason,
       });
@@ -189,6 +228,7 @@ async function sendReceiptForContribution(session, contribution, eventId) {
   } catch (error) {
     console.error('RECEIPT_EMAIL_FALHOU', {
       event_id: eventId,
+      payment_reference: paymentReference,
       code: contribution.code,
       erro: error.name,
     });
