@@ -70,10 +70,10 @@ event. Subscription checkout sends the initial receipt only when Checkout
 confirms payment. Renewals send one receipt for each paid Stripe
 `subscription_cycle` invoice; failed and non-cycle invoices do not trigger
 receipts. If the annual plan is configured in Stripe as a one-year commitment
-with monthly billing, it sends a receipt for each confirmed monthly invoice,
-just like the monthly plan. Every receipt shows the subscription's monthly kg
-amount, not the contributor's cumulative total or an annualized sum. Before
-deploying the code:
+with annual billing, it sends one receipt for each confirmed annual payment.
+That annual receipt shows 12 times the monthly kg volume, representing the
+full paid coverage period. Monthly receipts show one month's kg volume. Neither
+uses the contributor's cumulative total. Before deploying the code:
 
 1. Apply `scripts/add-receipt-email-columns.sql` to the production PostgreSQL
    database.

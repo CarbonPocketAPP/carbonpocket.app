@@ -137,6 +137,7 @@ async function accumulatePaidInvoice(stripe, invoice) {
           email,
           name: name === 'Anonymous' ? sanitizeName(customerName) : name,
           category,
+          displayKg: category === 'anual' ? contribution.kg * 12 : contribution.kg,
         },
         invoiceId,
         invoiceId,
@@ -191,6 +192,9 @@ async function processCheckoutSession(stripe, session, eventId) {
           currentSession.metadata?.nome || currentSession.customer_details?.name,
         ),
         category: currentSession.metadata?.categoria,
+        displayKg: currentSession.metadata?.categoria === 'anual'
+          ? contribution.kg * 12
+          : contribution.kg,
       },
       eventId,
       currentSession.id,
@@ -216,6 +220,7 @@ async function sendReceiptForContribution(contribution, details, eventId, paymen
         : category === 'mensal'
           ? 'Starter Compensation'
           : 'One-time purchase',
+      displayKg: details.displayKg,
     });
     if (!result.sent) {
       console.warn('RECEIPT_EMAIL_NOT_SENT', {
