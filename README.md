@@ -51,9 +51,9 @@ Before using the ledger:
    backfill keeps it anonymous. Only after the buyer explicitly opts in, use
    `.\scripts\link-historical-checkout.ps1` to verify that specific paid
    Checkout Session and link it to the supplied public display name. Run this
-   only for the buyer's own checkout. Enter its `cs_live_...` Checkout Session
-   ID and the approved public name in PowerShell; never share the ID or email
-   in chat.
+   only for the buyer's own checkout. Enter its `pi_...` PaymentIntent ID or
+   `cs_live_...` Checkout Session ID and the approved public name in PowerShell;
+   never share the ID or email in chat.
 6. After `CONTRIBUTOR_LEDGER_BACKFILL_COMPLETE` and any authorized manual
    linking, remove
    `CONTRIBUTOR_BACKFILL_KEY` from Vercel and redeploy to disable the temporary

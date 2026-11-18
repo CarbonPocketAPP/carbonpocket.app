@@ -1,15 +1,18 @@
 $ErrorActionPreference = 'Stop'
 $endpoint = 'https://carbonpocketapp.vercel.app/api/contributor-backfill'
-$sessionId = Read-Host 'Paid Stripe Checkout Session ID (cs_live_...)'
+$paymentId = Read-Host 'Paid Stripe PaymentIntent (pi_...) or Checkout Session ID (cs_live_...)'
 $displayName = Read-Host 'Public display name'
 $secureKey = Read-Host 'Temporary Vercel backfill key' -AsSecureString
 $keyPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureKey)
 
 try {
   $key = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($keyPointer)
+  if ($paymentId -notmatch '^(cs_(live|test)_[A-Za-z0-9]+|pi_[A-Za-z0-9]+)$') {
+    throw 'Enter a Stripe PaymentIntent ID (pi_...) or Checkout Session ID (cs_...).'
+  }
   $body = @{
     action = 'link_historical_checkout'
-    sessionId = $sessionId
+    paymentId = $paymentId
     displayName = $displayName
   } | ConvertTo-Json -Compress
   $response = Invoke-RestMethod `

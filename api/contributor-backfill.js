@@ -98,8 +98,8 @@ export default async function handler(req, res) {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     if (isManualLink) {
       if (
-        typeof body.sessionId !== 'string' ||
-        !/^cs_(?:live|test)_[A-Za-z0-9]+$/.test(body.sessionId) ||
+        typeof body.paymentId !== 'string' ||
+        !/^(?:cs_(?:live|test)_[A-Za-z0-9]+|pi_[A-Za-z0-9]+)$/.test(body.paymentId) ||
         typeof body.displayName !== 'string' ||
         body.displayName.trim().length === 0 ||
         body.displayName.length > 100
@@ -107,7 +107,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'invalid_request' });
       }
       const result = await linkHistoricalOneTimeCheckout(stripe, db, {
-        sessionId: body.sessionId,
+        paymentId: body.paymentId,
         displayName: body.displayName,
       });
       return res.status(result.linked ? 200 : 409).json({
