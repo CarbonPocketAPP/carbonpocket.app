@@ -17,7 +17,7 @@ try {
       -Headers @{ 'x-contributor-backfill-key' = $key } `
       -Body $body
 
-    foreach ($name in $totals.Keys) {
+    foreach ($name in @($totals.Keys)) {
       $totals[$name] += [int]$response.processed.$name
     }
 
