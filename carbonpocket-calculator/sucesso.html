@@ -197,6 +197,12 @@
         <p class="result-kicker" id="payment-status">Payment status</p>
         <h1 id="payment-heading">Checking your payment</h1>
         <p id="payment-message">Verifying your payment...</p>
+        <a
+          id="contributors-link"
+          class="button button-primary"
+          href="https://carbonpocket.app/carbonpocket-calculator/contributors/"
+          hidden
+        ></a>
         <dl id="payment-details" hidden>
           <div id="payment-name-row" hidden><dt id="payment-name-label"></dt><dd class="receipt-contributor"><span id="payment-name"></span><span id="payment-plan-badge" class="receipt-plan-badge" hidden></span></dd></div>
           <div><dt id="payment-project-label"></dt><dd class="receipt-project"><a id="payment-project" href="https://brcarbon.com.br/brazilian-amazon/" target="_blank" rel="noopener noreferrer">Brazilian Amazon REDD+ APD</a></dd></div>
@@ -236,6 +242,7 @@
       const shareStatus = document.getElementById('share-status');
       const printHint = document.getElementById('print-hint');
       const calculatorLink = document.getElementById('calculator-link');
+      const contributorsLink = document.getElementById('contributors-link');
       const languageSelect = document.getElementById('receipt-language');
       let currentLanguage = 'en';
       let currentPayment = null;
@@ -284,6 +291,8 @@
         shareButton.textContent = text('shareImage');
         printHint.textContent = text('printHint');
         calculatorLink.textContent = text('back');
+        contributorsLink.textContent = text('contributors');
+        contributorsLink.hidden = paymentState !== 'completed';
 
         if (paymentState === 'checking') {
           heading.textContent = text('checking');
